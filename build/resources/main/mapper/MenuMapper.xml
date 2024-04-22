@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.latte.menu.repository.MenuMapper">
+    
+    <select id="findBrandRankingList" resultType="BrandRankingResponse">
+        SELECT MENU_NO, MENU_NAME, BRAND, CAFFEINE, IMAGE_URL
+        FROM MENU
+        WHERE BRAND = #{brand}
+        ORDER BY
+        <choose>
+            <when test="sortBy == 'caffeine-desc'">
+                CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) DESC
+            </when>
+            <when test="sortBy == 'caffeine-asc'">
+                CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) ASC
+            </when>
+            <when test="sortBy == 'favorite'">
+                MENU_NAME ASC
+            </when>
+            <otherwise>
+                MENU_NAME ASC
+            </otherwise>
+        </choose>
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+    </select>
+
+    <select id="getBrandRankingListCnt" resultType="int">
+        SELECT COUNT(*) AS CNT
+        FROM MENU
+        WHERE BRAND = #{brand}
+    </select>
+
+
+    <select id="findBrandCategoryList" resultType="BrandCategoryResponse">
+        SELECT MENU_NO, MENU_NAME, CAFFEINE, PRICE, IMAGE_URL
+        FROM MENU
+        <where>
+            <if test="brand != null and brand != ''">
+                and BRAND = #{brand}
+            </if>
+            <if test="cond == 'caffeine-none'">
+                and CAFFEINE = "0mg"
+            </if>
+        </where>
+        ORDER BY
+        <choose>
+            <when test="sortBy == 'caffeine-desc'">
+                CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) DESC
+            </when>
+            <when test="sortBy == 'caffeine-asc'">
+                CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) ASC
+            </when>
+            <otherwise>
+                MENU_NAME ASC
+            </otherwise>
+        </choose>
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+    </select>
+
+    <select id="getBrandCategoryCnt" resultType="int">
+        SELECT COUNT(*) AS CNT
+        FROM MENU
+        <where>
+            <if test="brand != null and brand != ''">
+                and BRAND = #{brand}
+            </if>
+            <if test="cond == 'caffeine-none'">
+                and CAFFEINE = "0mg"
+            </if>
+        </where>
+    </select>
+
+
+    <select id="findMenuList" resultType="MenuSearchResponse">
+        SELECT MENU_NO, MENU_NAME, CAFFEINE, BRAND, PRICE, IMAGE_URL
+        FROM MENU
+        <where>
+            <if test="cond == 'caffeine-none'">
+                and CAFFEINE = "0mg"
+            </if>
+            <if test="word != null and word != ''">
+                and MENU_NAME like concat('%', #{word}, '%')
+            </if>
+        </where>
+        ORDER BY
+        <choose>
+            <when test="sortBy == 'caffeine-desc'">
+                CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) DESC,
+            </when>
+            <when test="sortBy == 'caffeine-asc'">
+                CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) ASC,
+            </when>
+        </choose>
+            CASE BRAND
+                WHEN '스타벅스' THEN 1
+                WHEN '투썸' THEN 2
+                WHEN '컴포즈' THEN 3
+                WHEN '이디야' THEN 4
+                WHEN '빽다방' THEN 5
+                ELSE 6
+            END
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+    </select>
+
+    <select id="getFindMenuListCnt" resultType="int">
+        SELECT COUNT(*) AS CNT
+        FROM MENU
+        <where>
+            <if test="cond == 'caffeine-none'">
+                and CAFFEINE = "0mg"
+            </if>
+            <if test="word != null and word != ''">
+                and MENU_NAME like concat('%', #{word}, '%')
+            </if>
+        </where>
+    </select>
+
+</mapper>
