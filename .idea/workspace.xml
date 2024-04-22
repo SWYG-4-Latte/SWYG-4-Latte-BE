@@ -5,30 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9e4028c3-c845-4419-bd32-6d273623a210" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/common/redis/RedisConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/menu/cache/CacheScheduler.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/menu/response/BrandListResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/menu/response/SearchRankingResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/8.7/checksums/checksums.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/checksums/checksums.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/resourceHashesCache.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/ci-cd-gradle.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/ci-cd-gradle.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/LatteApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/LatteApplication.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/controller/MenuController.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/controller/MenuController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/service/BrandType.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/service/BrandType.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/service/MenuService.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/service/MenuService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/resources/main/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/build/resources/main/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/previous-compilation-data.bin" beforeDir="false" afterPath="$PROJECT_DIR$/build/tmp/compileJava/previous-compilation-data.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/LatteApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/LatteApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/menu/controller/MenuController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/menu/controller/MenuController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/menu/service/BrandType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/menu/service/BrandType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/menu/service/MenuService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/menu/service/MenuService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
