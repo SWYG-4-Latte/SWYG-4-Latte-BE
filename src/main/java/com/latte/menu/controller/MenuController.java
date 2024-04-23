@@ -71,4 +71,21 @@ public class MenuController {
         ResponseData<?> responseData = new ResponseData<>(null, searchWordRanking);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
+
+    @GetMapping("/compare")
+    public ResponseEntity<?> compareMenu(@RequestParam(value = "menu1", defaultValue = "") Long menuNo1,
+                                         @RequestParam(value = "menu2", defaultValue = "") Long menuNo2,
+                                         @RequestParam(value = "recent", defaultValue = "") String recent) {
+        log.info("recent = {}", recent);
+        MenuComparePageResponse menuComparePageResponse = menuService.menuCompare(menuNo1, menuNo2, recent);
+        ResponseData<?> responseData = new ResponseData<>(null, menuComparePageResponse);
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
+    @GetMapping("/detail/{menuNo}")
+    public ResponseEntity<?> menuDetail(@PathVariable Long menuNo) {
+        MenuDetailResponse menuDetailResponse = menuService.menuDetail(menuNo);
+        ResponseData<?> responseData = new ResponseData<>(null, menuDetailResponse);
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
 }

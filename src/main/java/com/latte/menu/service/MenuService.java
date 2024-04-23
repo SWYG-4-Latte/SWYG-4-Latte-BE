@@ -1,10 +1,7 @@
 package com.latte.menu.service;
 
 import com.latte.menu.repository.MenuMapper;
-import com.latte.menu.response.BrandCategoryResponse;
-import com.latte.menu.response.BrandRankingResponse;
-import com.latte.menu.response.MenuSearchResponse;
-import com.latte.menu.response.SearchRankingResponse;
+import com.latte.menu.response.*;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -92,4 +89,31 @@ public class MenuService {
     public void clearCache() {
         log.info("cache clear!!!");
     }
+
+
+    public MenuComparePageResponse menuCompare(Long menuNo1, Long menuNo2, String recent) {
+        MenuComparePageResponse menuComparePageResponse = new MenuComparePageResponse();
+        if (menuNo1 != null || menuNo2 != null) {
+            menuComparePageResponse.setCompare(menuMapper.compare(menuNo1, menuNo2));
+        }
+        if (!"".equals(recent)) {
+            String[] split = recent.split(",");
+            menuComparePageResponse.setRecent(menuMapper.getRecentMenu(split));
+        }
+        return menuComparePageResponse;
+    }
+
+    /**
+     * 사용자에 따른 영양성분의 높음, 낮음, 카페인 섭취량의 % 계산 필요
+     */
+    public MenuDetailResponse menuDetail(Long menuNo) {
+        MenuDetailResponse menuDetail = menuMapper.getMenuDetail(menuNo);
+        String caffeine = menuDetail.getCaffeine();
+        menuDetail.setCaffeine("카페인 " + caffeine);
+        // 낮은 함량의 카페인
+        int baseCaffeine = Integer.parseInt(caffeine.replace("mg", ""));
+        menuDetail.setLowCaffeineMenus(menuMapper.getLowCaffeineMenu(baseCaffeine));
+        return menuDetail;
+    }
+    
 }

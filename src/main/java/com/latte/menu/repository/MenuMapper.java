@@ -1,8 +1,6 @@
 package com.latte.menu.repository;
 
-import com.latte.menu.response.BrandCategoryResponse;
-import com.latte.menu.response.BrandRankingResponse;
-import com.latte.menu.response.MenuSearchResponse;
+import com.latte.menu.response.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.data.domain.Pageable;
@@ -30,4 +28,12 @@ public interface MenuMapper {
                                       @Param("pageable") Pageable pageable);
 
     int getFindMenuListCnt(@Param("cond") String cond, @Param("word") String word);
+
+    List<MenuCompareResponse> compare(@Param("menu1") Long menu1, @Param("menu2") Long menu2);
+
+    List<MenuSimpleResponse> getRecentMenu(@Param("menus") String[] menus);
+
+    MenuDetailResponse getMenuDetail(@Param("no") Long no);
+
+    List<MenuSimpleResponse> getLowCaffeineMenu(@Param("base") int base);
 }
