@@ -142,8 +142,26 @@
         )
     </select>
 
+    <!-- 메뉴 상세 데이터 -->
+    <resultMap id="menuDetailResultMap" type="MenuDetailResponse">
+        <id property="menuNo" column="menu_no"/>
+        <result property="brand" column="brand"/>
+        <result property="menuName" column="menu_name"/>
+        <result property="caffeine" column="caffeine"/>
+        <result property="price" column="price"/>
+        <result property="imageUrl" column="image_url"/>
+        <!-- 영양 성분 -->
+        <association property="nutrient" javaType="com.latte.menu.response.MenuDetailResponse$Nutrient">
+            <result property="kcal" column="kcal"/>
+            <result property="sugar" column="sugar"/>
+            <result property="salt" column="salt"/>
+            <result property="protein" column="protein"/>
+            <result property="satFat" column="sat_fat"/>
+        </association>
+    </resultMap>
 
-    <select id="getMenuDetail" resultType="MenuDetailResponse">
+
+    <select id="getMenuDetail" resultMap="menuDetailResultMap">
         SELECT MENU_NO, BRAND, MENU_NAME, CAFFEINE, PRICE, KCAL, SUGAR, SALT, PROTEIN, SAT_FAT, IMAGE_URL
         FROM MENU
         WHERE MENU_NO = #{no}
