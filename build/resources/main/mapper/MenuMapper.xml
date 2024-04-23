@@ -100,7 +100,8 @@
                 WHEN '이디야' THEN 4
                 WHEN '빽다방' THEN 5
                 ELSE 6
-            END
+            END,
+            MENU_NAME ASC
         LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
     </select>
 
@@ -115,6 +116,52 @@
                 and MENU_NAME like concat('%', #{word}, '%')
             </if>
         </where>
+    </select>
+
+
+    <select id="compare" resultType="MenuCompareResponse">
+        SELECT MENU_NO, BRAND, MENU_NAME, CAFFEINE, PRICE, ALLERGY, KCAL, IMAGE_URL
+        FROM MENU
+        <where>
+            <if test="menu1 != null">
+                or MENU_NO = #{menu1}
+            </if>
+            <if test="menu2 != null">
+                or MENU_NO = #{menu2}
+            </if>
+        </where>
+    </select>
+
+    <select id="getRecentMenu" parameterType="java.util.ArrayList" resultType="MenuSimpleResponse">
+        SELECT MENU_NO, MENU_NAME, IMAGE_URL
+        FROM MENU
+        WHERE MENU_NO IN (
+        <foreach item="no" collection="menus" index="index" separator=",">
+            #{no}
+        </foreach>
+        )
+    </select>
+
+
+    <select id="getMenuDetail" resultType="MenuDetailResponse">
+        SELECT MENU_NO, BRAND, MENU_NAME, CAFFEINE, PRICE, KCAL, SUGAR, SALT, PROTEIN, SAT_FAT, IMAGE_URL
+        FROM MENU
+        WHERE MENU_NO = #{no}
+    </select>
+
+    <select id="getLowCaffeineMenu" resultType="MenuSimpleResponse">
+        SELECT MENU_NO, MENU_NAME, IMAGE_URL
+        FROM MENU
+        <where>
+            <if test="base != 0">
+                and CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) &lt; #{base}
+            </if>
+            <if test="base == 0">
+                and CAFFEINE = '0mg'
+            </if>
+        </where>
+        ORDER BY RAND()
+        LIMIT 4
     </select>
 
 </mapper>
