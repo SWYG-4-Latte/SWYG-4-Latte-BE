@@ -11,11 +11,16 @@ public class MenuDetailResponse {
     private String menuName;
     private String caffeine;
     private String price;
-    private String kcal;
-    private String sugar;
-    private String salt;
-    private String protein;
-    private String satFat;
+    private Nutrient nutrient;
     private String imageUrl;
     private List<MenuSimpleResponse> lowCaffeineMenus;
+
+    @Data
+    public static class Nutrient {
+        private String kcal;
+        private String sugar;
+        private String salt;
+        private String protein;
+        private String satFat;
+    }
 }
