@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @RestController
@@ -38,10 +37,9 @@ public class MenuController {
 
     @GetMapping("/ranking/{brandName}")
     public ResponseEntity<?> brandRanking(@PathVariable String brandName,
-                                          @RequestParam(value = "sortBy", defaultValue = "") String sortBy,
-                                          @PageableDefault(size = 3) Pageable pageable) {
-        Page<BrandRankingResponse> brandRanking = menuService.findBrandRankingList(brandName, sortBy, pageable);
-        ResponseData<?> responseData = new ResponseData<>(null, brandRanking);
+                                          @RequestParam(value = "sortBy", defaultValue = "") String sortBy) {
+        List<BrandRankingResponse> brandRankingList = menuService.findBrandRankingList(brandName, sortBy);
+        ResponseData<?> responseData = new ResponseData<>(null, brandRankingList);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 

@@ -23,13 +23,7 @@
                 MENU_NAME ASC
             </otherwise>
         </choose>
-        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
-    </select>
-
-    <select id="getBrandRankingListCnt" resultType="int">
-        SELECT COUNT(*) AS CNT
-        FROM MENU
-        WHERE BRAND = #{brand}
+        LIMIT 10
     </select>
 
 
