@@ -37,10 +37,8 @@ public class MenuService {
     }
 
 
-    public Page<BrandRankingResponse> findBrandRankingList(String brandName, String sortBy, Pageable pageable) {
-        List<BrandRankingResponse> content = menuMapper.findBrandRankingList(BrandType.valueOf(brandName.toUpperCase()).getValue(), sortBy, pageable);
-        int total = menuMapper.getBrandRankingListCnt(BrandType.valueOf(brandName.toUpperCase()).getValue());
-        return new PageImpl<>(content, pageable, total);
+    public List<BrandRankingResponse> findBrandRankingList(String brandName, String sortBy) {
+        return menuMapper.findBrandRankingList(BrandType.valueOf(brandName.toUpperCase()).getValue(), sortBy);
     }
 
     public Page<BrandCategoryResponse> findBrandCategoryList(String brandName, String sortBy, String cond, Pageable pageable) {
