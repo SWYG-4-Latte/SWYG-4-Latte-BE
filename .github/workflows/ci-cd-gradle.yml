@@ -3,17 +3,16 @@ name: CI/CD with Gradle
 
 # Event 지정
 on:
-  pull_request:
+  push:
     branches: [ "master" ]
-    types: [closed]
 
-      # Workflow 내 Job 을 정의
+
+# Workflow 내 Job 을 정의
 jobs:
   # Job 의 이름
   CI-CD-build:
     # Runner 환경 정의
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true  # 정상적으로 병합되었을 때 실행
 
     # Step 정의
     steps:
