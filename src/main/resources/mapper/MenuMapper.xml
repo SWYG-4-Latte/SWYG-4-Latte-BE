@@ -3,25 +3,26 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.latte.menu.repository.MenuMapper">
-    
+
     <select id="findBrandRankingList" resultType="BrandRankingResponse">
-        SELECT MENU_NO, MENU_NAME, BRAND, CAFFEINE, IMAGE_URL
+        SELECT MENU.MENU_NO, MENU_NAME, BRAND, CAFFEINE, IMAGE_URL
         FROM MENU
+        <if test="sortBy == 'popularity'">
+            LEFT OUTER JOIN DRINK
+            ON MENU.MENU_NO = DRINK.MENU_NO
+        </if>
         WHERE BRAND = #{brand}
-        ORDER BY
+        <if test="sortBy == 'popularity'">
+            GROUP BY MENU.MENU_NO, MENU_NAME, BRAND, CAFFEINE, IMAGE_URL
+            ORDER BY COUNT(DRINK.MENU_NO) DESC
+        </if>
         <choose>
             <when test="sortBy == 'caffeine-desc'">
-                CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) DESC
+                ORDER BY CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) DESC
             </when>
             <when test="sortBy == 'caffeine-asc'">
-                CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) ASC
+                ORDER BY CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) ASC
             </when>
-            <when test="sortBy == 'favorite'">
-                MENU_NAME ASC
-            </when>
-            <otherwise>
-                MENU_NAME ASC
-            </otherwise>
         </choose>
         LIMIT 10
     </select>
@@ -87,15 +88,15 @@
                 CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) ASC,
             </when>
         </choose>
-            CASE BRAND
-                WHEN '스타벅스' THEN 1
-                WHEN '투썸' THEN 2
-                WHEN '컴포즈' THEN 3
-                WHEN '이디야' THEN 4
-                WHEN '빽다방' THEN 5
-                ELSE 6
-            END,
-            MENU_NAME ASC
+        CASE BRAND
+        WHEN '스타벅스' THEN 1
+        WHEN '투썸' THEN 2
+        WHEN '컴포즈' THEN 3
+        WHEN '이디야' THEN 4
+        WHEN '빽다방' THEN 5
+        ELSE 6
+        END,
+        MENU_NAME ASC
         LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
     </select>
 
