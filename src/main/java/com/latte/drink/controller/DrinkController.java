@@ -43,7 +43,7 @@ public class DrinkController {
      * 일단 완성, 주석 해제 필요
      */
     @GetMapping("/calendar")
-    public ResponseEntity<?> findCaffeineByMonth(@RequestParam("datetime") LocalDateTime dateTime) {
+    public ResponseEntity<?> findCaffeineByMonth(@RequestParam("datetime") String dateTime) {
         MemberResponse member = (MemberResponse) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         CalendarResponse calendar = drinkService.findCaffeineByMonth(member, dateTime);
         ResponseData<?> dateResponse = new ResponseData<>(null, calendar);

@@ -27,9 +27,10 @@ public class DrinkService {
     private final DrinkMapper drinkMapper;
     private final StandardValueCalculate standardValueCalculate;
 
-    public CalendarResponse findCaffeineByMonth(MemberResponse member, LocalDateTime dateTime) {
+    public CalendarResponse findCaffeineByMonth(MemberResponse member, String dateTime) {
 
-        LocalDateTime now = LocalDateTime.now();
+        String[] yearMonth = dateTime.split("-");
+        LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime firstDayOfMonth;
         LocalDateTime lastDayOfMonth;
         LocalDateTime lastDayOfLastMonth;
@@ -39,17 +40,23 @@ public class DrinkService {
          * 전달 받은 달이 이번 달 경우 -> 지난 달 N 일 ~ 이번 달 N 일
          * 전달 받은 달이 이번 달이 아닌 경우 -> 기준 달의 이전 달 전체 ~ 기준 달 전체
          */
-        if (now.getYear() == dateTime.getYear() && now.getMonth() == dateTime.getMonth()) {
-            firstDayOfMonth = dateTime.withDayOfMonth(1); // 이번 달 1일
-            lastDayOfMonth = dateTime;                    // 이번 달 N 일
-            lastDayOfLastMonth = dateTime.minusMonths(1); // 지난 달 N 일
+        if (today.getYear() == Integer.parseInt(yearMonth[0]) && today.getMonthValue() == Integer.parseInt(yearMonth[1])) {
+            firstDayOfMonth = today.withDayOfMonth(1); // 이번 달 1일
+            lastDayOfMonth = today;                    // 이번 달 N 일
+            lastDayOfLastMonth = today.minusMonths(1); // 지난 달 N 일
             firstDayOfLastMonth = lastDayOfLastMonth.withDayOfMonth(1);   // 지난 달 1일
         } else {    // 지난 달인 경우
-            firstDayOfMonth = dateTime.withDayOfMonth(1); // 기준 달 1일
+            // 기준 달 1일
+            firstDayOfMonth = LocalDateTime.of(Integer.parseInt(yearMonth[0]), Integer.parseInt(yearMonth[1]), 1, 0, 0, 0);
             lastDayOfMonth = firstDayOfMonth.withDayOfMonth(firstDayOfMonth.toLocalDate().lengthOfMonth());    // 기준 달 마지막 날짜
-            firstDayOfLastMonth = dateTime.minusMonths(1).withDayOfMonth(1);    // 지난 달 1일
+            firstDayOfLastMonth = firstDayOfMonth.minusMonths(1);    // 지난 달 1일
             lastDayOfLastMonth = firstDayOfLastMonth.withDayOfMonth(firstDayOfLastMonth.toLocalDate().lengthOfMonth()); // 지난 달 마지막 날짜
         }
+
+        log.info("firstDayOfMonth = {}", firstDayOfMonth);
+        log.info("lastDayOfMonth = {}", lastDayOfMonth);
+        log.info("lastDayOfLastMonth = {}", lastDayOfLastMonth);
+        log.info("firstDayOfLastMonth = {}", firstDayOfLastMonth);
 
         /**
          * 월별 카페인 섭취량 통계
