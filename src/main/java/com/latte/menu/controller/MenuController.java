@@ -65,7 +65,7 @@ public class MenuController {
 
     @GetMapping("/ranking/word")
     public ResponseEntity<?> searchWordRanking() {
-        List<SearchRankingResponse> searchWordRanking = menuService.getSearchWordRanking();
+        List<MenuSearchRankingResponse> searchWordRanking = menuService.getSearchWordRanking();
         ResponseData<?> responseData = new ResponseData<>(null, searchWordRanking);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }

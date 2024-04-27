@@ -5,8 +5,6 @@ import com.latte.menu.response.*;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +24,7 @@ import java.util.Set;
 public class MenuService {
 
     private final MenuMapper menuMapper;
-    private final String rankingKey = "searchWordRanking";
+    private final String rankingKey = "menuSearchRanking";
 
     private final RedisTemplate<String, String> redisTemplate;
     private ZSetOperations<String, String> zSetOperations;
@@ -64,9 +62,8 @@ public class MenuService {
     }
 
 
-    @Cacheable(value = "searchWordRankingCache", key = "'searchWordRanking'")
-    public List<SearchRankingResponse> getSearchWordRanking() {
-        List<SearchRankingResponse> rankingResponses = new ArrayList<>();
+    public List<MenuSearchRankingResponse> getSearchWordRanking() {
+        List<MenuSearchRankingResponse> rankingResponses = new ArrayList<>();
         Set<ZSetOperations.TypedTuple<String>> typedTuples = zSetOperations.reverseRangeWithScores(rankingKey, 0, 4);
 
         if (typedTuples.size() == 0) {
@@ -76,16 +73,11 @@ public class MenuService {
         int rank = 1;
         for (ZSetOperations.TypedTuple<String> typedTuple : typedTuples) {
             String word = typedTuple.getValue();
-            SearchRankingResponse response = new SearchRankingResponse(rank, word);
+            MenuSearchRankingResponse response = new MenuSearchRankingResponse(rank, word);
             rankingResponses.add(response);
             rank++;
         }
         return rankingResponses;
-    }
-
-    @CacheEvict(value = "searchWordRankingCache", allEntries = true)
-    public void clearCache() {
-        log.info("cache clear!!!");
     }
 
 
