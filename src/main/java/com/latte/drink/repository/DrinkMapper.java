@@ -12,20 +12,24 @@ import java.util.List;
 @Mapper
 public interface DrinkMapper {
 
-    List<DateResponse> findCalendar(@Param("memberNo") String memberNo,
+    List<DrinkMenuResponse> findHomeResponse(@Param("mbrId") String mbrId,
+                                          @Param("startDateTime") LocalDateTime startDateTime,
+                                          @Param("lastDateTime") LocalDateTime lastDateTime);
+
+    List<DateResponse> findCalendar(@Param("mbrId") String mbrId,
                                     @Param("startDateTime") LocalDateTime startDateTime,
                                     @Param("lastDateTime") LocalDateTime lastDateTime);
 
-    int findSumCaffeineByMonth(@Param("memberNo") String memberNo,
+    int findSumCaffeineByMonth(@Param("mbrId") String mbrId,
                                @Param("startDateTime") LocalDateTime startDateTime,
                                @Param("lastDateTime") LocalDateTime lastDateTime);
 
 
-    DateStatusResponse findSumCaffeineByDate(@Param("memberNo") String memberNo,
+    DateStatusResponse findSumCaffeineByDate(@Param("mbrId") String mbrId,
                                              @Param("localDateTime") LocalDateTime localDateTime,
                                              @Param("minNormal") int minNormal,
                                              @Param("maxNormal") int maxNormal);
 
-    List<DrinkMenuResponse> findMenuByDate(@Param("memberNo") String memberNo,
+    List<DrinkMenuResponse> findMenuByDate(@Param("mbrId") String mbrId,
                                            @Param("localDateTime") LocalDateTime localDateTime);
 }

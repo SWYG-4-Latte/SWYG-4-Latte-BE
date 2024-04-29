@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,10 +33,26 @@ public class DrinkController {
     /**
      * 임시용 데이터 
      */
-    /*
     private final MemberResponse member = new MemberResponse("1", "이름", "비밀번호", "닉네임", "연락처", "이메일", Gender.M,
-            false, 0, "", "", "이미지", "권한", "26", "N", "3", null, null);
-    */
+            false, 0, "없어요", "", "이미지", "권한", "26", "N", "3", null, null);
+
+    /**
+     * 홈화면 
+     * 일단 완성, 주석 해제 필요
+     */
+    @GetMapping()
+    public ResponseEntity<?> homeResponse() {
+//        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ResponseData<Object> responseData = new ResponseData<>(null, null);
+//        if ("anonymousUser".equals(principal)) {
+//            responseData.setMessage("로그인 하지 않은 사용자입니다");
+//            return new ResponseEntity<>(responseData, HttpStatus.OK);
+//        }
+//        MemberResponse member = (MemberResponse) principal;
+        responseData.setData(drinkService.findHomeResponse(member));
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
 
     /**
      * 날짜별 높음, 보통, 낮음
@@ -44,7 +61,7 @@ public class DrinkController {
      */
     @GetMapping("/calendar")
     public ResponseEntity<?> findCaffeineByMonth(@RequestParam("datetime") String dateTime) {
-        MemberResponse member = (MemberResponse) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        //MemberResponse member = (MemberResponse) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         CalendarResponse calendar = drinkService.findCaffeineByMonth(member, dateTime);
         ResponseData<?> dateResponse = new ResponseData<>(null, calendar);
         return new ResponseEntity<>(dateResponse, HttpStatus.OK);
@@ -56,7 +73,7 @@ public class DrinkController {
      */
     @GetMapping("/date")
     public ResponseEntity<?> findCaffeineByDate(@RequestParam("datetime") LocalDateTime dateTime) {
-        MemberResponse member = (MemberResponse) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        //MemberResponse member = (MemberResponse) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         DateStatusResponse caffeineByToday = drinkService.findCaffeineByDate(member, dateTime);
         ResponseData<?> dateResponse = new ResponseData<>(null, caffeineByToday);
         return new ResponseEntity<>(dateResponse, HttpStatus.OK);
@@ -68,7 +85,7 @@ public class DrinkController {
      */
     @GetMapping("/date/menu")
     public ResponseEntity<?> findMenuByDate(@RequestParam("datetime") LocalDateTime dateTime) {
-        MemberResponse member = (MemberResponse) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        //MemberResponse member = (MemberResponse) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<DrinkMenuResponse> menuByToday = drinkService.findMenuByDate(member, dateTime);
         ResponseData<?> menuDate = new ResponseData<>(null, menuByToday);
         return new ResponseEntity<>(menuDate, HttpStatus.OK);
