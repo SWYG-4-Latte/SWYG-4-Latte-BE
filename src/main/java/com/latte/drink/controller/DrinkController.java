@@ -1,6 +1,7 @@
 package com.latte.drink.controller;
 
 import com.latte.common.response.ResponseData;
+import com.latte.drink.request.DrinkMenuRequest;
 import com.latte.drink.response.CalendarResponse;
 import com.latte.drink.response.DateStatusResponse;
 import com.latte.drink.response.DrinkMenuResponse;
@@ -11,12 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,7 +30,7 @@ public class DrinkController {
     /**
      * 임시용 데이터 
      */
-    private final MemberResponse member = new MemberResponse("1", "이름", "비밀번호", "닉네임", "연락처", "이메일", Gender.M,
+    private final MemberResponse member = new MemberResponse("testUser", "이름", "비밀번호", "닉네임", "연락처", "이메일", Gender.M,
             false, 0, "없어요", "", "이미지", "권한", "26", "N", "3", null, null);
 
     /**
@@ -89,5 +86,13 @@ public class DrinkController {
         List<DrinkMenuResponse> menuByToday = drinkService.findMenuByDate(member, dateTime);
         ResponseData<?> menuDate = new ResponseData<>(null, menuByToday);
         return new ResponseEntity<>(menuDate, HttpStatus.OK);
+    }
+
+    @PostMapping("/date/menu")
+    public ResponseEntity<?> saveDrinkMenu(@RequestBody DrinkMenuRequest drinkMenuRequest) {
+        //MemberResponse member = (MemberResponse) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        drinkService.saveDrinkMenu(member, drinkMenuRequest.getMenuNo());
+        ResponseData<?> responseData = new ResponseData<>("기록이 완료되었습니다", null);
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 }

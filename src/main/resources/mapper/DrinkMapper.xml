@@ -70,4 +70,11 @@
         WHERE MBR_ID = #{mbrId}
           AND REQ_DATE = #{localDateTime}
     </select>
+
+
+    <insert id="saveDrinkMenu">
+        INSERT INTO DRINK(MBR_ID, MENU_NO, REQ_DATE)
+        VALUES (#{mbrId}, #{menuNo}, #{localDateTime})
+    </insert>
+
 </mapper>

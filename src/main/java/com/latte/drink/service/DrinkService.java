@@ -128,4 +128,9 @@ public class DrinkService {
     public List<DrinkMenuResponse> findMenuByDate(MemberResponse member, LocalDateTime dateTime) {
         return drinkMapper.findMenuByDate(member.getMbrId(), dateTime);
     }
+
+    public void saveDrinkMenu(MemberResponse member, Long menuNo) {
+        LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        drinkMapper.saveDrinkMenu(member.getMbrId(), menuNo, today);
+    }
 }

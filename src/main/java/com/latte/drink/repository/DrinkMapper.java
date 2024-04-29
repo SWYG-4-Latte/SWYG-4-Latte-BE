@@ -32,4 +32,8 @@ public interface DrinkMapper {
 
     List<DrinkMenuResponse> findMenuByDate(@Param("mbrId") String mbrId,
                                            @Param("localDateTime") LocalDateTime localDateTime);
+
+    void saveDrinkMenu(@Param("mbrId") String mbrId,
+                       @Param("menuNo") Long menuNo,
+                       @Param("localDateTime") LocalDateTime localDateTime);
 }
