@@ -4,12 +4,27 @@
 
 <mapper namespace="com.latte.drink.repository.DrinkMapper">
 
+    <select id="findHomeResponse" resultType="DrinkMenuResponse">
+        SELECT MENU.MENU_NO,
+               MENU.MENU_NAME,
+               MENU.BRAND,
+               MENU.IMAGE_URL,
+               MENU.CAFFEINE
+        FROM DRINK
+                 JOIN MENU
+                      ON DRINK.MENU_NO = MENU.MENU_NO
+        WHERE MBR_ID = #{mbrId}
+          AND REQ_DATE &gt;= #{startDateTime}
+          AND REQ_DATE &lt;= #{lastDateTime}
+    </select>
+
+
     <select id="findCalendar" resultType="DateResponse">
         SELECT DAY(REQ_DATE) AS DATE, SUM(CAST(SUBSTRING(MENU.CAFFEINE, 1, LENGTH(MENU.CAFFEINE) - 2) AS UNSIGNED)) AS CAFFEINE
         FROM DRINK
                  JOIN MENU
                       ON DRINK.MENU_NO = MENU.MENU_NO
-        WHERE MEMBER_NO = #{memberNo}
+        WHERE MBR_ID = #{mbrId}
           AND REQ_DATE &gt;= #{startDateTime}
           AND REQ_DATE &lt;= #{lastDateTime}
         GROUP BY REQ_DATE
@@ -21,7 +36,7 @@
         FROM DRINK
                  JOIN MENU
                       ON DRINK.MENU_NO = MENU.MENU_NO
-        WHERE MEMBER_NO = #{memberNo}
+        WHERE MBR_ID = #{mbrId}
             AND REQ_DATE &gt;= #{startDateTime}
             AND REQ_DATE &lt;= #{lastDateTime}
     </select>
@@ -41,7 +56,7 @@
                  FROM DRINK
                     JOIN MENU
                         ON DRINK.MENU_NO = MENU.MENU_NO
-                 WHERE MEMBER_NO = #{memberNo}
+                 WHERE MBR_ID = #{mbrId}
                    AND REQ_DATE = #{localDateTime}
              ) AS SUM_TABLE
     </select>
@@ -52,7 +67,7 @@
         FROM DRINK
                  JOIN MENU
                       ON DRINK.MENU_NO = MENU.MENU_NO
-        WHERE MEMBER_NO = #{memberNo}
+        WHERE MBR_ID = #{mbrId}
           AND REQ_DATE = #{localDateTime}
     </select>
 </mapper>

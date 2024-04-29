@@ -1,10 +1,7 @@
 package com.latte.drink.service;
 
 import com.latte.drink.repository.DrinkMapper;
-import com.latte.drink.response.CalendarResponse;
-import com.latte.drink.response.DateResponse;
-import com.latte.drink.response.DateStatusResponse;
-import com.latte.drink.response.DrinkMenuResponse;
+import com.latte.drink.response.*;
 import com.latte.drink.standard.StandardValue;
 import com.latte.drink.standard.StandardValueCalculate;
 import com.latte.member.response.MemberResponse;
@@ -26,6 +23,27 @@ public class DrinkService {
 
     private final DrinkMapper drinkMapper;
     private final StandardValueCalculate standardValueCalculate;
+
+    public HomeCaffeineResponse findHomeResponse(MemberResponse member) {
+        int today = 0;
+        String remain = "";
+        LocalDateTime lastDateTime = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime startDateTime = lastDateTime.minusDays(3);    // 3일 전까지만 조회
+        List<DrinkMenuResponse> recent = drinkMapper.findHomeResponse(member.getMbrId(), startDateTime, lastDateTime);
+        int maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
+
+        for (DrinkMenuResponse drinkMenuResponse : recent) {
+            today += Integer.parseInt(drinkMenuResponse.getCaffeine().replace("mg", ""));
+        }
+
+        if (today > maxCaffeine) {
+            remain = "0mg";
+        } else {
+            remain = (maxCaffeine - today) + "mg";
+        }
+
+        return new HomeCaffeineResponse(today + "mg", remain, recent);
+    }
 
     public CalendarResponse findCaffeineByMonth(MemberResponse member, String dateTime) {
 
