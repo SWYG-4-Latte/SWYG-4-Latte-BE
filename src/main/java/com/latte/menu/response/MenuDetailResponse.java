@@ -10,7 +10,7 @@ public class MenuDetailResponse {
     private String brand;
     private String menuName;
     private String caffeine;
-    private String price;
+    private int price;
     private Nutrient nutrient;
     private String imageUrl;
     private List<MenuSimpleResponse> lowCaffeineMenus;

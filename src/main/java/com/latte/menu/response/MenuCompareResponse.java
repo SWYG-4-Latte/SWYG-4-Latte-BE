@@ -8,7 +8,7 @@ public class MenuCompareResponse {
     private String brand;
     private String menuName;
     private String caffeine;
-    private String price;
+    private int price;
     private String allergy;
     private String kcal;
     private String imageUrl;

@@ -8,6 +8,6 @@ public class MenuSearchResponse {
     private String menuName;
     private String caffeine;
     private String brand;
-    private String price;
+    private int price;
     private String imageUrl;
 }
