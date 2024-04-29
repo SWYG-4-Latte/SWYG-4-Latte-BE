@@ -10,6 +10,7 @@ import com.latte.member.response.Gender;
 import com.latte.member.response.MemberResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -91,8 +92,14 @@ public class DrinkController {
     @PostMapping("/date/menu")
     public ResponseEntity<?> saveDrinkMenu(@RequestBody DrinkMenuRequest drinkMenuRequest) {
         //MemberResponse member = (MemberResponse) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        drinkService.saveDrinkMenu(member, drinkMenuRequest.getMenuNo());
-        ResponseData<?> responseData = new ResponseData<>("기록이 완료되었습니다", null);
+        ResponseData<?> responseData = new ResponseData<>(null, null);
+        try {
+            drinkService.saveDrinkMenu(member, drinkMenuRequest.getMenuNo());
+            responseData.setMessage("기록이 완료되었습니다");
+        } catch (DataIntegrityViolationException exception) {
+            responseData.setMessage("존재하지 않는 사용자 혹은 메뉴입니다");
+            return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
+        }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 }
