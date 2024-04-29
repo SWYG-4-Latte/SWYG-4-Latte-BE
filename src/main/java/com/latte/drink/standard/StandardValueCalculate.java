@@ -4,7 +4,6 @@ import com.latte.member.response.Gender;
 import com.latte.member.response.MemberResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 @Slf4j
 @Component
@@ -20,17 +19,17 @@ public class StandardValueCalculate {
          */
         if(member.getGender().equals(Gender.M)) {
             // 알레르기 여부
-            if (StringUtils.hasText(member.getAllergy())) {
-                type = "MY";
-            } else {
+            if ("없어요".equals(member.getAllergy())) {
                 type = "MN";
+            } else {
+                type = "MY";
             }
         } else {
             if (!member.isPregnancy()) {
-                if (StringUtils.hasText(member.getAllergy())) {
-                    type = "FNY";
-                } else {
+                if ("없어요".equals(member.getAllergy())) {
                     type = "FNN";
+                } else {
+                    type = "FNY";
                 }
             } else {
                 int pregMonth = member.getPregMonth();
