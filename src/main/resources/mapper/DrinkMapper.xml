@@ -63,7 +63,7 @@
 
 
     <select id="findMenuByDate" resultType="DrinkMenuResponse">
-        SELECT MENU.MENU_NO, MENU.MENU_NAME, MENU.BRAND, MENU.IMAGE_URL, CONCAT('카페인 ', MENU.CAFFEINE) AS CAFFEINE
+        SELECT MENU.MENU_NO, MENU.MENU_NAME, MENU.BRAND, MENU.IMAGE_URL, MENU.CAFFEINE
         FROM DRINK
                  JOIN MENU
                       ON DRINK.MENU_NO = MENU.MENU_NO
