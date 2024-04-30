@@ -10,6 +10,7 @@ public class MenuDetailResponse {
     private String brand;
     private String menuName;
     private String caffeine;
+    private String percent;
     private int price;
     private Nutrient nutrient;
     private String imageUrl;

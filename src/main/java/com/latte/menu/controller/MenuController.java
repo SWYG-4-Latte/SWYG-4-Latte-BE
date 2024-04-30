@@ -1,6 +1,8 @@
 package com.latte.menu.controller;
 
 import com.latte.common.response.ResponseData;
+import com.latte.member.response.Gender;
+import com.latte.member.response.MemberResponse;
 import com.latte.menu.response.*;
 import com.latte.menu.service.BrandType;
 import com.latte.menu.service.MenuService;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -23,6 +26,9 @@ import java.util.List;
 public class MenuController {
 
     private final MenuService menuService;
+
+    private final MemberResponse member = new MemberResponse("1", "testUser", "이름", "비밀번호", "닉네임", "연락처", "이메일", Gender.M,
+            false, 0, "없어요", "", "이미지", "권한", "26", "N", "3", null, null);
 
     @GetMapping("/brand")
     public ResponseEntity<?> brandList() {
@@ -82,7 +88,14 @@ public class MenuController {
 
     @GetMapping("/detail/{menuNo}")
     public ResponseEntity<?> menuDetail(@PathVariable Long menuNo) {
-        MenuDetailResponse menuDetailResponse = menuService.menuDetail(menuNo);
+//        MemberResponse member;
+//        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        if ("anonymousUser".equals(principal)) {
+//            member = null;
+//        } else {
+//            member = (MemberResponse) principal;
+//        }
+        MenuDetailResponse menuDetailResponse = menuService.menuDetail(menuNo, member);
         ResponseData<?> responseData = new ResponseData<>(null, menuDetailResponse);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
