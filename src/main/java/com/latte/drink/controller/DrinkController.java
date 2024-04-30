@@ -31,7 +31,7 @@ public class DrinkController {
     /**
      * 임시용 데이터 
      */
-    private final MemberResponse member = new MemberResponse("testUser", "이름", "비밀번호", "닉네임", "연락처", "이메일", Gender.M,
+    private final MemberResponse member = new MemberResponse("1", "testUser", "이름", "비밀번호", "닉네임", "연락처", "이메일", Gender.M,
             false, 0, "없어요", "", "이미지", "권한", "26", "N", "3", null, null);
 
     /**
