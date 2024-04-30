@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 
 @Slf4j
@@ -40,14 +41,14 @@ public class DrinkController {
      */
     @GetMapping()
     public ResponseEntity<?> homeResponse() {
-//        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        ResponseData<Object> responseData = new ResponseData<>(null, null);
-//        if ("anonymousUser".equals(principal)) {
-//            responseData.setMessage("로그인 하지 않은 사용자입니다");
+        ResponseData<Object> responseData;
+//        Optional<MemberResponse> memberResponse = isLogin();
+//        if (memberResponse.isEmpty()) {
+//            responseData = new ResponseData<>("로그인 하지 않은 사용자입니다", null);
 //            return new ResponseEntity<>(responseData, HttpStatus.OK);
 //        }
-//        MemberResponse member = (MemberResponse) principal;
-        responseData.setData(drinkService.findHomeResponse(member));
+//        MemberResponse member = memberResponse.get();
+        responseData = new ResponseData<>(null, drinkService.findHomeResponse(member));
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
@@ -59,10 +60,16 @@ public class DrinkController {
      */
     @GetMapping("/calendar")
     public ResponseEntity<?> findCaffeineByMonth(@RequestParam("datetime") String dateTime) {
-        //MemberResponse member = (MemberResponse) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ResponseData<Object> responseData;
+//        Optional<MemberResponse> memberResponse = isLogin();
+//        if (memberResponse.isEmpty()) {
+//            responseData = new ResponseData<>("로그인 하지 않은 사용자입니다", null);
+//            return new ResponseEntity<>(responseData, HttpStatus.OK);
+//        }
+//        MemberResponse member = memberResponse.get();
         CalendarResponse calendar = drinkService.findCaffeineByMonth(member, dateTime);
-        ResponseData<?> dateResponse = new ResponseData<>(null, calendar);
-        return new ResponseEntity<>(dateResponse, HttpStatus.OK);
+        responseData = new ResponseData<>(null, calendar);
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
     /**
@@ -71,10 +78,16 @@ public class DrinkController {
      */
     @GetMapping("/date")
     public ResponseEntity<?> findCaffeineByDate(@RequestParam("datetime") LocalDateTime dateTime) {
-        //MemberResponse member = (MemberResponse) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ResponseData<Object> responseData;
+//        Optional<MemberResponse> memberResponse = isLogin();
+//        if (memberResponse.isEmpty()) {
+//            responseData = new ResponseData<>("로그인 하지 않은 사용자입니다", null);
+//            return new ResponseEntity<>(responseData, HttpStatus.OK);
+//        }
+//        MemberResponse member = memberResponse.get();
         DateStatusResponse caffeineByToday = drinkService.findCaffeineByDate(member, dateTime);
-        ResponseData<?> dateResponse = new ResponseData<>(null, caffeineByToday);
-        return new ResponseEntity<>(dateResponse, HttpStatus.OK);
+        responseData = new ResponseData<>(null, caffeineByToday);
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
     /**
@@ -83,23 +96,43 @@ public class DrinkController {
      */
     @GetMapping("/date/menu")
     public ResponseEntity<?> findMenuByDate(@RequestParam("datetime") LocalDateTime dateTime) {
-        //MemberResponse member = (MemberResponse) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ResponseData<Object> responseData;
+//        Optional<MemberResponse> memberResponse = isLogin();
+//        if (memberResponse.isEmpty()) {
+//            responseData = new ResponseData<>("로그인 하지 않은 사용자입니다", null);
+//            return new ResponseEntity<>(responseData, HttpStatus.OK);
+//        }
+//        MemberResponse member = memberResponse.get();
         List<DrinkMenuResponse> menuByToday = drinkService.findMenuByDate(member, dateTime);
-        ResponseData<?> menuDate = new ResponseData<>(null, menuByToday);
-        return new ResponseEntity<>(menuDate, HttpStatus.OK);
+        responseData = new ResponseData<>(null, menuByToday);
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
     @PostMapping("/date/menu")
     public ResponseEntity<?> saveDrinkMenu(@RequestBody DrinkMenuRequest drinkMenuRequest) {
-        //MemberResponse member = (MemberResponse) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        ResponseData<?> responseData = new ResponseData<>(null, null);
+        ResponseData<?> responseData;
+//        Optional<MemberResponse> memberResponse = isLogin();
+//        if (memberResponse.isEmpty()) {
+//            responseData = new ResponseData<>("로그인 후 이용 가능합니다", null);
+//            return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
+//        }
+//        MemberResponse member = memberResponse.get();
         try {
-            drinkService.saveDrinkMenu(member, drinkMenuRequest.getMenuNo());
-            responseData.setMessage("기록이 완료되었습니다");
+            drinkService.saveDrinkMenu(member, drinkMenuRequest.getMenuNo(), drinkMenuRequest.getDateTime());
+            responseData = new ResponseData<>("기록이 완료되었습니다", null);
         } catch (DataIntegrityViolationException exception) {
-            responseData.setMessage("존재하지 않는 사용자 혹은 메뉴입니다");
+            responseData = new ResponseData<>("존재하지 않는 사용자 혹은 메뉴입니다", null);
             return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
+
+    private Optional<MemberResponse> isLogin() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if ("anonymousUser".equals(principal)) {
+            return Optional.empty();
+        }
+        return Optional.of((MemberResponse) principal);
     }
 }

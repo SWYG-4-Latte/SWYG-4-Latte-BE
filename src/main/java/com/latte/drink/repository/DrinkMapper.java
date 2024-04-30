@@ -13,8 +13,7 @@ import java.util.List;
 public interface DrinkMapper {
 
     List<DrinkMenuResponse> findHomeResponse(@Param("mbrNo") String mbrNo,
-                                          @Param("startDateTime") LocalDateTime startDateTime,
-                                          @Param("lastDateTime") LocalDateTime lastDateTime);
+                                          @Param("today") LocalDateTime today);
 
     List<DateResponse> findCalendar(@Param("mbrNo") String mbrNo,
                                     @Param("startDateTime") LocalDateTime startDateTime,

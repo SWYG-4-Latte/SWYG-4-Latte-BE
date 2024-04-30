@@ -8,14 +8,16 @@
         SELECT MENU.MENU_NO,
                MENU.MENU_NAME,
                MENU.BRAND,
-               MENU.IMAGE_URL,
-               MENU.CAFFEINE
+               MENU.CAFFEINE,
+               CONCAT(MENU.MENU_SIZE, '(', SUBSTRING_INDEX(MENU.VOLUMN, '(', 1), ')') AS MENU_SIZE,
+               MENU.IMAGE_URL
         FROM DRINK
                  JOIN MENU
                       ON DRINK.MENU_NO = MENU.MENU_NO
         WHERE MBR_NO = #{mbrNo}
-          AND REQ_DATE &gt;= #{startDateTime}
-          AND REQ_DATE &lt;= #{lastDateTime}
+          AND REQ_DATE &lt;= #{today}
+        ORDER BY REQ_DATE DESC, DRINK_NO DESC
+        LIMIT 5
     </select>
 
 
@@ -63,7 +65,12 @@
 
 
     <select id="findMenuByDate" resultType="DrinkMenuResponse">
-        SELECT MENU.MENU_NO, MENU.MENU_NAME, MENU.BRAND, MENU.IMAGE_URL, MENU.CAFFEINE
+        SELECT MENU.MENU_NO,
+               MENU.MENU_NAME,
+               MENU.BRAND,
+               MENU.CAFFEINE,
+               CONCAT(MENU.MENU_SIZE, '(', SUBSTRING_INDEX(MENU.VOLUMN, '(', 1), ')') AS MENU_SIZE,
+               MENU.IMAGE_URL
         FROM DRINK
                  JOIN MENU
                       ON DRINK.MENU_NO = MENU.MENU_NO

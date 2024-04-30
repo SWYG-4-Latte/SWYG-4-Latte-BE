@@ -6,7 +6,8 @@ import lombok.Data;
 public class DrinkMenuResponse {
     private Long menuNo;
     private String menuName;
-    private String caffeine;
     private String brand;
+    private String caffeine;
+    private String menuSize;
     private String imageUrl;
 }
