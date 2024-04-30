@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- mapper DTD 선언 -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.latte.member.mapper.MemberMapper">
+    <!-- tb_member 테이블 전체 컬럼 -->
+        <sql id="memberColumns">
+                mbr_id
+              , password
+              , mbr_name
+              , age
+              , nickname
+              , image_url
+              , allergy
+              , cup_day
+              , gender
+              , cell_phone
+              , email
+              , pregnancy
+              , preg_month
+              , role
+              , symptom
+              , delete_yn
+              , reg_date
+              , update_date
+        </sql>
+
+    <!--회원 정보 조회-->
+    <select id="getMemberInfo" parameterType="String" resultType="com.latte.member.response.MemberResponse">
+        SELECT
+        <include refid="memberColumns" />
+        FROM tb_member
+        where mbr_Id = #{mbrId}
+    </select>
+
+
+<!--    &lt;!&ndash;회원 아이디 조회&ndash;&gt;
+    <select id="findById" parameterType="String" resultType="com.latte.member.response.MemberResponse">
+        &lt;!&ndash;MemberMapper.findById&ndash;&gt;
+            SELECT
+            <include refid="memberColumns" />
+            FROM tb_member
+            where mbr_Id = #{mbrId}
+    </select>-->
+
+<!--
+    &lt;!&ndash;회원 리스트 조회&ndash;&gt;
+    <select id="getMemberList" resultType="list">
+        &lt;!&ndash;MemberMapper.getMemberList&ndash;&gt;
+        SELECT
+        <include refid="memberColumns" />
+        FROM tb_member
+    </select>
+
+
+    &lt;!&ndash; 회원 수 카운팅 (ID 중복 체크) &ndash;&gt;
+    <select id="countByLoginId" parameterType="string" resultType="int">
+        SELECT
+            COUNT(*)
+        FROM
+            tb_member
+        WHERE
+            mbr_id = #{mbrId}
+    </select>
+-->
+
+
+</mapper>

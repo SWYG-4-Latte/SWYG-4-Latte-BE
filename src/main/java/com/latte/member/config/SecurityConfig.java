@@ -1,33 +1,18 @@
 package com.latte.member.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latte.member.config.auth.PrincipalDetailsService;
 import com.latte.member.config.jwt.JwtAuthenticationFilter;
-import com.latte.member.config.jwt.JwtAuthorizationFilter;
+import com.latte.member.config.jwt.JwtTokenProvider;
 import com.latte.member.mapper.AuthMapper;
-import com.latte.member.mapper.MemberMapper;
-import org.apache.catalina.filters.CorsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.web.ErrorResponse;
 
 @Configuration
 @EnableWebSecurity // 스프링 시큐리티 필터가 스프링 필터체인에 등록됨
@@ -41,6 +26,12 @@ public class SecurityConfig{
     @Autowired
     private CorsConfig corsConfig;
 
+
+    private final JwtTokenProvider jwtTokenProvider;
+
+    public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
 
 
     @Bean
@@ -56,8 +47,8 @@ public class SecurityConfig{
                                 authorizeHttpRequest
                                         .requestMatchers("/").permitAll()
                                         .requestMatchers("/auth/login", "/auth/signup").permitAll()
-                                      //  .requestMatchers("/auth/admin").hasRole("ADMIN")
-                                      //  .requestMatchers("/auth/user").hasRole("USER")
+                                        //  .requestMatchers("/auth/admin").hasRole("ADMIN")
+                                        //  .requestMatchers("/auth/user").hasRole("USER")
                                         //.anyRequest().authenticated()
                                         .anyRequest().permitAll()
                         //.anyRequest().hasRole("ROLE_USER")
@@ -80,6 +71,8 @@ public class SecurityConfig{
 
         http
                 .csrf((csrf) -> csrf.disable());
+                // JWT 인증을 위하여 직접 구현한 필터를 UsernamePasswordAuthenticationFilter 전에 실행
+                //.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class).build();
 
 
         return http.build();
@@ -87,7 +80,7 @@ public class SecurityConfig{
 
 
 
-    public class MyCustomDsl extends AbstractHttpConfigurer<MyCustomDsl, HttpSecurity> {
+/*    public class MyCustomDsl extends AbstractHttpConfigurer<MyCustomDsl, HttpSecurity> {
         @Override
         public void configure(HttpSecurity http) throws Exception {
             AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
@@ -96,7 +89,7 @@ public class SecurityConfig{
                     .addFilter(new JwtAuthenticationFilter(authenticationManager))
                     .addFilter(new JwtAuthorizationFilter(authenticationManager, authMapper));
         }
-    }
+    }*/
 
 
 }
