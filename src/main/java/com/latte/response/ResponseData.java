@@ -8,9 +8,11 @@ import lombok.Data;
 @AllArgsConstructor
 @Builder
 public class ResponseData<T> {
-    private int statusCode;
+    private String message;
     //private String responseMessage;
     private T data;
 
 
+    public void setData(String key, boolean value) {
+    }
 }

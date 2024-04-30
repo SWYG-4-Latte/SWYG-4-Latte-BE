@@ -5,30 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9e4028c3-c845-4419-bd32-6d273623a210" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/config/CorsConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/config/auth/PrincipalDetails.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/config/auth/PrincipalDetailsService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/config/jwt/JwtAuthenticationFilter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/config/jwt/JwtAuthorizationFilter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/config/jwt/JwtProperties.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/controller/AuthConroller.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/mapper/AuthMapper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/mapper/MemberMapper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/request/MemberRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/response/Gender.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/response/MemberResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/service/AuthService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/service/MemberService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/response/ResponseData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/response/ResponseMessage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/response/StatusCode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/log4jdbc.log4j2.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/mapper/member/AuthMapper.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/mapper/member/MemberMapper.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/templates/member/joinForm.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/templates/member/loginForm.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/templates/member/myPage.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/checksums/checksums.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/checksums/checksums.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" afterDir="false" />
@@ -37,20 +13,19 @@
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/resourceHashesCache.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/5d290807-8a68-42ff-883a-2dadf1ff2ae3.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/5d290807-8a68-42ff-883a-2dadf1ff2ae3.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/member/config/SecurityConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/member/config/SecurityConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/member/controller/LoginController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/resources/main/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/build/resources/main/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/resources/main/templates/member/login.html" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/previous-compilation-data.bin" beforeDir="false" afterPath="$PROJECT_DIR$/build/tmp/compileJava/previous-compilation-data.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/member/config/CorsConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/config/CorsConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/member/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/member/controller/LoginController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/controller/MemberController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/member/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/member/admin.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/member/config/auth/PrincipalDetailsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/config/auth/PrincipalDetailsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/member/controller/AuthConroller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/controller/AuthConroller.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/member/controller/MemberController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/controller/MemberController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/member/mapper/AuthMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/mapper/AuthMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/member/request/MemberRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/request/MemberRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/member/response/MemberResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/response/MemberResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/member/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/service/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/response/ResponseData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/response/ResponseData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/mapper/member/AuthMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/mapper/member/AuthMapper.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,7 +80,7 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "Spring Boot.LatteApplication.executor": "Debug",
     "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "feat/Login",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/김연지/Desktop/study/latte/src/main/resources/mapper/member",
     "node.js.detected.package.eslint": "true",
@@ -163,6 +138,8 @@
       <workItem from="1713615428067" duration="216000" />
       <workItem from="1713616023047" duration="25020000" />
       <workItem from="1713877722870" duration="19509000" />
+      <workItem from="1714384414334" duration="10492000" />
+      <workItem from="1714396940500" duration="4954000" />
     </task>
     <servers />
   </component>
@@ -177,14 +154,19 @@
           <option name="timeStamp" value="4" />
         </breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/com/latte/member/controller/AuthConroller.java</url>
-          <line>95</line>
-          <option name="timeStamp" value="14" />
+          <url>file://$PROJECT_DIR$/src/main/java/com/latte/member/service/AuthService.java</url>
+          <line>78</line>
+          <option name="timeStamp" value="6" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/com/latte/member/service/AuthService.java</url>
-          <line>87</line>
-          <option name="timeStamp" value="15" />
+          <line>76</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/latte/member/controller/AuthConroller.java</url>
+          <line>105</line>
+          <option name="timeStamp" value="10" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

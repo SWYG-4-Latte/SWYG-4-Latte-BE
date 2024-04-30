@@ -1,5 +1,6 @@
 package com.latte.member.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latte.member.request.MemberRequest;
 import com.latte.member.response.MemberResponse;
 import com.latte.member.service.AuthService;
@@ -14,7 +15,9 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -53,26 +56,27 @@ public class AuthConroller {
      */
     @PostMapping("/signup")
     @ResponseBody
-    public ResponseEntity<?> saveMember(@RequestBody MemberRequest request) {
+    public ResponseEntity<?> saveMember(@RequestBody MemberRequest request){
 
-        //System.out.println("가입정보" + request);
-
-        //request.setRole("ROLE_USER");
-/*        String rawPassword = request.getPassword();
-        String encPassword = bCryptPasswordEncoder.encode(rawPassword);
-        request.setPassword(encPassword);*/
-        int res = authService.save(request);
+        boolean res = authService.save(request);
 
         MemberResponse result = authService.getMemberInfo(request.getMbrId());
-        String data;
-        if(res > 0) {
-            data = String.valueOf(result);
+        String message = "";
+
+        Map<String, Object> dataMap = new HashMap<>();
+
+        if(res) {
+            dataMap.put("result", result); // MemberResponse를 Map에 추가
+            message = "회원 가입에 성공했습니다.";
         } else {
-            data = "FAIL";
+            message = "회원 가입에 실패했습니다.";
         }
 
 
-        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK.value(), data);
+        dataMap.put("confirmId", res); // res 값을 Map에 추가
+
+
+        ResponseData<?> responseData = new ResponseData<>(message, dataMap);
         return new ResponseEntity<>(responseData, OK);
     }
 
@@ -85,27 +89,35 @@ public class AuthConroller {
      * @return
      */
     @PostMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable("id") String id, @RequestBody @Validated final MemberRequest request) {
-       // Map<String, Object> response = new HashMap<>();
-
-/*        String rawPassword = request.getPassword();
-        String encPassword = bCryptPasswordEncoder.encode(rawPassword);
-        request.setPassword(encPassword);*/
+    public ResponseEntity<?> update(@PathVariable String id, @RequestBody @Validated final MemberRequest request) {
 
 
-        int res = authService.update(request);
-        MemberResponse result = authService.getMemberInfo(request.getMbrId());
-        String data;
-        System.out.println("=============result" + result);
-       if(res > 0) {
-           data = String.valueOf(result);
+        String message = "";
+
+        MemberResponse bfData = authService.getMemberInfo(id);
+        String seq = bfData.getMbrNo();
+        request.setMbrNo(seq);
+        boolean res = authService.update(request);
+
+        Map<String, Object> dataMap = new HashMap<>();
+
+
+        if(res) {
+            MemberResponse result = authService.getMemberSeq(seq);
+            dataMap.put("result", result); // MemberResponse를 Map에 추가
+            message = "회원 수정에 성공했습니다.";
         } else {
-           data = "FAIL";
+            message = "회원 수정에 실패했습니다.";
         }
 
-        ResponseData<?> responseData = new ResponseData<>(HttpStatus.OK.value(), data);
-        return new ResponseEntity<>(responseData, OK);
+
+        dataMap.put("confirmId", res); // res 값을 Map에 추가
+
+
+        ResponseData<?> responseData = new ResponseData<>(message, dataMap);
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
+
 
 
     /**
@@ -115,10 +127,20 @@ public class AuthConroller {
      */
     @DeleteMapping("/delete/{id}")
     @ResponseBody
-    public void deleteMember(@PathVariable String id) {
+    public ResponseEntity<?> deleteMember(@PathVariable String id) {
 
-        authService.deleteMember(id);
+        boolean res = authService.deleteMember(id);
+        String data = "";
+        String message = "";
+        if (res) {
+            data = "true";
+            message = "회원 탈퇴에 성공했습니다.";
+        } else {
+            data = "false";
+            message = "회원 탈퇴에 실패했습니다.";
+        }
 
-        System.out.println("회원가입 탈퇴 성공");
+        ResponseData<?> responseData = new ResponseData<>(message, data);
+        return new ResponseEntity<>(responseData, OK);
     }
 }

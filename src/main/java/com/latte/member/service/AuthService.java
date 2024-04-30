@@ -32,31 +32,24 @@ public class AuthService {
      * @param request
      */
     @Transactional
-    public int save(MemberRequest request) {
+    public boolean save(MemberRequest request) {
 
         int existId = authMapper.countByLoginId(request.getMbrId());
 
         if(existId == 1) {
             System.out.println("========아이디가 존재합니다 ==========");
-            return 1;
+            return false;
         } else {
             // 권한 부여
             request.setRole("USER");
             // 회원탈퇴 여부
             request.setDeleteYn("N");
-/*            request.setCellPhone("010");
-            request.setGender(Gender.valueOf("M"));
-            request.setPregnancy(false);
-            request.setAge("26");
-            request.setCupDay("1");
-            request.setAllergy("우유");
-            request.setSymptom("잠이 안 와요");*/
 
             request.encodingPassword(passwordEncoder);
 
             authMapper.insertMember(request);
 
-            return 0;
+            return true;
         }
 
     }
@@ -66,26 +59,26 @@ public class AuthService {
      * @param
      */
     @Transactional
-    public int update(MemberRequest request) {
+    public boolean update(MemberRequest request) {
 
-        request.setRole("USER");
-        request.setDeleteYn("N");
-    /*    request.setCellPhone("010");
-        request.setGender(Gender.valueOf("M"));
-        request.setPregnancy(false);
-        request.setAge("26");
-        request.setCupDay("5");
-        request.setAllergy("우유");
-        request.setSymptom("잠이 안 와요");*/
+        int existId = authMapper.countByLoginId(request.getMbrId());
 
-        request.encodingPassword(passwordEncoder);
-        /*
-        if(id == null)
-        MemberResponse response = memberMapper.findById(id)
-                .orElseThrow(() -> new NullPointerException("해당 아이디가 존재하지 않습니다."));
-*/
+        if(existId == 1) {
+            System.out.println("========아이디가 존재합니다 ==========");
+            return false;
+        } else {
+            // 권한 부여
+            request.setRole("USER");
+            // 회원탈퇴 여부
+            request.setDeleteYn("N");
 
-        return authMapper.updateMember(request);
+            request.encodingPassword(passwordEncoder);
+
+            authMapper.updateMember(request);
+
+            return true;
+        }
+
     }
 
 
@@ -95,9 +88,9 @@ public class AuthService {
      * @param id
      */
     @Transactional
-    public void deleteMember(String id) {
+    public boolean deleteMember(String id) {
 
-        authMapper.deleteMember(id);
+        return authMapper.deleteMember(id);
     }
 
     /**
@@ -130,4 +123,17 @@ public class AuthService {
         System.out.println("==============service" +  authMapper.findById(id));
         return authMapper.findById(id);
     }
+
+    /**
+     * 회원 상세정보 조회
+     * @return
+     */
+    public MemberResponse getMemberSeq(String seq) {
+
+        System.out.println("==============service" +  authMapper.findBySeq(seq));
+        return authMapper.findBySeq(seq);
+    }
+
+
+
 }

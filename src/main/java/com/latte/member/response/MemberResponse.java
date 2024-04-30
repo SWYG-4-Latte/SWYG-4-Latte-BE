@@ -14,6 +14,8 @@ import java.util.List;
 public class MemberResponse {
 
 
+    private String mbrNo;           // primary key
+
     private String mbrId;          // ID
 
     private String mbrName;         // 이름

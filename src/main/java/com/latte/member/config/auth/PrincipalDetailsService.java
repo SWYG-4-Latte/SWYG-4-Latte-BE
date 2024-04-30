@@ -24,8 +24,8 @@ public class PrincipalDetailsService implements UserDetailsService {
 
     // 시큐리티 session에 authentication 정보가 들어감
     @Override
-    public UserDetails loadUserByUsername(String mbrId) throws UsernameNotFoundException {
-        MemberResponse memberEntity = authMapper.findById(mbrId);
+    public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
+        MemberResponse memberEntity = authMapper.findById(id);
         if(memberEntity != null) {
             return new PrincipalDetails(memberEntity);
         }

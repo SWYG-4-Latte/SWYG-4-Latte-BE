@@ -16,6 +16,8 @@ import org.springframework.util.StringUtils;
 public class MemberRequest {
 
 
+    private String mbrNo;          // 회원 번호
+
     //@NotBlank(message = "아이디는 필수 입력 값입니다.")
     private String mbrId;          // ID
 
