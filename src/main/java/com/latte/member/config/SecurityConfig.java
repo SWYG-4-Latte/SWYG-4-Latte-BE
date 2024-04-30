@@ -70,9 +70,9 @@ public class SecurityConfig{
 
 
         http
-                .csrf((csrf) -> csrf.disable());
+                .csrf((csrf) -> csrf.disable())
                 // JWT 인증을 위하여 직접 구현한 필터를 UsernamePasswordAuthenticationFilter 전에 실행
-                //.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class).build();
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
 
         return http.build();
