@@ -135,14 +135,29 @@
     </select>
 
     <select id="getFindMenuListCnt" resultType="int">
-        SELECT COUNT(*) AS CNT
-        FROM MENU
+        SELECT COUNT(M1.MENU_NO)
+        FROM menu M1
+        <!-- 용량이 가장 작은 음료들을 검색 -->
+        INNER JOIN (
+            SELECT
+                menu_name,
+                brand,
+                MIN(CAST(SUBSTRING_INDEX(volumn, 'oz(', 1) AS DECIMAL(5,2))) AS min_size
+            FROM menu
+            GROUP BY menu_name, brand
+            ) AS M2
+            ON M1.menu_name = M2.menu_name
+                AND M1.brand = M2.brand
+                AND CAST(SUBSTRING_INDEX(M1.volumn, 'oz(', 1) AS DECIMAL(5,2)) = M2.min_size
         <where>
             <if test="cond == 'caffeine-none'">
-                and CAFFEINE = "0mg"
+                and M1.CAFFEINE = "0mg"
             </if>
+            <!-- 검색어 -->
             <if test="word != null and word != ''">
-                and MENU_NAME like concat('%', #{word}, '%')
+                and M1.MENU_NAME LIKE CONCAT('%', TRIM(#{word}), '%')
+                or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%')
+                or REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%')
             </if>
         </where>
     </select>
