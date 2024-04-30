@@ -70,36 +70,67 @@
         </where>
     </select>
 
-
+    <!-- 음료 검색 시, 가장 작은 사이즈를 기준으로 검색 -->
     <select id="findMenuList" resultType="MenuSearchResponse">
-        SELECT MENU_NO, MENU_NAME, CAFFEINE, BRAND, PRICE, IMAGE_URL
-        FROM MENU
+        SELECT
+            M1.menu_no,
+            M1.menu_name,
+            M1.brand,
+            M1.caffeine,
+            M1.price,
+            M1.image_url
+        FROM menu M1
+        <!-- 용량이 가장 작은 음료들을 검색 -->
+        INNER JOIN (
+            SELECT
+                menu_name,
+                brand,
+                MIN(CAST(SUBSTRING_INDEX(volumn, 'oz(', 1) AS DECIMAL(5,2))) AS min_size
+            FROM menu
+            GROUP BY menu_name, brand
+        ) AS M2
+            ON M1.menu_name = M2.menu_name
+                AND M1.brand = M2.brand
+                AND CAST(SUBSTRING_INDEX(M1.volumn, 'oz(', 1) AS DECIMAL(5,2)) = M2.min_size
         <where>
             <if test="cond == 'caffeine-none'">
-                and CAFFEINE = "0mg"
+                and M1.CAFFEINE = "0mg"
             </if>
+            <!-- 검색어 -->
             <if test="word != null and word != ''">
-                and MENU_NAME like concat('%', #{word}, '%')
+                and M1.MENU_NAME LIKE CONCAT('%', TRIM(#{word}), '%')
+                or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%')
+                or REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%')
             </if>
         </where>
         ORDER BY
         <choose>
             <when test="sortBy == 'caffeine-desc'">
-                CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) DESC,
+                CAST(SUBSTRING(M1.CAFFEINE, 1, LOCATE('mg', M1.CAFFEINE) - 1) AS UNSIGNED) DESC,
             </when>
             <when test="sortBy == 'caffeine-asc'">
-                CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) ASC,
+                CAST(SUBSTRING(M1.CAFFEINE, 1, LOCATE('mg', M1.CAFFEINE) - 1) AS UNSIGNED) ASC,
             </when>
         </choose>
-        CASE BRAND
-        WHEN '스타벅스' THEN 1
-        WHEN '투썸' THEN 2
-        WHEN '컴포즈' THEN 3
-        WHEN '이디야' THEN 4
-        WHEN '빽다방' THEN 5
-        ELSE 6
+        <!-- 검색어에 따라 정렬 -->
+        <if test="word != null and word != ''">
+            CASE
+                WHEN M1.MENU_NAME LIKE CONCAT('%', TRIM(#{word}), '%') THEN 1
+                WHEN M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%') THEN 2
+                WHEN REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%') THEN 3
+                ELSE 4
+            END,
+        </if>
+        <!-- 브랜드 정렬 기준 -->
+        CASE M1.BRAND
+            WHEN '스타벅스' THEN 1
+            WHEN '투썸플레이스' THEN 2
+            WHEN '컴포즈' THEN 3
+            WHEN '이디야' THEN 4
+            WHEN '빽다방' THEN 5
+            ELSE 6
         END,
-        MENU_NAME ASC
+        M1.MENU_NAME ASC  <!-- HOT, ICE 정렬 -->
         LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
     </select>
 
