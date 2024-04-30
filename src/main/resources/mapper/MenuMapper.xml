@@ -5,9 +5,9 @@
 <mapper namespace="com.latte.menu.repository.MenuMapper">
 
     <select id="findBrandRankingList" resultType="BrandRankingResponse">
-        SELECT RANKING.MENU_NO, RANKING.MENU_NAME, RANKING.BRAND, RANKING.CAFFEINE, RANKING.IMAGE_URL
+        SELECT RANKING.MENU_NO, RANKING.MENU_NAME, RANKING.BRAND, RANKING.CAFFEINE, RANKING.MENU_SIZE, RANKING.IMAGE_URL
         FROM (
-            SELECT MENU.MENU_NO, MENU_NAME, BRAND, CAFFEINE, IMAGE_URL
+            SELECT MENU.MENU_NO, MENU_NAME, BRAND, CAFFEINE, CONCAT(MENU.MENU_SIZE, '(', SUBSTRING_INDEX(MENU.VOLUMN, '(', 1), ')') AS MENU_SIZE, IMAGE_URL
             FROM MENU
             LEFT OUTER JOIN DRINK
                 ON MENU.MENU_NO = DRINK.MENU_NO
@@ -24,24 +24,39 @@
             <when test="sortBy == 'caffeine-asc'">
                 CAST(SUBSTRING(RANKING.CAFFEINE, 1, LOCATE('mg', RANKING.CAFFEINE) - 1) AS UNSIGNED) ASC
             </when>
-            <when test="sortBy == 'popularity'">
-                COUNT(RANKING.MENU_NO) DESC
-            </when>
         </choose>
     </select>
 
 
     <select id="findBrandCategoryList" resultType="BrandCategoryResponse">
-        SELECT MENU_NO, MENU_NAME, CAFFEINE, PRICE, IMAGE_URL
-        FROM MENU
-        <where>
-            <if test="brand != null and brand != ''">
-                and BRAND = #{brand}
-            </if>
-            <if test="cond == 'caffeine-none'">
-                and CAFFEINE = "0mg"
-            </if>
-        </where>
+        SELECT
+            M1.MENU_NO,
+            M1.MENU_NAME,
+            M1.BRAND,
+            M1.CAFFEINE,
+            M1.PRICE,
+            M1.IMAGE_URL
+        FROM menu M1
+        <!-- 용량이 가장 작은 음료들 -->
+        INNER JOIN (
+            SELECT
+                MENU_NAME,
+                BRAND,
+                MIN(CAST(SUBSTRING_INDEX(VOLUMN, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_ZISE
+            FROM MENU
+            <where>
+                <if test="brand != null and brand != ''">
+                    and BRAND = #{brand}
+                </if>
+                <if test="cond == 'caffeine-none'">
+                    and CAFFEINE = "0mg"
+                </if>
+            </where>
+            GROUP BY MENU_NAME, BRAND
+            ) AS M2
+                ON M1.MENU_NAME = M2.MENU_NAME
+                    AND M1.BRAND = M2.BRAND
+                    AND CAST(SUBSTRING_INDEX(M1.VOLUMN, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_ZISE
         ORDER BY
         <choose>
             <when test="sortBy == 'caffeine-desc'">
@@ -58,40 +73,52 @@
     </select>
 
     <select id="getBrandCategoryCnt" resultType="int">
-        SELECT COUNT(*) AS CNT
-        FROM MENU
-        <where>
-            <if test="brand != null and brand != ''">
-                and BRAND = #{brand}
-            </if>
-            <if test="cond == 'caffeine-none'">
-                and CAFFEINE = "0mg"
-            </if>
-        </where>
+        SELECT COUNT(M1.MENU_NO)
+        FROM MENU M1
+        <!-- 용량이 가장 작은 음료들 -->
+        INNER JOIN (
+            SELECT
+                MENU_NAME,
+                BRAND,
+                MIN(CAST(SUBSTRING_INDEX(VOLUMN, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
+            FROM MENU
+            <where>
+                <if test="brand != null and brand != ''">
+                    and BRAND = #{brand}
+                </if>
+                <if test="cond == 'caffeine-none'">
+                    and CAFFEINE = "0mg"
+                </if>
+            </where>
+            GROUP BY MENU_NAME, brand
+            ) AS M2
+                ON M1.MENU_NAME = M2.MENU_NAME
+                    AND M1.BRAND = M2.BRAND
+                    AND CAST(SUBSTRING_INDEX(M1.VOLUMN, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
     </select>
 
     <!-- 음료 검색 시, 가장 작은 사이즈를 기준으로 검색 -->
     <select id="findMenuList" resultType="MenuSearchResponse">
         SELECT
-            M1.menu_no,
-            M1.menu_name,
-            M1.brand,
-            M1.caffeine,
-            M1.price,
-            M1.image_url
-        FROM menu M1
+            M1.MENU_NO,
+            M1.MENU_NAME,
+            M1.BRAND,
+            M1.CAFFEINE,
+            M1.PRICE,
+            M1.IMAGE_URL
+        FROM MENU M1
         <!-- 용량이 가장 작은 음료들을 검색 -->
         INNER JOIN (
             SELECT
-                menu_name,
-                brand,
-                MIN(CAST(SUBSTRING_INDEX(volumn, 'oz(', 1) AS DECIMAL(5,2))) AS min_size
-            FROM menu
-            GROUP BY menu_name, brand
+                MENU_NAME,
+                BRAND,
+                MIN(CAST(SUBSTRING_INDEX(VOLUMN, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
+            FROM MENU
+            GROUP BY MENU_NAME, BRAND
         ) AS M2
-            ON M1.menu_name = M2.menu_name
-                AND M1.brand = M2.brand
-                AND CAST(SUBSTRING_INDEX(M1.volumn, 'oz(', 1) AS DECIMAL(5,2)) = M2.min_size
+            ON M1.MENU_NAME = M2.MENU_NAME
+                AND M1.BRAND = M2.BRAND
+                AND CAST(SUBSTRING_INDEX(M1.VOLUMN, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
         <where>
             <if test="cond == 'caffeine-none'">
                 and M1.CAFFEINE = "0mg"
@@ -136,19 +163,19 @@
 
     <select id="getFindMenuListCnt" resultType="int">
         SELECT COUNT(M1.MENU_NO)
-        FROM menu M1
+        FROM MENU M1
         <!-- 용량이 가장 작은 음료들을 검색 -->
         INNER JOIN (
             SELECT
-                menu_name,
-                brand,
-                MIN(CAST(SUBSTRING_INDEX(volumn, 'oz(', 1) AS DECIMAL(5,2))) AS min_size
-            FROM menu
-            GROUP BY menu_name, brand
+                MENU_NAME,
+                BRAND,
+                MIN(CAST(SUBSTRING_INDEX(VOLUMN, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
+            FROM MENU
+            GROUP BY MENU_NAME, BRAND
             ) AS M2
-            ON M1.menu_name = M2.menu_name
-                AND M1.brand = M2.brand
-                AND CAST(SUBSTRING_INDEX(M1.volumn, 'oz(', 1) AS DECIMAL(5,2)) = M2.min_size
+            ON M1.MENU_NAME = M2.MENU_NAME
+                AND M1.BRAND = M2.BRAND
+                AND CAST(SUBSTRING_INDEX(M1.VOLUMN, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
         <where>
             <if test="cond == 'caffeine-none'">
                 and M1.CAFFEINE = "0mg"
