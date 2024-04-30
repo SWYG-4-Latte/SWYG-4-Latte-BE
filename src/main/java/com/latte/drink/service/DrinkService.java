@@ -25,24 +25,26 @@ public class DrinkService {
     private final StandardValueCalculate standardValueCalculate;
 
     public HomeCaffeineResponse findHomeResponse(MemberResponse member) {
-        int today = 0;
-        String remain = "";
-        LocalDateTime lastDateTime = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-        LocalDateTime startDateTime = lastDateTime.minusDays(3);    // 3일 전까지만 조회
-        List<DrinkMenuResponse> recent = drinkMapper.findHomeResponse(member.getMbrNo(), startDateTime, lastDateTime);
+        int todayCaffeine = 0;
+        String interval = "";
+        String status = "";
+        LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        List<DrinkMenuResponse> recent = drinkMapper.findHomeResponse(member.getMbrNo(), today);
         int maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
 
         for (DrinkMenuResponse drinkMenuResponse : recent) {
-            today += Integer.parseInt(drinkMenuResponse.getCaffeine().replace("mg", ""));
+            todayCaffeine += Integer.parseInt(drinkMenuResponse.getCaffeine().replace("mg", ""));
         }
 
-        if (today > maxCaffeine) {
-            remain = "0mg";
+        if (maxCaffeine < todayCaffeine) {
+            status = "초과";
+            interval = Math.abs(maxCaffeine - todayCaffeine) + "mg";
         } else {
-            remain = (maxCaffeine - today) + "mg";
+            status = "적정";
+            interval = (maxCaffeine - todayCaffeine) + "mg";
         }
 
-        return new HomeCaffeineResponse(today + "mg", remain, recent);
+        return new HomeCaffeineResponse(status, todayCaffeine + "mg", interval, recent);
     }
 
     public CalendarResponse findCaffeineByMonth(MemberResponse member, String dateTime) {
@@ -129,8 +131,7 @@ public class DrinkService {
         return drinkMapper.findMenuByDate(member.getMbrNo(), dateTime);
     }
 
-    public void saveDrinkMenu(MemberResponse member, Long menuNo) {
-        LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-        drinkMapper.saveDrinkMenu(member.getMbrNo(), menuNo, today);
+    public void saveDrinkMenu(MemberResponse member, Long menuNo, LocalDateTime dateTime) {
+        drinkMapper.saveDrinkMenu(member.getMbrNo(), menuNo, dateTime);
     }
 }
