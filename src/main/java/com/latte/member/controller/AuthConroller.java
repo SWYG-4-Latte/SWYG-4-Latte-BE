@@ -1,12 +1,15 @@
 package com.latte.member.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latte.member.config.jwt.JwtToken;
+import com.latte.member.request.LoginRequest;
 import com.latte.member.request.MemberRequest;
 import com.latte.member.response.MemberResponse;
 import com.latte.member.service.AuthService;
 import com.latte.response.ResponseData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +25,7 @@ import java.util.Map;
 
 import static org.springframework.http.HttpStatus.OK;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/auth")
@@ -47,6 +51,23 @@ public class AuthConroller {
     @GetMapping("/signup")
     public String joinForm() {
         return "member/joinForm";
+    }
+
+
+    @PostMapping("/login")
+    @ResponseBody
+    public JwtToken login(@RequestBody LoginRequest request) {
+        String id = request.getMbrId();
+        String password = request.getPassword();
+        JwtToken jwtToken = authService.signIn(id, password);
+        log.info("request id = {}, password = {}", id, password);
+        log.info("jwtToken accessToken = {}, refreshToken = {}", jwtToken.getAccessToken(), jwtToken.getRefreshToken());
+        return jwtToken;
+    }
+
+    @PostMapping("/test")
+    public String test() {
+        return "success";
     }
 
     /**
