@@ -3,15 +3,19 @@ package com.latte.member.response;
 import com.latte.member.request.MemberRequest;
 import groovy.transform.builder.Builder;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
 
 
 @Getter
 @Setter
 @ToString
-public class MemberResponse {
+public class MemberResponse implements UserDetails {
 
 
     private String mbrNo;           // primary key
@@ -59,5 +63,35 @@ public class MemberResponse {
 
     public List<MemberResponse> setMemberList(List<MemberResponse> memberList) {
         return memberList;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(this.role));
+    }
+
+    @Override
+    public String getUsername() {
+        return mbrId;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
