@@ -51,7 +51,7 @@ public class MemberController {
      * @return
      */
     @Secured("ROLE_USER")
-    @GetMapping("/mypage/{id}")
+    @GetMapping("/mypage/{seq}")
     public String myPage(@PathVariable String id) {
 
         authService.getMemberInfo(id);

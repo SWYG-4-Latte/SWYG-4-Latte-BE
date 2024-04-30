@@ -11,11 +11,11 @@ public interface AuthMapper {
 
 
 
-    int updateMember(MemberRequest request);
+    void updateMember(MemberRequest request);
 
     //public MemberResponse getMemberInfo(String Id);
 
-    MemberResponse findById(String Id);
+    MemberResponse findBySeq(String seq);
 
     List<MemberResponse> getMemberList();
 
@@ -23,5 +23,7 @@ public interface AuthMapper {
 
     int countByLoginId(String id);
 
-    void deleteMember(String id);
+    boolean deleteMember(String id);
+
+    MemberResponse findById(String id);
 }
