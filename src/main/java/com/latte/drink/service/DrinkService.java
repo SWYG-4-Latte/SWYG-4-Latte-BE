@@ -29,7 +29,7 @@ public class DrinkService {
         String remain = "";
         LocalDateTime lastDateTime = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime startDateTime = lastDateTime.minusDays(3);    // 3일 전까지만 조회
-        List<DrinkMenuResponse> recent = drinkMapper.findHomeResponse(member.getMbrId(), startDateTime, lastDateTime);
+        List<DrinkMenuResponse> recent = drinkMapper.findHomeResponse(member.getMbrNo(), startDateTime, lastDateTime);
         int maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
 
         for (DrinkMenuResponse drinkMenuResponse : recent) {
@@ -80,9 +80,9 @@ public class DrinkService {
          * 월별 카페인 섭취량 통계
          */
         // 이번 달 카페인 섭취량
-        int sumCaffeineByMonth = drinkMapper.findSumCaffeineByMonth(member.getMbrId(), firstDayOfMonth, lastDayOfMonth);
+        int sumCaffeineByMonth = drinkMapper.findSumCaffeineByMonth(member.getMbrNo(), firstDayOfMonth, lastDayOfMonth);
         // 지난 달 N 일까지의 카페인 섭취량
-        int sumCaffeineByLastMonth = drinkMapper.findSumCaffeineByMonth(member.getMbrId(), firstDayOfLastMonth, lastDayOfLastMonth);
+        int sumCaffeineByLastMonth = drinkMapper.findSumCaffeineByMonth(member.getMbrNo(), firstDayOfLastMonth, lastDayOfLastMonth);
 
         // 월 통계량
         String status = "";
@@ -101,7 +101,7 @@ public class DrinkService {
          * 날짜별 카페인 섭취 상태
          */
         StandardValue memberStandardValue = standardValueCalculate.getMemberStandardValue(member);
-        List<DateResponse> calendar = drinkMapper.findCalendar(member.getMbrId(), firstDayOfMonth, lastDayOfMonth);
+        List<DateResponse> calendar = drinkMapper.findCalendar(member.getMbrNo(), firstDayOfMonth, lastDayOfMonth);
         Map<String, String> mapResponse = new HashMap<>();
 
         for (DateResponse response : calendar) {
@@ -122,15 +122,15 @@ public class DrinkService {
 
     public DateStatusResponse findCaffeineByDate(MemberResponse member, LocalDateTime dateTime) {
         StandardValue memberStandardValue = standardValueCalculate.getMemberStandardValue(member);
-        return drinkMapper.findSumCaffeineByDate(member.getMbrId(), dateTime, memberStandardValue.getMinNormal(), memberStandardValue.getMaxNormal());
+        return drinkMapper.findSumCaffeineByDate(member.getMbrNo(), dateTime, memberStandardValue.getMinNormal(), memberStandardValue.getMaxNormal());
     }
 
     public List<DrinkMenuResponse> findMenuByDate(MemberResponse member, LocalDateTime dateTime) {
-        return drinkMapper.findMenuByDate(member.getMbrId(), dateTime);
+        return drinkMapper.findMenuByDate(member.getMbrNo(), dateTime);
     }
 
     public void saveDrinkMenu(MemberResponse member, Long menuNo) {
         LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-        drinkMapper.saveDrinkMenu(member.getMbrId(), menuNo, today);
+        drinkMapper.saveDrinkMenu(member.getMbrNo(), menuNo, today);
     }
 }
