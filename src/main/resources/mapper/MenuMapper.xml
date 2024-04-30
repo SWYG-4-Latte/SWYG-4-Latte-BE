@@ -219,6 +219,7 @@
         <result property="brand" column="brand"/>
         <result property="menuName" column="menu_name"/>
         <result property="caffeine" column="caffeine"/>
+        <result property="percent" column="percent"/>
         <result property="price" column="price"/>
         <result property="imageUrl" column="image_url"/>
         <!-- 영양 성분 -->
@@ -234,6 +235,9 @@
 
     <select id="getMenuDetail" resultMap="menuDetailResultMap">
         SELECT MENU_NO, BRAND, MENU_NAME, CAFFEINE, PRICE, KCAL, SUGAR, SALT, PROTEIN, SAT_FAT, IMAGE_URL
+            <if test="maxCaffeine != null">
+                ,CONCAT(ROUND(CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) / #{maxCaffeine} * 100), '%') AS PERCENT
+            </if>
         FROM MENU
         WHERE MENU_NO = #{no}
     </select>

@@ -1,5 +1,7 @@
 package com.latte.menu.service;
 
+import com.latte.drink.standard.StandardValueCalculate;
+import com.latte.member.response.MemberResponse;
 import com.latte.menu.repository.MenuMapper;
 import com.latte.menu.response.*;
 import jakarta.annotation.PostConstruct;
@@ -24,6 +26,7 @@ import java.util.Set;
 public class MenuService {
 
     private final MenuMapper menuMapper;
+    private final StandardValueCalculate standardValueCalculate;
     private final String rankingKey = "menuSearchRanking";
 
     private final RedisTemplate<String, String> redisTemplate;
@@ -96,12 +99,14 @@ public class MenuService {
     /**
      * 사용자에 따른 영양성분의 높음, 낮음, 카페인 섭취량의 % 계산 필요
      */
-    public MenuDetailResponse menuDetail(Long menuNo) {
-        MenuDetailResponse menuDetail = menuMapper.getMenuDetail(menuNo);
-        String caffeine = menuDetail.getCaffeine();
-        menuDetail.setCaffeine("카페인 " + caffeine);
+    public MenuDetailResponse menuDetail(Long menuNo, MemberResponse member) {
+        Integer maxCaffeine = null;
+        if (member != null) {
+            maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
+        }
+        MenuDetailResponse menuDetail = menuMapper.getMenuDetail(menuNo, maxCaffeine);
         // 낮은 함량의 카페인
-        int baseCaffeine = Integer.parseInt(caffeine.replace("mg", ""));
+        int baseCaffeine = Integer.parseInt(menuDetail.getCaffeine().replace("mg", ""));
         menuDetail.setLowCaffeineMenus(menuMapper.getLowCaffeineMenu(baseCaffeine));
         return menuDetail;
     }

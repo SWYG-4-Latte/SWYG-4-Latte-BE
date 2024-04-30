@@ -32,7 +32,7 @@ public interface MenuMapper {
 
     List<MenuSimpleResponse> getRecentMenu(@Param("menus") String[] menus);
 
-    MenuDetailResponse getMenuDetail(@Param("no") Long no);
+    MenuDetailResponse getMenuDetail(@Param("no") Long no, @Param("maxCaffeine") Integer maxCaffeine);
 
     List<MenuSimpleResponse> getLowCaffeineMenu(@Param("base") int base);
 }
