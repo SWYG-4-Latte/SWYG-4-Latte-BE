@@ -18,4 +18,4 @@ else
 fi
 
 echo "> jar 파일을 실행합니다"
-nohup java -jar build/libs/$JAR_NAME > $REPOSITORY/nohup.out 2>&1 &
+nohup java -jar -Duser.timezone=Asia/Seoul build/libs/$JAR_NAME > $REPOSITORY/nohup.out 2>&1 &
