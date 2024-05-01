@@ -1,6 +1,7 @@
 package com.latte.drink.controller;
 
 import com.latte.common.response.ResponseData;
+import com.latte.drink.exception.NotLoginException;
 import com.latte.drink.request.DrinkMenuRequest;
 import com.latte.drink.response.CalendarResponse;
 import com.latte.drink.response.DateStatusResponse;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 
 @Slf4j
@@ -29,18 +29,19 @@ public class DrinkController {
     private final DrinkService drinkService;
 
     /**
-     * 홈화면 
-     * 일단 완성, 주석 해제 필요
+     * 홈화면
+     * 오늘 마신 카페인, 남은 혹은 초과한 카페인
+     * 최근 마신 음료 ( 최대 5개 )
      */
     @GetMapping()
     public ResponseEntity<?> homeResponse() {
-        ResponseData<Object> responseData;
-        Optional<MemberResponse> memberResponse = isLogin();
-        if (memberResponse.isEmpty()) {
-            responseData = new ResponseData<>("로그인 하지 않은 사용자입니다", null);
-            return new ResponseEntity<>(responseData, HttpStatus.OK);
+        ResponseData<?> responseData;
+        try {
+            MemberResponse member = isLogin();
+            responseData = new ResponseData<>(null, drinkService.findHomeResponse(member));
+        } catch (NotLoginException exception) {
+            responseData = new ResponseData<>(exception.getMessage(), null);
         }
-        responseData = new ResponseData<>(null, drinkService.findHomeResponse(memberResponse.get()));
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
@@ -48,66 +49,62 @@ public class DrinkController {
     /**
      * 날짜별 높음, 보통, 낮음
      * 지난 달보다 카페인 섭취량이 어떻게 변했는지
-     * 일단 완성, 주석 해제 필요
      */
     @GetMapping("/calendar")
     public ResponseEntity<?> findCaffeineByMonth(@RequestParam("datetime") String dateTime) {
-        ResponseData<Object> responseData;
-        Optional<MemberResponse> memberResponse = isLogin();
-        if (memberResponse.isEmpty()) {
-            responseData = new ResponseData<>("로그인 하지 않은 사용자입니다", null);
-            return new ResponseEntity<>(responseData, HttpStatus.OK);
+        ResponseData<?> responseData;
+        try {
+            MemberResponse member = isLogin();
+            CalendarResponse calendar = drinkService.findCaffeineByMonth(member, dateTime);
+            responseData = new ResponseData<>(null, calendar);
+        } catch (NotLoginException exception) {
+            responseData = new ResponseData<>(exception.getMessage(), null);
         }
-        CalendarResponse calendar = drinkService.findCaffeineByMonth(memberResponse.get(), dateTime);
-        responseData = new ResponseData<>(null, calendar);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
     /**
      * 날짜별 카페인 섭취량
-     * 일단 완성, 주석 해제 필요
      */
     @GetMapping("/date")
     public ResponseEntity<?> findCaffeineByDate(@RequestParam("datetime") LocalDateTime dateTime) {
-        ResponseData<Object> responseData;
-        Optional<MemberResponse> memberResponse = isLogin();
-        if (memberResponse.isEmpty()) {
-            responseData = new ResponseData<>("로그인 하지 않은 사용자입니다", null);
-            return new ResponseEntity<>(responseData, HttpStatus.OK);
+        ResponseData<?> responseData;
+        try {
+            MemberResponse member = isLogin();
+            DateStatusResponse caffeineByToday = drinkService.findCaffeineByDate(member, dateTime);
+            responseData = new ResponseData<>(null, caffeineByToday);
+        } catch (NotLoginException exception) {
+            responseData = new ResponseData<>(exception.getMessage(), null);
         }
-        DateStatusResponse caffeineByToday = drinkService.findCaffeineByDate(memberResponse.get(), dateTime);
-        responseData = new ResponseData<>(null, caffeineByToday);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
     /**
      * 날짜별 마신 음료 조회
-     * 일단 완성, 주석 해제 필요
      */
     @GetMapping("/date/menu")
     public ResponseEntity<?> findMenuByDate(@RequestParam("datetime") LocalDateTime dateTime) {
-        ResponseData<Object> responseData;
-        Optional<MemberResponse> memberResponse = isLogin();
-        if (memberResponse.isEmpty()) {
-            responseData = new ResponseData<>("로그인 하지 않은 사용자입니다", null);
-            return new ResponseEntity<>(responseData, HttpStatus.OK);
+        ResponseData<?> responseData;
+        try {
+            MemberResponse member = isLogin();
+            List<DrinkMenuResponse> menuByToday = drinkService.findMenuByDate(member, dateTime);
+            responseData = new ResponseData<>(null, menuByToday);
+        } catch (NotLoginException exception) {
+            responseData = new ResponseData<>(exception.getMessage(), null);
         }
-        List<DrinkMenuResponse> menuByToday = drinkService.findMenuByDate(memberResponse.get(), dateTime);
-        responseData = new ResponseData<>(null, menuByToday);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
     @PostMapping("/date/menu")
     public ResponseEntity<?> saveDrinkMenu(@RequestBody DrinkMenuRequest drinkMenuRequest) {
         ResponseData<?> responseData;
-        Optional<MemberResponse> memberResponse = isLogin();
-        if (memberResponse.isEmpty()) {
-            responseData = new ResponseData<>("로그인 후 이용 가능합니다", null);
-            return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
-        }
         try {
-            drinkService.saveDrinkMenu(memberResponse.get(), drinkMenuRequest.getMenuNo(), drinkMenuRequest.getDateTime());
+            MemberResponse member = isLogin();
+            drinkService.saveDrinkMenu(member, drinkMenuRequest.getMenuNo(), drinkMenuRequest.getDateTime());
             responseData = new ResponseData<>("기록이 완료되었습니다", null);
+        } catch (NotLoginException exception) {
+            responseData = new ResponseData<>(exception.getMessage(), null);
+            return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
         } catch (DataIntegrityViolationException exception) {
             responseData = new ResponseData<>("존재하지 않는 사용자 혹은 메뉴입니다", null);
             return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
@@ -116,11 +113,11 @@ public class DrinkController {
     }
 
 
-    private Optional<MemberResponse> isLogin() {
+    private MemberResponse isLogin() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if ("anonymousUser".equals(principal)) {
-            return Optional.empty();
+            throw new NotLoginException("로그인하지 않은 사용자입니다");
         }
-        return Optional.of((MemberResponse) principal);
+        return (MemberResponse) principal;
     }
 }
