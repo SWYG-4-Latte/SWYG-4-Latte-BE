@@ -1,6 +1,7 @@
 package com.latte.menu.controller;
 
 import com.latte.common.response.ResponseData;
+import com.latte.member.response.MemberResponse;
 import com.latte.menu.response.*;
 import com.latte.menu.service.BrandType;
 import com.latte.menu.service.MenuService;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -65,7 +67,7 @@ public class MenuController {
 
     @GetMapping("/ranking/word")
     public ResponseEntity<?> searchWordRanking() {
-        List<SearchRankingResponse> searchWordRanking = menuService.getSearchWordRanking();
+        List<MenuSearchRankingResponse> searchWordRanking = menuService.getSearchWordRanking();
         ResponseData<?> responseData = new ResponseData<>(null, searchWordRanking);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -74,7 +76,6 @@ public class MenuController {
     public ResponseEntity<?> compareMenu(@RequestParam(value = "menu1", defaultValue = "") Long menuNo1,
                                          @RequestParam(value = "menu2", defaultValue = "") Long menuNo2,
                                          @RequestParam(value = "recent", defaultValue = "") String recent) {
-        log.info("recent = {}", recent);
         MenuComparePageResponse menuComparePageResponse = menuService.menuCompare(menuNo1, menuNo2, recent);
         ResponseData<?> responseData = new ResponseData<>(null, menuComparePageResponse);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
@@ -82,7 +83,14 @@ public class MenuController {
 
     @GetMapping("/detail/{menuNo}")
     public ResponseEntity<?> menuDetail(@PathVariable Long menuNo) {
-        MenuDetailResponse menuDetailResponse = menuService.menuDetail(menuNo);
+        MemberResponse member;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if ("anonymousUser".equals(principal)) {
+            member = null;
+        } else {
+            member = (MemberResponse) principal;
+        }
+        MenuDetailResponse menuDetailResponse = menuService.menuDetail(menuNo, member);
         ResponseData<?> responseData = new ResponseData<>(null, menuDetailResponse);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }

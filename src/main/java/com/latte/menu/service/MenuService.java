@@ -1,12 +1,12 @@
 package com.latte.menu.service;
 
+import com.latte.drink.standard.StandardValueCalculate;
+import com.latte.member.response.MemberResponse;
 import com.latte.menu.repository.MenuMapper;
 import com.latte.menu.response.*;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +26,8 @@ import java.util.Set;
 public class MenuService {
 
     private final MenuMapper menuMapper;
-    private final String rankingKey = "searchWordRanking";
+    private final StandardValueCalculate standardValueCalculate;
+    private final String rankingKey = "menuSearchRanking";
 
     private final RedisTemplate<String, String> redisTemplate;
     private ZSetOperations<String, String> zSetOperations;
@@ -64,9 +65,8 @@ public class MenuService {
     }
 
 
-    @Cacheable(value = "searchWordRankingCache", key = "'searchWordRanking'")
-    public List<SearchRankingResponse> getSearchWordRanking() {
-        List<SearchRankingResponse> rankingResponses = new ArrayList<>();
+    public List<MenuSearchRankingResponse> getSearchWordRanking() {
+        List<MenuSearchRankingResponse> rankingResponses = new ArrayList<>();
         Set<ZSetOperations.TypedTuple<String>> typedTuples = zSetOperations.reverseRangeWithScores(rankingKey, 0, 4);
 
         if (typedTuples.size() == 0) {
@@ -76,16 +76,11 @@ public class MenuService {
         int rank = 1;
         for (ZSetOperations.TypedTuple<String> typedTuple : typedTuples) {
             String word = typedTuple.getValue();
-            SearchRankingResponse response = new SearchRankingResponse(rank, word);
+            MenuSearchRankingResponse response = new MenuSearchRankingResponse(rank, word);
             rankingResponses.add(response);
             rank++;
         }
         return rankingResponses;
-    }
-
-    @CacheEvict(value = "searchWordRankingCache", allEntries = true)
-    public void clearCache() {
-        log.info("cache clear!!!");
     }
 
 
@@ -104,12 +99,14 @@ public class MenuService {
     /**
      * 사용자에 따른 영양성분의 높음, 낮음, 카페인 섭취량의 % 계산 필요
      */
-    public MenuDetailResponse menuDetail(Long menuNo) {
-        MenuDetailResponse menuDetail = menuMapper.getMenuDetail(menuNo);
-        String caffeine = menuDetail.getCaffeine();
-        menuDetail.setCaffeine("카페인 " + caffeine);
+    public MenuDetailResponse menuDetail(Long menuNo, MemberResponse member) {
+        Integer maxCaffeine = null;
+        if (member != null) {
+            maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
+        }
+        MenuDetailResponse menuDetail = menuMapper.getMenuDetail(menuNo, maxCaffeine);
         // 낮은 함량의 카페인
-        int baseCaffeine = Integer.parseInt(caffeine.replace("mg", ""));
+        int baseCaffeine = Integer.parseInt(menuDetail.getCaffeine().replace("mg", ""));
         menuDetail.setLowCaffeineMenus(menuMapper.getLowCaffeineMenu(baseCaffeine));
         return menuDetail;
     }
