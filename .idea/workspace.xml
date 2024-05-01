@@ -9,32 +9,8 @@
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/resourceHashesCache.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/LatteApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/LatteApplication.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/member/config/SecurityConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/member/config/SecurityConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/cache/CacheScheduler.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/controller/MenuController.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/controller/MenuController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/repository/MenuMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/repository/MenuMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/response/BrandCategoryResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/response/BrandCategoryResponse.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/response/BrandRankingResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/response/BrandRankingResponse.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/response/MenuCompareResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/response/MenuCompareResponse.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/response/MenuDetailResponse$Nutrient.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/response/MenuDetailResponse$Nutrient.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/response/MenuDetailResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/response/MenuDetailResponse.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/response/MenuSearchResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/response/MenuSearchResponse.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/response/SearchRankingResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/service/BrandType.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/service/BrandType.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/service/MenuService.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/latte/menu/service/MenuService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/resources/main/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/build/resources/main/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/resources/main/mapper/MenuMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/build/resources/main/mapper/MenuMapper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/compileTransaction/stash-dir/CacheScheduler.class.uniqueId1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/compileTransaction/stash-dir/MenuController.class.uniqueId3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/compileTransaction/stash-dir/MenuMapper.class.uniqueId2" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/compileTransaction/stash-dir/MenuService.class.uniqueId0" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/previous-compilation-data.bin" beforeDir="false" afterPath="$PROJECT_DIR$/build/tmp/compileJava/previous-compilation-data.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/member/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/config/SecurityConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -162,7 +138,7 @@
       <workItem from="1714452562943" duration="9195000" />
       <workItem from="1714465490838" duration="8274000" />
       <workItem from="1714484185840" duration="118000" />
-      <workItem from="1714539341302" duration="3447000" />
+      <workItem from="1714539341302" duration="8984000" />
     </task>
     <servers />
   </component>

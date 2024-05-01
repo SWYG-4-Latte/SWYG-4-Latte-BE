@@ -125,9 +125,9 @@
             </if>
             <!-- 검색어 -->
             <if test="word != null and word != ''">
-                and M1.MENU_NAME LIKE CONCAT('%', TRIM(#{word}), '%')
+                and (M1.MENU_NAME LIKE CONCAT('%', TRIM(#{word}), '%')
                 or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%')
-                or REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%')
+                or REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%'))
             </if>
         </where>
         ORDER BY
@@ -182,9 +182,9 @@
             </if>
             <!-- 검색어 -->
             <if test="word != null and word != ''">
-                and M1.MENU_NAME LIKE CONCAT('%', TRIM(#{word}), '%')
+                and (M1.MENU_NAME LIKE CONCAT('%', TRIM(#{word}), '%')
                 or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%')
-                or REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%')
+                or REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%'))
             </if>
         </where>
     </select>
