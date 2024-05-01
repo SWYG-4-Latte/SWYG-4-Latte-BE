@@ -8,5 +8,6 @@ public class BrandRankingResponse {
     private String menuName;
     private String brand;
     private String caffeine;
+    private String menuSize;
     private String imageUrl;
 }
