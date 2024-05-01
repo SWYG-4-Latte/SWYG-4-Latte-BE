@@ -1,7 +1,6 @@
 package com.latte.menu.controller;
 
 import com.latte.common.response.ResponseData;
-import com.latte.member.response.Gender;
 import com.latte.member.response.MemberResponse;
 import com.latte.menu.response.*;
 import com.latte.menu.service.BrandType;
@@ -26,9 +25,6 @@ import java.util.List;
 public class MenuController {
 
     private final MenuService menuService;
-
-    private final MemberResponse member = new MemberResponse("1", "testUser", "이름", "비밀번호", "닉네임", "연락처", "이메일", Gender.M,
-            false, 0, "없어요", "", "이미지", "권한", "26", "N", "3", null, null);
 
     @GetMapping("/brand")
     public ResponseEntity<?> brandList() {
@@ -80,7 +76,6 @@ public class MenuController {
     public ResponseEntity<?> compareMenu(@RequestParam(value = "menu1", defaultValue = "") Long menuNo1,
                                          @RequestParam(value = "menu2", defaultValue = "") Long menuNo2,
                                          @RequestParam(value = "recent", defaultValue = "") String recent) {
-        log.info("recent = {}", recent);
         MenuComparePageResponse menuComparePageResponse = menuService.menuCompare(menuNo1, menuNo2, recent);
         ResponseData<?> responseData = new ResponseData<>(null, menuComparePageResponse);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
@@ -88,13 +83,13 @@ public class MenuController {
 
     @GetMapping("/detail/{menuNo}")
     public ResponseEntity<?> menuDetail(@PathVariable Long menuNo) {
-//        MemberResponse member;
-//        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//        if ("anonymousUser".equals(principal)) {
-//            member = null;
-//        } else {
-//            member = (MemberResponse) principal;
-//        }
+        MemberResponse member;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if ("anonymousUser".equals(principal)) {
+            member = null;
+        } else {
+            member = (MemberResponse) principal;
+        }
         MenuDetailResponse menuDetailResponse = menuService.menuDetail(menuNo, member);
         ResponseData<?> responseData = new ResponseData<>(null, menuDetailResponse);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
