@@ -13,6 +13,7 @@ public class MenuDetailResponse {
     private String percent;
     private int price;
     private Nutrient nutrient;
+    private Level level;
     private String imageUrl;
     private List<MenuSimpleResponse> lowCaffeineMenus;
 
@@ -23,5 +24,14 @@ public class MenuDetailResponse {
         private String salt;
         private String protein;
         private String satFat;
+    }
+
+    @Data
+    public static class Level {
+        private String kcalLevel;
+        private String sugarLevel;
+        private String saltLevel;
+        private String proteinLevel;
+        private String satFatLevel;
     }
 }
