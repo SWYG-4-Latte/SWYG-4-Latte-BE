@@ -26,17 +26,17 @@ public class PrincipalDetailsService implements UserDetailsService  {
     // 시큐리티 session에 authentication 정보가 들어감
 
     @Override
-    public UserDetails loadUserByUsername(String mbrId) throws UsernameNotFoundException {
-        if (mbrId == null || mbrId.isEmpty()) {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        if (username == null || username.isEmpty()) {
             throw new UsernameNotFoundException("유효하지 않은 사용자 이름입니다.");
         }
 
-        MemberResponse memberEntity = authMapper.findById(mbrId);
+        MemberResponse memberEntity = authMapper.findById(username);
         if (memberEntity != null) {
             return new PrincipalDetails(memberEntity);
         }
 
-        throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + mbrId);
+        throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username);
     }
     // 해당하는 User 의 데이터가 존재한다면 UserDetails 객체로 만들어서 return
     private UserDetails createUserDetails(MemberResponse member) {

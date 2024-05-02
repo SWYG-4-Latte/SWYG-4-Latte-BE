@@ -203,7 +203,7 @@
                   , reg_date
                   , update_date
         ) VALUES (
-                    #{mbrId}
+                   #{mbrId}
                  , #{password}
                  , #{mbrName}
                  , #{age}
