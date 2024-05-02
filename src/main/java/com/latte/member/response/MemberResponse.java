@@ -1,7 +1,6 @@
 package com.latte.member.response;
 
-import com.latte.member.request.MemberRequest;
-import groovy.transform.builder.Builder;
+
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

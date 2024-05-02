@@ -26,4 +26,6 @@ public interface AuthMapper {
     boolean deleteMember(String id);
 
     MemberResponse findById(String id);
+
+    MemberResponse findIdByEmail(String email);
 }
