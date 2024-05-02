@@ -25,8 +25,14 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+<<<<<<< HEAD
 	//implementation group: 'org.mybatis.spring.boot', name: 'mybatis-spring-boot-starter', version: '2.3.1'
 	implementation group: 'org.springframework.security', name: 'spring-security-crypto', version: '5.7.6'  /* spring-security-crypto */
+=======
+	implementation 'org.springframework.data:spring-data-commons:3.2.2'			// Spring Data 의 페이징 사용
+	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'	// SQL 로그 출력 시 파라미터 입력
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+>>>>>>> master
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'

@@ -1,6 +1,9 @@
 package com.latte.member.response;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,6 +17,10 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
+<<<<<<< HEAD
+=======
+@AllArgsConstructor
+>>>>>>> master
 public class MemberResponse implements UserDetails {
 
 
@@ -93,4 +100,8 @@ public class MemberResponse implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> master

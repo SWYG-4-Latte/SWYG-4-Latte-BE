@@ -1,10 +1,14 @@
 package com.latte.member.config;
 
+<<<<<<< HEAD
 import com.latte.member.config.jwt.CustomUserDetailsService;
 import com.latte.member.config.jwt.JwtAuthenticationFilter;
 import com.latte.member.config.jwt.JwtTokenProvider;
 import com.latte.member.mapper.AuthMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+=======
+import com.latte.member.config.jwt.JwtAuthenticationFilter;
+>>>>>>> master
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,8 +19,19 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+<<<<<<< HEAD
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+=======
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
+>>>>>>> master
 
 @Configuration
 @EnableWebSecurity // 스프링 시큐리티 필터가 스프링 필터체인에 등록됨
@@ -50,13 +65,37 @@ public class SecurityConfig{
         return new BCryptPasswordEncoder();
     }
 
+<<<<<<< HEAD
+=======
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+
+        corsConfiguration.setAllowedOriginPatterns(List.of("*"));
+        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "HEAD", "OPTIONS"));
+        corsConfiguration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+        corsConfiguration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfiguration); // 모든 경로에 대해서 CORS 설정을 적용
+
+        return source;
+    }
+
+>>>>>>> master
     @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+
+        http.cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()));
+
         http
                 .authorizeHttpRequests((authorizeHttpRequest) ->
                                 authorizeHttpRequest
                                         .requestMatchers("/").permitAll()
+<<<<<<< HEAD
                                         .requestMatchers("/auth/test").hasRole("USER")
+=======
+>>>>>>> master
                                         .requestMatchers("/auth/login", "/auth/signup").permitAll()
                                         //  .requestMatchers("/auth/admin").hasRole("ADMIN")
                                         //  .requestMatchers("/auth/user").hasRole("USER")
@@ -68,6 +107,7 @@ public class SecurityConfig{
                         formLogin
                                 .usernameParameter("mbrId")
                                 .passwordParameter("password")
+<<<<<<< HEAD
                                 //.loginPage("/auth/login")
                                 //.failureUrl("/auth/login?failed")
                                 //.loginProcessingUrl("/auth/login") // login 주소가 호출되면 시큐리티가 낚아채서 대신 로그인 진행
@@ -88,12 +128,30 @@ public class SecurityConfig{
                 .sessionManagement(sessionManagement ->
                         sessionManagement
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+=======
+                                .loginPage("/auth/login")
+                                .failureUrl("/auth/login?failed")
+                                .loginProcessingUrl("/auth/login") // login 주소가 호출되면 시큐리티가 낚아채서 대신 로그인 진행
+                                .defaultSuccessUrl("/", true)
+                )
+                .logout((logout) -> logout
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout"))
+                        .logoutSuccessUrl("/")
+                        .invalidateHttpSession(true)
+>>>>>>> master
                 );
+
+
+        http
+                .csrf((csrf) -> csrf.disable())
+                .addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+
 
         return http.build();
     }
 
 
+<<<<<<< HEAD
 
 
 
@@ -106,4 +164,6 @@ public class SecurityConfig{
     }
 
 
+=======
+>>>>>>> master
 }
