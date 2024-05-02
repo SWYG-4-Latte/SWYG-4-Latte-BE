@@ -5,26 +5,14 @@
 <mapper namespace="com.latte.menu.repository.MenuMapper">
 
     <select id="findBrandRankingList" resultType="BrandRankingResponse">
-        SELECT RANKING.MENU_NO, RANKING.MENU_NAME, RANKING.BRAND, RANKING.CAFFEINE, RANKING.MENU_SIZE, RANKING.IMAGE_URL
-        FROM (
-            SELECT MENU.MENU_NO, MENU_NAME, BRAND, CAFFEINE, CONCAT(MENU.MENU_SIZE, '(', SUBSTRING_INDEX(MENU.VOLUMN, '(', 1), ')') AS MENU_SIZE, IMAGE_URL
-            FROM MENU
+        SELECT MENU.MENU_NO, MENU_NAME, BRAND, CAFFEINE, CONCAT(MENU.MENU_SIZE, '(', SUBSTRING_INDEX(MENU.VOLUMN, '(', 1), ')') AS MENU_SIZE, IMAGE_URL
+        FROM MENU
             LEFT OUTER JOIN DRINK
                 ON MENU.MENU_NO = DRINK.MENU_NO
-            WHERE BRAND = #{brand}
-            GROUP BY MENU.MENU_NO, MENU_NAME, BRAND, CAFFEINE, IMAGE_URL
-            ORDER BY COUNT(DRINK.MENU_NO) DESC
-            LIMIT 10
-        ) AS RANKING
-        ORDER BY
-        <choose>
-            <when test="sortBy == 'caffeine-desc'">
-                CAST(SUBSTRING(RANKING.CAFFEINE, 1, LOCATE('mg', RANKING.CAFFEINE) - 1) AS UNSIGNED) DESC
-            </when>
-            <when test="sortBy == 'caffeine-asc'">
-                CAST(SUBSTRING(RANKING.CAFFEINE, 1, LOCATE('mg', RANKING.CAFFEINE) - 1) AS UNSIGNED) ASC
-            </when>
-        </choose>
+        WHERE BRAND = #{brand}
+        GROUP BY MENU.MENU_NO, MENU_NAME, BRAND, CAFFEINE, IMAGE_URL
+        ORDER BY COUNT(DRINK.MENU_NO) DESC
+        LIMIT 10
     </select>
 
 
