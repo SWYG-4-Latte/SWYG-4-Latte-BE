@@ -1,6 +1,7 @@
 package com.latte.member.mapper;
 
 import com.latte.member.request.MemberRequest;
+import com.latte.member.response.FindIdResponse;
 import com.latte.member.response.MemberResponse;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -27,5 +28,5 @@ public interface AuthMapper {
 
     MemberResponse findById(String id);
 
-    MemberResponse findIdByEmail(String email);
+    FindIdResponse findIdByNameEmail(String name, String email);
 }
