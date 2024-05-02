@@ -194,6 +194,7 @@ public class AuthConroller {
      * @param request
      * @return
      */
+/*
     @PostMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable String id, @RequestBody @Validated final MemberRequest request) {
 
@@ -224,6 +225,7 @@ public class AuthConroller {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
+*/
 
 
     /**

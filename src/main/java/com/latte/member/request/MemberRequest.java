@@ -4,10 +4,7 @@ import com.latte.member.response.Gender;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,10 +16,14 @@ import java.util.Collection;
 @Setter
 @ToString
 @Builder
+@AllArgsConstructor
 public class MemberRequest implements UserDetails {
 
+    public MemberRequest() {
 
-    private String mbrNo;          // 회원 번호
+    }
+
+    private int mbrNo;          // 회원 번호
 
     //@NotBlank(message = "아이디는 필수 입력 값입니다.")
     private String mbrId;          // ID
@@ -83,27 +84,27 @@ public class MemberRequest implements UserDetails {
 
     @Override
     public String getUsername() {
-        return null;
+        return mbrId;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 
     //private Boolean deleteYn;       // 회원탈퇴 여부
