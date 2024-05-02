@@ -38,8 +38,8 @@ public class MenuService {
     }
 
 
-    public List<BrandRankingResponse> findBrandRankingList(String brandName, String sortBy) {
-        return menuMapper.findBrandRankingList(BrandType.valueOf(brandName.toUpperCase()).getValue(), sortBy);
+    public List<BrandRankingResponse> findBrandRankingList(String brandName) {
+        return menuMapper.findBrandRankingList(BrandType.valueOf(brandName.toUpperCase()).getValue());
     }
 
     public Page<BrandCategoryResponse> findBrandCategoryList(String brandName, String sortBy, String cond, Pageable pageable) {

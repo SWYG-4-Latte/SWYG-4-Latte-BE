@@ -38,9 +38,8 @@ public class MenuController {
     }
 
     @GetMapping("/ranking/{brandName}")
-    public ResponseEntity<?> brandRanking(@PathVariable String brandName,
-                                          @RequestParam(value = "sortBy", defaultValue = "") String sortBy) {
-        List<BrandRankingResponse> brandRankingList = menuService.findBrandRankingList(brandName, sortBy);
+    public ResponseEntity<?> brandRanking(@PathVariable String brandName) {
+        List<BrandRankingResponse> brandRankingList = menuService.findBrandRankingList(brandName);
         ResponseData<?> responseData = new ResponseData<>(null, brandRankingList);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
