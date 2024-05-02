@@ -30,34 +30,16 @@
     <!--회원 정보 조회-->
     <select id="findById" parameterType="String" resultType="com.latte.member.response.MemberResponse">
         <!--AuthMapper.getMemberInfo-->
-        <![CDATA[
+
             SELECT
-                 mbr_no
-              ,  mbr_id
-              , password
-              , mbr_name
-              , age
-              , nickname
-              , image_url
-              , allergy
-              , cup_day
-              , gender
-              , cell_phone
-              , email
-              , pregnancy
-              , preg_month
-              , role
-              , symptom
-              , delete_yn
-              , reg_date
-              , update_date
+                <include refid="memberColumns" />
             FROM tb_member
             where mbr_id = #{mbrId}
-        ]]>
+
     </select>
 
     <!--회원 넘버 정보 조회-->
-    <select id="findBySeq" parameterType="String" resultType="com.latte.member.response.MemberResponse">
+    <select id="findBySeq" parameterType="int" resultType="com.latte.member.response.MemberResponse">
         <!--AuthMapper.getMemberInfo-->
         <![CDATA[
             SELECT
