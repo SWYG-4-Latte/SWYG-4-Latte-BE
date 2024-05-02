@@ -9,8 +9,7 @@ import java.util.List;
 
 @Mapper
 public interface MenuMapper {
-    List<BrandRankingResponse> findBrandRankingList(@Param("brand") String brand,
-                                                    @Param("sortBy") String sortBy);
+    List<BrandRankingResponse> findBrandRankingList(@Param("brand") String brand);
 
     int getBrandRankingListCnt(@Param("brand") String brand);
 
