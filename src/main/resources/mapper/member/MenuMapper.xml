@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.latte.menu.repository.MenuMapper">
+
+    <select id="findBrandRankingList" resultType="BrandRankingResponse">
+        SELECT MENU.MENU_NO, MENU_NAME, BRAND, CAFFEINE, CONCAT(MENU.MENU_SIZE, '(', SUBSTRING_INDEX(MENU.VOLUMN, '(', 1), ')') AS MENU_SIZE, IMAGE_URL
+        FROM MENU
+            LEFT OUTER JOIN DRINK
+                ON MENU.MENU_NO = DRINK.MENU_NO
+        WHERE BRAND = #{brand}
+        GROUP BY MENU.MENU_NO, MENU_NAME, BRAND, CAFFEINE, IMAGE_URL
+        ORDER BY COUNT(DRINK.MENU_NO) DESC
+        LIMIT 10
+    </select>
+
+
+    <select id="findBrandCategoryList" resultType="BrandCategoryResponse">
+        SELECT
+            M1.MENU_NO,
+            M1.MENU_NAME,
+            M1.BRAND,
+            M1.CAFFEINE,
+            M1.PRICE,
+            M1.IMAGE_URL
+        FROM menu M1
+        <!-- 용량이 가장 작은 음료들 -->
+        INNER JOIN (
+            SELECT
+                MENU_NAME,
+                BRAND,
+                MIN(CAST(SUBSTRING_INDEX(VOLUMN, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_ZISE
+            FROM MENU
+            <where>
+                <if test="brand != null and brand != ''">
+                    and BRAND = #{brand}
+                </if>
+                <if test="cond == 'caffeine-none'">
+                    and CAFFEINE = "0mg"
+                </if>
+            </where>
+            GROUP BY MENU_NAME, BRAND
+            ) AS M2
+                ON M1.MENU_NAME = M2.MENU_NAME
+                    AND M1.BRAND = M2.BRAND
+                    AND CAST(SUBSTRING_INDEX(M1.VOLUMN, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_ZISE
+        ORDER BY
+        <choose>
+            <when test="sortBy == 'caffeine-desc'">
+                CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) DESC
+            </when>
+            <when test="sortBy == 'caffeine-asc'">
+                CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) ASC
+            </when>
+            <otherwise>
+                MENU_NAME ASC
+            </otherwise>
+        </choose>
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+    </select>
+
+    <select id="getBrandCategoryCnt" resultType="int">
+        SELECT COUNT(M1.MENU_NO)
+        FROM MENU M1
+        <!-- 용량이 가장 작은 음료들 -->
+        INNER JOIN (
+            SELECT
+                MENU_NAME,
+                BRAND,
+                MIN(CAST(SUBSTRING_INDEX(VOLUMN, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
+            FROM MENU
+            <where>
+                <if test="brand != null and brand != ''">
+                    and BRAND = #{brand}
+                </if>
+                <if test="cond == 'caffeine-none'">
+                    and CAFFEINE = "0mg"
+                </if>
+            </where>
+            GROUP BY MENU_NAME, brand
+            ) AS M2
+                ON M1.MENU_NAME = M2.MENU_NAME
+                    AND M1.BRAND = M2.BRAND
+                    AND CAST(SUBSTRING_INDEX(M1.VOLUMN, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
+    </select>
+
+    <!-- 음료 검색 시, 가장 작은 사이즈를 기준으로 검색 -->
+    <select id="findMenuList" resultType="MenuSearchResponse">
+        SELECT
+            M1.MENU_NO,
+            M1.MENU_NAME,
+            M1.BRAND,
+            M1.CAFFEINE,
+            M1.PRICE,
+            M1.IMAGE_URL
+        FROM MENU M1
+        <!-- 용량이 가장 작은 음료들을 검색 -->
+        INNER JOIN (
+            SELECT
+                MENU_NAME,
+                BRAND,
+                MIN(CAST(SUBSTRING_INDEX(VOLUMN, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
+            FROM MENU
+            GROUP BY MENU_NAME, BRAND
+        ) AS M2
+            ON M1.MENU_NAME = M2.MENU_NAME
+                AND M1.BRAND = M2.BRAND
+                AND CAST(SUBSTRING_INDEX(M1.VOLUMN, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
+        <where>
+            <if test="cond == 'caffeine-none'">
+                and M1.CAFFEINE = "0mg"
+            </if>
+            <!-- 검색어 -->
+            <if test="word != null and word != ''">
+                and (M1.MENU_NAME LIKE CONCAT('%', TRIM(#{word}), '%')
+                or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%')
+                or REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%'))
+            </if>
+        </where>
+        ORDER BY
+        <choose>
+            <when test="sortBy == 'caffeine-desc'">
+                CAST(SUBSTRING(M1.CAFFEINE, 1, LOCATE('mg', M1.CAFFEINE) - 1) AS UNSIGNED) DESC,
+            </when>
+            <when test="sortBy == 'caffeine-asc'">
+                CAST(SUBSTRING(M1.CAFFEINE, 1, LOCATE('mg', M1.CAFFEINE) - 1) AS UNSIGNED) ASC,
+            </when>
+        </choose>
+        <!-- 검색어에 따라 정렬 -->
+        <if test="word != null and word != ''">
+            CASE
+                WHEN M1.MENU_NAME LIKE CONCAT('%', TRIM(#{word}), '%') THEN 1
+                WHEN M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%') THEN 2
+                WHEN REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%') THEN 3
+                ELSE 4
+            END,
+        </if>
+        <!-- 브랜드 정렬 기준 -->
+        CASE M1.BRAND
+            WHEN '스타벅스' THEN 1
+            WHEN '투썸플레이스' THEN 2
+            WHEN '컴포즈' THEN 3
+            WHEN '이디야' THEN 4
+            WHEN '빽다방' THEN 5
+            ELSE 6
+        END,
+        M1.MENU_NAME ASC  <!-- HOT, ICE 정렬 -->
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+    </select>
+
+    <select id="getFindMenuListCnt" resultType="int">
+        SELECT COUNT(M1.MENU_NO)
+        FROM MENU M1
+        <!-- 용량이 가장 작은 음료들을 검색 -->
+        INNER JOIN (
+            SELECT
+                MENU_NAME,
+                BRAND,
+                MIN(CAST(SUBSTRING_INDEX(VOLUMN, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
+            FROM MENU
+            GROUP BY MENU_NAME, BRAND
+            ) AS M2
+            ON M1.MENU_NAME = M2.MENU_NAME
+                AND M1.BRAND = M2.BRAND
+                AND CAST(SUBSTRING_INDEX(M1.VOLUMN, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
+        <where>
+            <if test="cond == 'caffeine-none'">
+                and M1.CAFFEINE = "0mg"
+            </if>
+            <!-- 검색어 -->
+            <if test="word != null and word != ''">
+                and (M1.MENU_NAME LIKE CONCAT('%', TRIM(#{word}), '%')
+                or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%')
+                or REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%'))
+            </if>
+        </where>
+    </select>
+
+
+    <select id="compare" resultType="MenuCompareResponse">
+        SELECT MENU_NO, BRAND, MENU_NAME, CAFFEINE, PRICE, ALLERGY, KCAL, IMAGE_URL
+        FROM MENU
+        <where>
+            <if test="menu1 != null">
+                or MENU_NO = #{menu1}
+            </if>
+            <if test="menu2 != null">
+                or MENU_NO = #{menu2}
+            </if>
+        </where>
+    </select>
+
+    <select id="getRecentMenu" parameterType="java.util.ArrayList" resultType="MenuSimpleResponse">
+        SELECT MENU_NO, MENU_NAME, IMAGE_URL
+        FROM MENU
+        WHERE MENU_NO IN (
+        <foreach item="no" collection="menus" index="index" separator=",">
+            #{no}
+        </foreach>
+        )
+    </select>
+
+    <!-- 메뉴 상세 데이터 -->
+    <resultMap id="menuDetailResultMap" type="MenuDetailResponse">
+        <id property="menuNo" column="menu_no"/>
+        <result property="brand" column="brand"/>
+        <result property="menuName" column="menu_name"/>
+        <result property="caffeine" column="caffeine"/>
+        <result property="percent" column="percent"/>
+        <result property="price" column="price"/>
+        <result property="imageUrl" column="image_url"/>
+        <!-- 영양 성분 -->
+        <association property="nutrient" javaType="com.latte.menu.response.MenuDetailResponse$Nutrient">
+            <result property="kcal" column="kcal"/>
+            <result property="sugar" column="sugar"/>
+            <result property="salt" column="salt"/>
+            <result property="protein" column="protein"/>
+            <result property="satFat" column="sat_fat"/>
+        </association>
+        <!-- 영양 성분 높낮이 -->
+        <association property="level" javaType="com.latte.menu.response.MenuDetailResponse$Level">
+            <result property="kcalLevel" column="kcal_level"/>
+            <result property="sugarLevel" column="sugar_level"/>
+            <result property="saltLevel" column="salt_level"/>
+            <result property="proteinLevel" column="protein_level"/>
+            <result property="satFatLevel" column="sat_fat_level"/>
+        </association>
+    </resultMap>
+
+
+    <select id="getMenuDetail" resultMap="menuDetailResultMap">
+        SELECT MENU_NO, BRAND, MENU_NAME, CAFFEINE, PRICE, KCAL, SUGAR, SALT, PROTEIN, SAT_FAT, IMAGE_URL,
+        <!-- 칼로리 높낮이 -->
+            CASE
+                WHEN CAST(SUBSTRING(KCAL, 1, LOCATE('kcal', KCAL) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '낮음'
+                WHEN CAST(SUBSTRING(KCAL, 1, LOCATE('kcal', KCAL) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '높음'
+                ELSE '보통'
+            END AS KCAL_LEVEL,
+        <!-- 당류 높낮이 -->
+            CASE
+                WHEN CAST(SUBSTRING(SUGAR, 1, LOCATE('g', SUGAR) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSugar} THEN '낮음'
+                WHEN CAST(SUBSTRING(SUGAR, 1, LOCATE('g', SUGAR) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSugar} THEN '높음'
+                ELSE '보통'
+            END AS SUGAR_LEVEL,
+        <!-- 나트륨 높낮이 -->
+            CASE
+                WHEN CAST(SUBSTRING(SALT, 1, LOCATE('mg', SALT) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSalt} THEN '낮음'
+                WHEN CAST(SUBSTRING(SALT, 1, LOCATE('mg', SALT) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSalt} THEN '높음'
+                ELSE '보통'
+            END AS SALT_LEVEL,
+        <!-- 단백질 높낮이 -->
+            CASE
+                WHEN CAST(SUBSTRING(PROTEIN, 1, LOCATE('g', PROTEIN) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minProtein} THEN '낮음'
+                WHEN CAST(SUBSTRING(PROTEIN, 1, LOCATE('g', PROTEIN) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minProtein} THEN '높음'
+                ELSE '보통'
+            END AS PROTEIN_LEVEL,
+        <!-- 포화지방 높낮이 -->
+            CASE
+                WHEN CAST(SUBSTRING(SAT_FAT, 1, LOCATE('g', SAT_FAT) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSatFat} THEN '낮음'
+                WHEN CAST(SUBSTRING(SAT_FAT, 1, LOCATE('g', SAT_FAT) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSatFat} THEN '높음'
+                ELSE '보통'
+            END AS SAT_FAT_LEVEL
+            <if test="maxCaffeine != null">
+                ,CONCAT(ROUND(CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) / #{maxCaffeine} * 100), '%') AS PERCENT
+            </if>
+        FROM MENU
+        WHERE MENU_NO = #{no}
+    </select>
+
+    <select id="getLowCaffeineMenu" resultType="MenuSimpleResponse">
+        SELECT MENU_NO, MENU_NAME, IMAGE_URL
+        FROM MENU
+        <where>
+            <if test="base != 0">
+                and CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) &lt; #{base}
+            </if>
+            <if test="base == 0">
+                and CAFFEINE = '0mg'
+            </if>
+        </where>
+        ORDER BY RAND()
+        LIMIT 4
+    </select>
+
+</mapper>
