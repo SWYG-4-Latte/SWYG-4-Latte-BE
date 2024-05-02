@@ -2,15 +2,21 @@ package com.latte.member.controller;
 
 import com.latte.member.config.SecurityUtil;
 import com.latte.member.config.jwt.JwtToken;
+import com.latte.member.request.FindIdRequest;
 import com.latte.member.request.LoginRequest;
 import com.latte.member.request.MemberRequest;
+import com.latte.member.request.PwChangeRequest;
+import com.latte.member.response.FindIdResponse;
 import com.latte.member.response.MemberResponse;
+import com.latte.member.response.PwChangeResponse;
+import com.latte.member.response.SendOtpResponse;
 import com.latte.member.service.AuthService;
 import com.latte.member.service.EmailService;
 import com.latte.response.ResponseData;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -245,19 +251,9 @@ public class AuthConroller {
     }
 
 
-    //Email과 name의 일치여부를 check하는 컨트롤러
-    @PostMapping("/check/findPw")
-    public @ResponseBody Map<String, Boolean> pw_find(String userEmail, String userName){
-        Map<String,Boolean> json = new HashMap<>();
-        boolean pwFindCheck = authService.userEmailCheck(userEmail,userName);
-
-        System.out.println(pwFindCheck);
-        json.put("check", pwFindCheck);
-        return json;
-    }
 
     //등록된 이메일로 임시비밀번호를 발송하고 발송된 임시비밀번호로 사용자의 pw를 변경하는 컨트롤러
-    @PostMapping("/find-password")
+/*    @PostMapping("/find-password")
     public @ResponseBody void findPassword(String userName, String userEmail) {
         MailDto dto = sendEmailService.createMailAndChangePassword(userEmail, userName);
         sendEmailService.mailSend(dto);
@@ -274,42 +270,96 @@ public class AuthConroller {
         mimeMessageHelper.setFrom(from);
         mimeMessageHelper.setTo();
 
-    }
-/*
-    @PostMapping("/find-id")
-    public ResponseEntity<?> findIdByEmail(@RequestParam String email) {
-        // 이메일로 아이디 찾기 로직
-        String foundId = authService.findIdByEmail(email);
-        if (foundId != null) {
-            String subject = "아이디 찾기 결과";
-            String text = "회원님의 아이디는 " + foundId + "입니다.";
-            emailService.sendEmail(email, subject, text);
+    }*/
 
-            ResponseData<?> responseData = new ResponseData<>("이메일로 아이디를 발송했습니다.", null);
-            return new ResponseEntity<>(responseData, OK);
+
+    // [API] 아이디 찾기
+    @PostMapping("/findId")
+    public ResponseEntity<?> findId(FindIdRequest request) {
+
+        FindIdResponse member = authService.findIdByNameEmail(request.getUserName(), request.getEmail());
+
+        String message = "";
+        String data = "";
+
+        if(member.getFindId() == null || member.getFindId() == "") {
+            message = "해당 정보로 가입한 아이디가 없습니다.";
         } else {
-
-            ResponseData<?> responseData = new ResponseData<>("해당하는 이메일로 가입된 아이디가 없습니다.", null);
-            return new ResponseEntity<>(responseData, OK);
-            //return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당하는 이메일로 가입된 아이디가 없습니다.");
+            message = "회원님의 아이디는 " + member.getFindId() + "입니다.";
+            data = String.valueOf(member);
         }
+
+        ResponseData<?> responseData = new ResponseData<>(message, data);
+        return new ResponseEntity<>(responseData, OK);
     }
 
-    @PostMapping("/find-password")
-    public ResponseEntity<?> resetPassword(@RequestParam String email) {
-        // 이메일로 비밀번호 재설정 로직
-        boolean resetResult = authService.resetPasswordByEmail(email);
-        if (resetResult) {
-            String subject = "비밀번호 재설정 안내";
-            String text = "비밀번호가 재설정되었습니다. 새로운 비밀번호로 로그인하세요.";
-            emailService.sendEmail(email, subject, text);
-            return ResponseEntity.ok("이메일로 재설정 안내를 발송했습니다.");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당하는 이메일로 가입된 계정이 없습니다.");
-        }
-    }
-*/
+    // [API] 비밀번호 변경 > 본인인증번호 발송
+/*    @PostMapping("/sendOtp")
+    public SendOtpResponse sendOtp(String mbrId, String email ) {
 
+        // 유효회원 여부 검사
+        boolean existsUser = false;
+            existsUser = tbMemberRepository.existsByUserIdAndUserEmail(request.getUserId(), request.getUserInfo());
+
+        // 인증번호 발송
+        if(!existsUser) {
+            return new SendOtpResponse(false, "해당 정보로 가입한 아이디가 없습니다.");
+        }
+        else {
+            String resOtp = "false";
+
+            // 발송로직
+            resOtp = mailSend.balsongMailSend(request.getUserInfo());
+
+
+            // 발송된 인증번호 저장
+            if(resOtp.equals("false")) {
+                return new SendOtpResponse(false, "인증번호 발송에 실패했습니다. 다시 요청해주세요");
+            }
+            else {
+                TbAuthLog ettAuthLog = tbAuthLogRepository.findByUserId(request.getUserId());
+
+                if(ettAuthLog!=null) {
+                    ettAuthLog.setAuthNum(resOtp);
+                    ettAuthLog.setAuthType(request.getOptType().equals("E") ? "MAIL" : "PN");
+                    ettAuthLog.setAuthLoc(request.getUserInfo());
+                    ettAuthLog.setModId(request.getUserId());
+                    ettAuthLog.setModDate(getToday());
+                }
+                else {
+                    ettAuthLog = new TbAuthLog();
+                    ettAuthLog.setUserId(request.getUserId());
+                    ettAuthLog.setAuthNum(resOtp);
+                    ettAuthLog.setAuthType(request.getOptType().equals("E") ? "MAIL" : "PN");
+                    ettAuthLog.setAuthLoc(request.getUserInfo());
+                    ettAuthLog.setRegId(request.getUserId());
+                    ettAuthLog.setRegDate(getToday());
+                    ettAuthLog.setModId(request.getUserId());
+                    ettAuthLog.setModDate(getToday());
+                }
+
+                tbAuthLogRepository.save(ettAuthLog);
+            }
+
+        }
+
+        return new SendOtpResponse(true, "");
+    }
+
+    // [API] 비밀번호 변경 > 본인인증번호 비교 확인
+    @PostMapping("/checkOtp")
+    public CheckOtpResponse checkOtp(CheckOtpRequest request) {
+
+        return memberService.checkOtp(request);
+    }
+
+    // [API] 비밀번호 변경
+    @PostMapping("/pwChange")
+    public PwChangeResponse pwChange(HttpSession session, PwChangeRequest request) {
+        request.setUserId(SessionUtil.getUserId(session));
+
+        return memberService.pwChange(request);
+    }*/
 
 
 

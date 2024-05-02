@@ -4,24 +4,20 @@ import com.latte.member.config.jwt.JwtToken;
 import com.latte.member.config.jwt.JwtTokenProvider;
 import com.latte.member.mapper.AuthMapper;
 import com.latte.member.request.MemberRequest;
+import com.latte.member.request.SendOtpRequest;
+import com.latte.member.response.FindIdResponse;
 import com.latte.member.response.MemberResponse;
+import com.latte.member.response.SendOtpResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.lang.reflect.Member;
-import java.util.List;
 
 @Service
 public class AuthService {
@@ -157,44 +153,124 @@ public class AuthService {
     }
 
 
+
     /**
-     * 회원 이메일로 회원 아이디 찾기
+     * 회원 이름과 이메일로 회원 아이디 찾기
+     *
      * @param email
      * @return
      */
-    public String findIdByEmail(String email) {
+    public FindIdResponse findIdByNameEmail(String name, String email) {
 
-        System.out.println("==============service" +  authMapper.findIdByEmail(email));
+        System.out.println("==============service" +  authMapper.findIdByNameEmail(name, email));
 
-        MemberResponse member = authMapper.findIdByEmail(email);
+        FindIdResponse member = authMapper.findIdByNameEmail(name, email);
+
+        if(member == null) {
+            return new FindIdResponse(false, null);
+        }
+
+        String strUserId = member.getFindId();
 
 
-        return member.getMbrId();
+        return new FindIdResponse(true, strUserId);
+    }
+
+    /**
+     * 인증번호 발송하기
+     * @param mbrId
+     * @param email
+     * @return
+     */
+/*    public SendOtpResponse sendOtp(SendOtpRequest request) {
+
+        // 유효회원 여부 검사
+        int existsUser = false;
+        existsUser = authMapper.countByLoginId(request.getUserId());
+
+        // 인증번호 발송
+        if(!existsUser) {
+            return new SendOtpResponse(false, "해당 정보로 가입한 아이디가 없습니다.");
+        }
+        else {
+            String resOtp = "false";
+
+            // 발송로직
+            resOtp = mailSend.balsongMailSend(request.getUserInfo());
+
+
+            // 발송된 인증번호 저장
+            if(resOtp.equals("false")) {
+                return new SendOtpResponse(false, "인증번호 발송에 실패했습니다. 다시 요청해주세요");
+            }
+            else {
+                TbAuthLog ettAuthLog = tbAuthLogRepository.findByUserId(request.getUserId());
+
+                if(ettAuthLog!=null) {
+                    ettAuthLog.setAuthNum(resOtp);
+                    ettAuthLog.setAuthType(request.getOptType().equals("E") ? "MAIL" : "PN");
+                    ettAuthLog.setAuthLoc(request.getUserInfo());
+                    ettAuthLog.setModId(request.getUserId());
+                    ettAuthLog.setModDate(getToday());
+                }
+                else {
+                    ettAuthLog = new TbAuthLog();
+                    ettAuthLog.setUserId(request.getUserId());
+                    ettAuthLog.setAuthNum(resOtp);
+                    ettAuthLog.setAuthType(request.getOptType().equals("E") ? "MAIL" : "PN");
+                    ettAuthLog.setAuthLoc(request.getUserInfo());
+                    ettAuthLog.setRegId(request.getUserId());
+                    ettAuthLog.setRegDate(getToday());
+                    ettAuthLog.setModId(request.getUserId());
+                    ettAuthLog.setModDate(getToday());
+                }
+
+                tbAuthLogRepository.save(ettAuthLog);
+            }
+
+        }
+
+        return new SendOtpResponse(true, "");
     }
 
 
-    public MemberResponse findByEmail(String email) {
+    *//**
+     * 본인인증번호 비교 확인
+     * @param request
+     * @return
+     *//*
 
-        System.out.println("==============service" +  authMapper.findIdByEmail(email));
+    public CheckOtpResponse checkOtp(CheckOtpRequest request) {
+        // 필드 유효성 검사
+        if(isNull(request.toString()))			throw new AiconException("[모든] 필드가 비어있습니다.");
+        if(isNull(request.getUserId()))			throw new AiconException("[userId] 필드가 비어있습니다.");
 
-        MemberResponse member = authMapper.findIdByEmail(email);
+        TbAuthLog ettAuthLog = tbAuthLogRepository.findByUserId(request.getUserId());
 
+        if(ettAuthLog == null) {
+            return new CheckOtpResponse(false, "해당 정보로 가입한 아이디가 없습니다.");
+        }
+        if(!ettAuthLog.getAuthNum().equals(request.getAuthNum())) {
+            return new CheckOtpResponse(false, "인증번호가 일치하지 않습니다.");
+        }
+        if(isPassed(ettAuthLog.getModDate(), 5)) {
+            return new CheckOtpResponse(false, "유효하지 않은 인증번호입니다.");
+        }
 
-        return member;
-    }
-
+        return new CheckOtpResponse(true, "");
+    }*/
 
 
     /**
      * 회원 리스트
      * @return
      */
-    public List<MemberResponse> getMemberList() {
+/*    public List<MemberResponse> getMemberList() {
 
         List<MemberResponse> list = authMapper.getMemberList();
 
         return list;
-    }
+    }*/
 
     /**
      * 회원 상세정보 조회

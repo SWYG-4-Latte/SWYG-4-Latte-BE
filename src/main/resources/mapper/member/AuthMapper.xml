@@ -95,32 +95,15 @@
 
 
 
-    <!--회원 이메일로 정보 조회-->
-    <select id="findIdByEmail" parameterType="String" resultType="com.latte.member.response.MemberResponse">
-        <!--AuthMapper.findIdByEmail-->
+    <!--회원 이름과 이메일로 아이디 조회-->
+    <select id="findIdByNameEmail" parameterType="String" resultType="com.latte.member.response.FindIdResponse">
+        <!--AuthMapper.findIdByNameEmail-->
         <![CDATA[
             SELECT
-                 mbr_no
-              ,  mbr_id
-              , password
-              , mbr_name
-              , age
-              , nickname
-              , image_url
-              , allergy
-              , cup_day
-              , gender
-              , cell_phone
-              , email
-              , pregnancy
-              , preg_month
-              , role
-              , symptom
-              , delete_yn
-              , reg_date
-              , update_date
+                  mbr_id
+                , delete_yn
             FROM tb_member
-            where email = #{email}
+            where email = #{email} and mbrName = #{mbrName}
         ]]>
     </select>
 
@@ -152,7 +135,7 @@
     </update>
 
     <!--회원 비밀번호 찾기 후 수정-->
-    <update id="updateMember" parameterType="com.latte.member.request.MemberRequest">
+    <update id="updatePassword" parameterType="com.latte.member.request.MemberRequest">
         <!--AuthMapper.updateMember-->
         UPDATE `tb_member`
         set
