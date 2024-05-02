@@ -4,16 +4,22 @@ import com.latte.member.response.Gender;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
+
+import java.util.Collection;
 
 @Getter
 @Setter
 @ToString
-public class MemberRequest {
+@Builder
+public class MemberRequest implements UserDetails {
 
 
     private String mbrNo;          // 회원 번호
@@ -68,6 +74,36 @@ public class MemberRequest {
             return;
         }
         password = passwordEncoder.encode(password);
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+    }
+
+    @Override
+    public String getUsername() {
+        return null;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return false;
     }
 
     //private Boolean deleteYn;       // 회원탈퇴 여부
