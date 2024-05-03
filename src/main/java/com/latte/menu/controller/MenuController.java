@@ -1,6 +1,8 @@
 package com.latte.menu.controller;
 
 import com.latte.common.response.ResponseData;
+import com.latte.drink.exception.NotLoginException;
+import com.latte.member.response.Gender;
 import com.latte.member.response.MemberResponse;
 import com.latte.menu.response.*;
 import com.latte.menu.service.BrandType;
@@ -26,6 +28,19 @@ public class MenuController {
 
     private final MenuService menuService;
 
+    @GetMapping("/popup")
+    public ResponseEntity<?> menuPopup() {
+        MemberResponse member = isLogin();
+        if (member == null) {
+            new ResponseEntity<>(new ResponseData<>(null, null), HttpStatus.OK);
+        }
+        ResponseData<?> responseData = new ResponseData<>(null, menuService.popup(member));
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
+    /**
+     * 브랜드 조회
+     */
     @GetMapping("/brand")
     public ResponseEntity<?> brandList() {
         List<BrandListResponse> brandList = new ArrayList<>();
@@ -37,6 +52,9 @@ public class MenuController {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
+    /**
+     * 브랜드별 인기 메뉴 조회
+     */
     @GetMapping("/ranking/{brandName}")
     public ResponseEntity<?> brandRanking(@PathVariable String brandName) {
         List<BrandRankingResponse> brandRankingList = menuService.findBrandRankingList(brandName);
@@ -44,6 +62,9 @@ public class MenuController {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
+    /**
+     * 브랜드별 메뉴 조회
+     */
     @GetMapping("/{brandName}")
     public ResponseEntity<?> brandCategory(@PathVariable String brandName,
                                            @RequestParam(value = "sortBy", defaultValue = "") String sortBy,
@@ -54,6 +75,9 @@ public class MenuController {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
+    /**
+     * 검색 API
+     */
     @GetMapping("/list")
     public ResponseEntity<?> searchMenu(@RequestParam(value = "sortBy", defaultValue = "") String sortBy,
                                         @RequestParam(value = "cond", defaultValue = "") String cond,
@@ -64,6 +88,9 @@ public class MenuController {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
+    /**
+     * 인기 검색어 조회
+     */
     @GetMapping("/ranking/word")
     public ResponseEntity<?> searchWordRanking() {
         List<MenuSearchRankingResponse> searchWordRanking = menuService.getSearchWordRanking();
@@ -71,6 +98,9 @@ public class MenuController {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
+    /**
+     * 비교하기
+     */
     @GetMapping("/compare")
     public ResponseEntity<?> compareMenu(@RequestParam(value = "menu1", defaultValue = "") Long menuNo1,
                                          @RequestParam(value = "menu2", defaultValue = "") Long menuNo2,
@@ -80,15 +110,12 @@ public class MenuController {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
+    /**
+     * 상세 조회
+     */
     @GetMapping("/detail/{menuNo}")
     public ResponseEntity<?> menuDetail(@PathVariable Long menuNo) {
-        MemberResponse member;
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if ("anonymousUser".equals(principal)) {
-            member = null;
-        } else {
-            member = (MemberResponse) principal;
-        }
+        MemberResponse member = isLogin();
         ResponseData<?> responseData = new ResponseData<>(null, menuService.menuDetail(menuNo, member));
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -96,13 +123,7 @@ public class MenuController {
 
     @GetMapping("/detail1/{menuNo}")
     public ResponseEntity<?> menuDetail1(@PathVariable Long menuNo) {
-        MemberResponse member;
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if ("anonymousUser".equals(principal)) {
-            member = null;
-        } else {
-            member = (MemberResponse) principal;
-        }
+        MemberResponse member = isLogin();
         ResponseData<?> responseData = new ResponseData<>(null, menuService.menuDetail1(menuNo, member));
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -110,13 +131,7 @@ public class MenuController {
 
     @GetMapping("/detail2/{menuNo}")
     public ResponseEntity<?> menuDetail2(@PathVariable Long menuNo) {
-        MemberResponse member;
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if ("anonymousUser".equals(principal)) {
-            member = null;
-        } else {
-            member = (MemberResponse) principal;
-        }
+        MemberResponse member = isLogin();
         ResponseData<?> responseData = new ResponseData<>(null, menuService.menuDetail2(menuNo, member));
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -125,14 +140,21 @@ public class MenuController {
     @GetMapping("/detail3/{menuNo}")
     public ResponseEntity<?> menuDetail3(@PathVariable Long menuNo,
                                          @RequestParam(value = "menu_size", defaultValue = "") String menuSize) {
-        MemberResponse member;
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if ("anonymousUser".equals(principal)) {
-            member = null;
-        } else {
-            member = (MemberResponse) principal;
-        }
+        MemberResponse member = isLogin();
         ResponseData<?> responseData = new ResponseData<>(null, menuService.menuDetail3(menuNo, menuSize, member));
         return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
+    private MemberResponse isLogin() {
+        /*Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if ("anonymousUser".equals(principal)) {
+            return null;
+        }
+        return (MemberResponse) principal;*/
+        /**
+         * 테스트를 위해 잠시 작성
+         */
+        return new MemberResponse(21, "testUser", "이름", "비밀번호", "닉네임", "연락처", "이메일", Gender.M,
+                false, 0, "없어요", "", "이미지", "USER", "26", "N", "3", null, null);
     }
 }

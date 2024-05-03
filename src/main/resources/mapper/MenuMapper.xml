@@ -4,15 +4,32 @@
 
 <mapper namespace="com.latte.menu.repository.MenuMapper">
 
-    <select id="findBrandRankingList" resultType="BrandRankingResponse">
-        SELECT MENU.MENU_NO, MENU_NAME, BRAND, CAFFEINE, MENU_SIZE, IMAGE_URL
-        FROM MENU
-                 LEFT OUTER JOIN DRINK
-                                 ON MENU.MENU_NO = DRINK.MENU_NO
-        WHERE BRAND = #{brand}
-        GROUP BY MENU.MENU_NO, MENU_NAME, BRAND, CAFFEINE, IMAGE_URL
-        ORDER BY COUNT(DRINK.MENU_NO) DESC
-            LIMIT 10
+    <!-- 오늘 마신 카페인 총량 -->
+    <select id="findTodaySumCaffeine" resultType="java.lang.String">
+        SELECT
+            CASE
+                WHEN SUM_TABLE.SUM_CAFFEINE IS NULL THEN '낮음'
+                WHEN SUM_TABLE.SUM_CAFFEINE &lt; #{minNormal} THEN '낮음'
+                WHEN SUM_TABLE.SUM_CAFFEINE &gt; #{maxNormal} THEN '높음'
+                ELSE '보통'
+                END
+        FROM (
+                 SELECT IFNULL(SUM(CAST(SUBSTRING(MENU.CAFFEINE, 1, LENGTH(MENU.CAFFEINE) - 2) AS UNSIGNED)), NULL) AS SUM_CAFFEINE
+                 FROM DRINK
+                          JOIN MENU
+                               ON DRINK.MENU_NO = MENU.MENU_NO
+                 WHERE MBR_NO = #{mbrNo}
+                   AND REQ_DATE = #{localDateTime}
+             ) AS SUM_TABLE
+    </select>
+
+    <!-- 팝업 문구 출력 -->
+    <select id="findRecommendMenu" resultType="RecommendPopupResponse">
+        SELECT MENU_NO, IMAGE_URL, CONTENT
+        FROM RECOMMEND
+        WHERE STATUS = #{todayStatus}
+        ORDER BY RAND()
+        LIMIT 1
     </select>
 
 
