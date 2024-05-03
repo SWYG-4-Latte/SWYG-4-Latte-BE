@@ -118,15 +118,10 @@ public class DrinkController {
 
 
     private MemberResponse isLogin() {
-        /*Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if ("anonymousUser".equals(principal)) {
             throw new NotLoginException("로그인하지 않은 사용자입니다");
         }
-        return (MemberResponse) principal;*/
-        /**
-         * 테스트를 위해 잠시 작성
-         */
-        return new MemberResponse(21, "testUser", "이름", "비밀번호", "닉네임", "연락처", "이메일", Gender.M,
-                false, 0, "없어요", "", "이미지", "USER", "26", "N", "3", null, null);
+        return (MemberResponse) principal;
     }
 }
