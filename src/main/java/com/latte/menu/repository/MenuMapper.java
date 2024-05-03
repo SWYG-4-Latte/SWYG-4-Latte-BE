@@ -33,5 +33,9 @@ public interface MenuMapper {
 
     MenuDetailResponse getMenuDetail(@Param("no") Long no, @Param("maxCaffeine") Integer maxCaffeine);
 
-    List<MenuSimpleResponse> getLowCaffeineMenu(@Param("base") int base);
+    List<MenuDetailResponse> getMenuDetail1(@Param("no") Long no, @Param("maxCaffeine") Integer maxCaffeine);
+
+    MenuDetailResponse2 getMenuDetail2(@Param("no") Long no, @Param("maxCaffeine") Integer maxCaffeine);
+
+    MenuDetailResponse3 getMenuDetail3(@Param("no") Long no, @Param("menuSize") String menuSize, @Param("maxCaffeine") Integer maxCaffeine);
 }
