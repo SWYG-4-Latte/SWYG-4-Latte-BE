@@ -2,6 +2,7 @@ package com.latte.menu.controller;
 
 import com.latte.common.response.ResponseData;
 import com.latte.drink.exception.NotLoginException;
+import com.latte.member.mapper.AuthMapper;
 import com.latte.member.response.Gender;
 import com.latte.member.response.MemberResponse;
 import com.latte.menu.response.*;
@@ -27,6 +28,7 @@ import java.util.List;
 public class MenuController {
 
     private final MenuService menuService;
+    private final AuthMapper authMapper;    // 테스트를 위한 임시
 
     @GetMapping("/popup")
     public ResponseEntity<?> menuPopup() {
@@ -146,10 +148,11 @@ public class MenuController {
     }
 
     private MemberResponse isLogin() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        /*Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if ("anonymousUser".equals(principal)) {
             return null;
         }
-        return (MemberResponse) principal;
+        return (MemberResponse) principal;*/
+        return authMapper.findById("testUser");
     }
 }
