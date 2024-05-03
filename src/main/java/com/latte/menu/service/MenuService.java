@@ -96,19 +96,39 @@ public class MenuService {
         return menuComparePageResponse;
     }
 
-    /**
-     * 사용자에 따른 영양성분의 높음, 낮음, 카페인 섭취량의 % 계산 필요
-     */
     public MenuDetailResponse menuDetail(Long menuNo, MemberResponse member) {
         Integer maxCaffeine = null;
         if (member != null) {
             maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
         }
-        MenuDetailResponse menuDetail = menuMapper.getMenuDetail(menuNo, maxCaffeine);
-        // 낮은 함량의 카페인
-        int baseCaffeine = Integer.parseInt(menuDetail.getCaffeine().replace("mg", ""));
-        menuDetail.setLowCaffeineMenus(menuMapper.getLowCaffeineMenu(baseCaffeine));
-        return menuDetail;
+        return menuMapper.getMenuDetail(menuNo, maxCaffeine);
+    }
+
+
+    public List<MenuDetailResponse> menuDetail1(Long menuNo, MemberResponse member) {
+        Integer maxCaffeine = null;
+        if (member != null) {
+            maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
+        }
+        return menuMapper.getMenuDetail1(menuNo, maxCaffeine);
+    }
+
+
+    public MenuDetailResponse2 menuDetail2(Long menuNo, MemberResponse member) {
+        Integer maxCaffeine = null;
+        if (member != null) {
+            maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
+        }
+        return menuMapper.getMenuDetail2(menuNo, maxCaffeine);
+    }
+
+
+    public MenuDetailResponse3 menuDetail3(Long menuNo, String menuSize, MemberResponse member) {
+        Integer maxCaffeine = null;
+        if (member != null) {
+            maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
+        }
+        return menuMapper.getMenuDetail3(menuNo, menuSize, maxCaffeine);
     }
     
 }
