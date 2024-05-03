@@ -30,34 +30,16 @@
     <!--회원 정보 조회-->
     <select id="findById" parameterType="String" resultType="com.latte.member.response.MemberResponse">
         <!--AuthMapper.getMemberInfo-->
-        <![CDATA[
+
             SELECT
-                 mbr_no
-              ,  mbr_id
-              , password
-              , mbr_name
-              , age
-              , nickname
-              , image_url
-              , allergy
-              , cup_day
-              , gender
-              , cell_phone
-              , email
-              , pregnancy
-              , preg_month
-              , role
-              , symptom
-              , delete_yn
-              , reg_date
-              , update_date
+                <include refid="memberColumns" />
             FROM tb_member
             where mbr_id = #{mbrId}
-        ]]>
+
     </select>
 
     <!--회원 넘버 정보 조회-->
-    <select id="findBySeq" parameterType="String" resultType="com.latte.member.response.MemberResponse">
+    <select id="findBySeq" parameterType="int" resultType="com.latte.member.response.MemberResponse">
         <!--AuthMapper.getMemberInfo-->
         <![CDATA[
             SELECT
@@ -93,6 +75,22 @@
         FROM tb_member
     </select>
 
+
+
+    <!--회원 이름과 이메일로 아이디 조회-->
+    <select id="findIdByNameEmail" parameterType="String" resultType="com.latte.member.response.FindIdResponse">
+        <!--AuthMapper.findIdByNameEmail-->
+        <![CDATA[
+            SELECT
+                  mbr_id
+                , delete_yn
+            FROM tb_member
+            where email = #{email} and mbrName = #{mbrName}
+        ]]>
+    </select>
+
+
+
     <!--회원 정보 수정-->
     <update id="updateMember" parameterType="com.latte.member.request.MemberRequest">
         <!--AuthMapper.updateMember-->
@@ -116,6 +114,30 @@
           , `update_date` = NOW()
         WHERE
             `mbr_no`=#{mbrNo}
+    </update>
+
+    <!--회원 비밀번호 찾기 후 수정-->
+    <update id="updatePassword" parameterType="com.latte.member.request.MemberRequest">
+        <!--AuthMapper.updateMember-->
+        UPDATE `tb_member`
+        set
+        `mbr_id` = #{mbrId}
+        , `mbr_name` = #{mbrName}
+        , `age` = #{age}
+        , `nickname` = #{nickname}
+        , `image_url` = #{imageUrl}
+        , `allergy` = #{allergy}
+        , `cup_day` = #{cupDay}
+        , `gender` = #{gender}
+        , `cell_phone` = #{cellPhone}
+        , `email` = #{email}
+        , `pregnancy` = #{pregnancy}
+        , `preg_month` = #{pregMonth}
+        , `role` = #{role}
+        , `symptom` = #{symptom}
+        , `update_date` = NOW()
+        WHERE
+        `mbr_no`=#{mbrNo}
     </update>
 
     <!--회원 삭제-->
