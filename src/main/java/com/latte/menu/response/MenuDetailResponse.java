@@ -17,6 +17,7 @@ public class MenuDetailResponse {
     private Level level;
     private String imageUrl;
     private List<MenuSimpleResponse> lowCaffeineMenus;
+    private List<String> otherSizes;
 
     @Data
     public static class Nutrient {
