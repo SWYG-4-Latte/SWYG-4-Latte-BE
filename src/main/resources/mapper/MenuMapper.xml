@@ -218,6 +218,7 @@
         )
     </select>
 
+
     <!-- 메뉴 상세 데이터 -->
     <resultMap id="menuDetailResultMap" type="MenuDetailResponse">
         <id property="menuNo" column="menu_no"/>
@@ -246,11 +247,13 @@
         </association>
         <!-- 낮은 함량의 카페인 -->
         <collection property="lowCaffeineMenus" column="base = CAFFEINE, menuNo = MENU_NO" ofType="MenuSimpleResponse" select="getLowCaffeineMenu"/>
+        <!-- 메뉴의 다른 사이즈 정보 -->
+        <collection property="otherSizes" column="no = MENU_NO" ofType="java.lang.String" select="findOtherMenus"/>
     </resultMap>
 
 
     <select id="getMenuDetail" resultMap="menuDetailResultMap">
-        SELECT MENU_NO, BRAND, MENU_NAME, CAFFEINE, PRICE, KCAL, SUGAR, SALT, PROTEIN, SAT_FAT, IMAGE_URL,
+        SELECT MENU_NO, M1.BRAND, M1.MENU_NAME, CAFFEINE, PRICE, KCAL, SUGAR, SALT, PROTEIN, SAT_FAT, IMAGE_URL,
         CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') AS MENU_SIZE,
         <!-- 칼로리 높낮이 -->
         CASE
@@ -285,10 +288,28 @@
         <if test="maxCaffeine != null">
             ,CONCAT(ROUND(CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) / #{maxCaffeine} * 100), '%') AS PERCENT
         </if>
-        FROM MENU
-        WHERE MENU_NO = #{no}
+        FROM MENU AS M1
+        INNER JOIN (
+            SELECT BRAND, MENU_NAME, MIN(MENU_NO) AS MIN_SIZE
+            FROM MENU
+            WHERE MENU_NO = #{no}
+        ) AS M2
+            ON M1.BRAND = M2.BRAND
+                AND M1.MENU_NAME = M2.MENU_NAME
+        <where>
+            <if test="menuSize != 'defaultSize'">
+                and CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') = #{menuSize}
+            </if>
+        </where>
+        <!-- 사이즈 미지정시, 가장 작은 사이즈 음료 출력 -->
+        <if test="menuSize == 'defaultSize'">
+            ORDER BY MENU_NO ASC
+            LIMIT 1
+        </if>
     </select>
 
+
+    <!-- 낮은 함량의 카페인 -->
     <select id="getLowCaffeineMenu" resultType="MenuSimpleResponse">
         SELECT MENU_NO, MENU_NAME, IMAGE_URL
         FROM MENU
@@ -306,267 +327,8 @@
     </select>
 
 
-
-
-    <!-- 메뉴 상세 조회 1 -->
-    <resultMap id="menuDetail1ResultMap" type="MenuDetailResponse">
-        <id property="menuNo" column="menu_no"/>
-        <result property="brand" column="brand"/>
-        <result property="menuName" column="menu_name"/>
-        <result property="menuSize" column="menu_size"/>
-        <result property="caffeine" column="caffeine"/>
-        <result property="percent" column="percent"/>
-        <result property="price" column="price"/>
-        <result property="imageUrl" column="image_url"/>
-        <!-- 영양 성분 -->
-        <association property="nutrient" javaType="com.latte.menu.response.MenuDetailResponse$Nutrient">
-            <result property="kcal" column="kcal"/>
-            <result property="sugar" column="sugar"/>
-            <result property="salt" column="salt"/>
-            <result property="protein" column="protein"/>
-            <result property="satFat" column="sat_fat"/>
-        </association>
-        <!-- 영양 성분 높낮이 -->
-        <association property="level" javaType="com.latte.menu.response.MenuDetailResponse$Level">
-            <result property="kcalLevel" column="kcal_level"/>
-            <result property="sugarLevel" column="sugar_level"/>
-            <result property="saltLevel" column="salt_level"/>
-            <result property="proteinLevel" column="protein_level"/>
-            <result property="satFatLevel" column="sat_fat_level"/>
-        </association>
-        <!-- 낮은 함량의 카페인 -->
-        <collection property="lowCaffeineMenus" column="base = CAFFEINE, menuNo = MENU_NO" ofType="MenuSimpleResponse" select="getLowCaffeineMenu"/>
-    </resultMap>
-
-
-    <select id="getMenuDetail1" resultMap="menuDetail1ResultMap">
-        SELECT MENU_NO, M1.BRAND, M1.MENU_NAME, CAFFEINE, PRICE, KCAL, SUGAR, SALT, PROTEIN, SAT_FAT, IMAGE_URL,
-        CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') AS MENU_SIZE,
-        <!-- 칼로리 높낮이 -->
-        CASE
-            WHEN CAST(SUBSTRING(KCAL, 1, LOCATE('kcal', KCAL) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '낮음'
-            WHEN CAST(SUBSTRING(KCAL, 1, LOCATE('kcal', KCAL) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '높음'
-            ELSE '보통'
-        END AS KCAL_LEVEL,
-        <!-- 당류 높낮이 -->
-        CASE
-            WHEN CAST(SUBSTRING(SUGAR, 1, LOCATE('g', SUGAR) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSugar} THEN '낮음'
-            WHEN CAST(SUBSTRING(SUGAR, 1, LOCATE('g', SUGAR) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSugar} THEN '높음'
-            ELSE '보통'
-        END AS SUGAR_LEVEL,
-        <!-- 나트륨 높낮이 -->
-        CASE
-            WHEN CAST(SUBSTRING(SALT, 1, LOCATE('mg', SALT) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSalt} THEN '낮음'
-            WHEN CAST(SUBSTRING(SALT, 1, LOCATE('mg', SALT) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSalt} THEN '높음'
-            ELSE '보통'
-        END AS SALT_LEVEL,
-        <!-- 단백질 높낮이 -->
-        CASE
-            WHEN CAST(SUBSTRING(PROTEIN, 1, LOCATE('g', PROTEIN) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minProtein} THEN '낮음'
-            WHEN CAST(SUBSTRING(PROTEIN, 1, LOCATE('g', PROTEIN) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minProtein} THEN '높음'
-            ELSE '보통'
-        END AS PROTEIN_LEVEL,
-        <!-- 포화지방 높낮이 -->
-        CASE
-            WHEN CAST(SUBSTRING(SAT_FAT, 1, LOCATE('g', SAT_FAT) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSatFat} THEN '낮음'
-            WHEN CAST(SUBSTRING(SAT_FAT, 1, LOCATE('g', SAT_FAT) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSatFat} THEN '높음'
-            ELSE '보통'
-        END AS SAT_FAT_LEVEL
-        <if test="maxCaffeine != null">
-            ,CONCAT(ROUND(CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) / #{maxCaffeine} * 100), '%') AS PERCENT
-        </if>
-        FROM MENU AS M1
-        INNER JOIN (
-            SELECT BRAND, MENU_NAME
-            FROM MENU
-            WHERE MENU_NO = #{no}
-        ) AS M2
-            ON M1.BRAND = M2.BRAND
-                AND M1.MENU_NAME = M2.MENU_NAME
-    </select>
-
-
-
-
-
-
-
-    <!-- 메뉴 상세 조회 2 -->
-    <resultMap id="menuDetail2ResultMap" type="MenuDetailResponse2">
-        <id property="menuNo" column="menu_no"/>
-        <result property="brand" column="brand"/>
-        <result property="menuName" column="menu_name"/>
-        <result property="menuSize" column="menu_size"/>
-        <result property="caffeine" column="caffeine"/>
-        <result property="percent" column="percent"/>
-        <result property="price" column="price"/>
-        <result property="imageUrl" column="image_url"/>
-        <!-- 영양 성분 -->
-        <association property="nutrient" javaType="com.latte.menu.response.MenuDetailResponse2$Nutrient">
-            <result property="kcal" column="kcal"/>
-            <result property="sugar" column="sugar"/>
-            <result property="salt" column="salt"/>
-            <result property="protein" column="protein"/>
-            <result property="satFat" column="sat_fat"/>
-        </association>
-        <!-- 영양 성분 높낮이 -->
-        <association property="level" javaType="com.latte.menu.response.MenuDetailResponse2$Level">
-            <result property="kcalLevel" column="kcal_level"/>
-            <result property="sugarLevel" column="sugar_level"/>
-            <result property="saltLevel" column="salt_level"/>
-            <result property="proteinLevel" column="protein_level"/>
-            <result property="satFatLevel" column="sat_fat_level"/>
-        </association>
-        <!-- 낮은 함량의 카페인 -->
-        <collection property="lowCaffeineMenus" column="base = CAFFEINE, menuNo = MENU_NO" ofType="MenuSimpleResponse" select="getLowCaffeineMenu"/>
-
-        <!-- 다른 사이즈 메뉴 정보 -->
-        <collection property="otherSizes" column="no = MENU_NO" ofType="com.latte.menu.response.MenuDetailResponse2$OtherSize" select="findOtherMenus"/>
-    </resultMap>
-
-
-
-    <select id="getMenuDetail2" resultMap="menuDetail2ResultMap">
-        SELECT MENU_NO, BRAND, MENU_NAME, CAFFEINE, PRICE, KCAL, SUGAR, SALT, PROTEIN, SAT_FAT, IMAGE_URL,
-        CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') AS MENU_SIZE,
-        <!-- 칼로리 높낮이 -->
-        CASE
-        WHEN CAST(SUBSTRING(KCAL, 1, LOCATE('kcal', KCAL) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '낮음'
-        WHEN CAST(SUBSTRING(KCAL, 1, LOCATE('kcal', KCAL) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '높음'
-        ELSE '보통'
-        END AS KCAL_LEVEL,
-        <!-- 당류 높낮이 -->
-        CASE
-        WHEN CAST(SUBSTRING(SUGAR, 1, LOCATE('g', SUGAR) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSugar} THEN '낮음'
-        WHEN CAST(SUBSTRING(SUGAR, 1, LOCATE('g', SUGAR) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSugar} THEN '높음'
-        ELSE '보통'
-        END AS SUGAR_LEVEL,
-        <!-- 나트륨 높낮이 -->
-        CASE
-        WHEN CAST(SUBSTRING(SALT, 1, LOCATE('mg', SALT) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSalt} THEN '낮음'
-        WHEN CAST(SUBSTRING(SALT, 1, LOCATE('mg', SALT) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSalt} THEN '높음'
-        ELSE '보통'
-        END AS SALT_LEVEL,
-        <!-- 단백질 높낮이 -->
-        CASE
-        WHEN CAST(SUBSTRING(PROTEIN, 1, LOCATE('g', PROTEIN) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minProtein} THEN '낮음'
-        WHEN CAST(SUBSTRING(PROTEIN, 1, LOCATE('g', PROTEIN) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minProtein} THEN '높음'
-        ELSE '보통'
-        END AS PROTEIN_LEVEL,
-        <!-- 포화지방 높낮이 -->
-        CASE
-        WHEN CAST(SUBSTRING(SAT_FAT, 1, LOCATE('g', SAT_FAT) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSatFat} THEN '낮음'
-        WHEN CAST(SUBSTRING(SAT_FAT, 1, LOCATE('g', SAT_FAT) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSatFat} THEN '높음'
-        ELSE '보통'
-        END AS SAT_FAT_LEVEL
-        <if test="maxCaffeine != null">
-            ,CONCAT(ROUND(CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) / #{maxCaffeine} * 100), '%') AS PERCENT
-        </if>
-        FROM MENU
-        WHERE MENU_NO = #{no}
-    </select>
-
-
-    <select id="findOtherMenus" resultType="com.latte.menu.response.MenuDetailResponse2$OtherSize">
-        SELECT M1.MENU_NO AS OTHER_MENU_NO,
-               CONCAT(M1.MENU_SIZE, '(', SUBSTRING_INDEX(M1.VOLUME, '(', 1), ')') AS OTHER_MENU_SIZE
-        FROM MENU AS M1
-                 INNER JOIN (
-            SELECT BRAND, MENU_NAME
-            FROM MENU
-            WHERE MENU_NO = #{no}
-        ) AS M2
-                            ON M1.BRAND = M2.BRAND
-                                AND M1.MENU_NAME = M2.MENU_NAME
-    </select>
-
-
-
-
-    <!-- 메뉴 상세 조회 3 -->
-    <resultMap id="menuDetail3ResultMap" type="MenuDetailResponse3">
-        <id property="menuNo" column="menu_no"/>
-        <result property="brand" column="brand"/>
-        <result property="menuName" column="menu_name"/>
-        <result property="menuSize" column="menu_size"/>
-        <result property="caffeine" column="caffeine"/>
-        <result property="percent" column="percent"/>
-        <result property="price" column="price"/>
-        <result property="imageUrl" column="image_url"/>
-        <!-- 영양 성분 -->
-        <association property="nutrient" javaType="com.latte.menu.response.MenuDetailResponse3$Nutrient">
-            <result property="kcal" column="kcal"/>
-            <result property="sugar" column="sugar"/>
-            <result property="salt" column="salt"/>
-            <result property="protein" column="protein"/>
-            <result property="satFat" column="sat_fat"/>
-        </association>
-        <!-- 영양 성분 높낮이 -->
-        <association property="level" javaType="com.latte.menu.response.MenuDetailResponse3$Level">
-            <result property="kcalLevel" column="kcal_level"/>
-            <result property="sugarLevel" column="sugar_level"/>
-            <result property="saltLevel" column="salt_level"/>
-            <result property="proteinLevel" column="protein_level"/>
-            <result property="satFatLevel" column="sat_fat_level"/>
-        </association>
-        <!-- 낮은 함량의 카페인 -->
-        <collection property="lowCaffeineMenus" column="base = CAFFEINE, menuNo = MENU_NO" ofType="MenuSimpleResponse" select="getLowCaffeineMenu"/>
-
-        <!-- 다른 사이즈 메뉴 정보 -->
-        <collection property="otherSizes" column="no = MENU_NO" ofType="java.lang.String" select="findOtherMenus3"/>
-    </resultMap>
-
-
-
-    <select id="getMenuDetail3" resultMap="menuDetail3ResultMap">
-        SELECT MENU_NO, M1.BRAND, M1.MENU_NAME, CAFFEINE, PRICE, KCAL, SUGAR, SALT, PROTEIN, SAT_FAT, IMAGE_URL,
-        CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') AS MENU_SIZE,
-        <!-- 칼로리 높낮이 -->
-        CASE
-        WHEN CAST(SUBSTRING(KCAL, 1, LOCATE('kcal', KCAL) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '낮음'
-        WHEN CAST(SUBSTRING(KCAL, 1, LOCATE('kcal', KCAL) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '높음'
-        ELSE '보통'
-        END AS KCAL_LEVEL,
-        <!-- 당류 높낮이 -->
-        CASE
-        WHEN CAST(SUBSTRING(SUGAR, 1, LOCATE('g', SUGAR) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSugar} THEN '낮음'
-        WHEN CAST(SUBSTRING(SUGAR, 1, LOCATE('g', SUGAR) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSugar} THEN '높음'
-        ELSE '보통'
-        END AS SUGAR_LEVEL,
-        <!-- 나트륨 높낮이 -->
-        CASE
-        WHEN CAST(SUBSTRING(SALT, 1, LOCATE('mg', SALT) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSalt} THEN '낮음'
-        WHEN CAST(SUBSTRING(SALT, 1, LOCATE('mg', SALT) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSalt} THEN '높음'
-        ELSE '보통'
-        END AS SALT_LEVEL,
-        <!-- 단백질 높낮이 -->
-        CASE
-        WHEN CAST(SUBSTRING(PROTEIN, 1, LOCATE('g', PROTEIN) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minProtein} THEN '낮음'
-        WHEN CAST(SUBSTRING(PROTEIN, 1, LOCATE('g', PROTEIN) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minProtein} THEN '높음'
-        ELSE '보통'
-        END AS PROTEIN_LEVEL,
-        <!-- 포화지방 높낮이 -->
-        CASE
-        WHEN CAST(SUBSTRING(SAT_FAT, 1, LOCATE('g', SAT_FAT) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSatFat} THEN '낮음'
-        WHEN CAST(SUBSTRING(SAT_FAT, 1, LOCATE('g', SAT_FAT) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSatFat} THEN '높음'
-        ELSE '보통'
-        END AS SAT_FAT_LEVEL
-        <if test="maxCaffeine != null">
-            ,CONCAT(ROUND(CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) / #{maxCaffeine} * 100), '%') AS PERCENT
-        </if>
-        FROM MENU AS M1
-        INNER JOIN (
-        SELECT BRAND, MENU_NAME
-        FROM MENU
-        WHERE MENU_NO = #{no}
-        ) AS M2
-        ON M1.BRAND = M2.BRAND
-        AND M1.MENU_NAME = M2.MENU_NAME
-        WHERE CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') = #{menuSize}
-    </select>
-
-
-    <select id="findOtherMenus3" resultType="java.lang.String">
+    <!-- 메뉴의 다른 사이즈 정보 -->
+    <select id="findOtherMenus" resultType="java.lang.String">
         SELECT CONCAT(M1.MENU_SIZE, '(', SUBSTRING_INDEX(M1.VOLUME, '(', 1), ')') AS OTHER_MENU_SIZE
         FROM MENU AS M1
                  INNER JOIN (
@@ -574,8 +336,8 @@
             FROM MENU
             WHERE MENU_NO = #{no}
         ) AS M2
-                            ON M1.BRAND = M2.BRAND
-                                AND M1.MENU_NAME = M2.MENU_NAME
+            ON M1.BRAND = M2.BRAND
+                AND M1.MENU_NAME = M2.MENU_NAME
     </select>
 
 

@@ -1,9 +1,7 @@
 package com.latte.menu.controller;
 
 import com.latte.common.response.ResponseData;
-import com.latte.drink.exception.NotLoginException;
 import com.latte.member.mapper.AuthMapper;
-import com.latte.member.response.Gender;
 import com.latte.member.response.MemberResponse;
 import com.latte.menu.response.*;
 import com.latte.menu.service.BrandType;
@@ -116,34 +114,10 @@ public class MenuController {
      * 상세 조회
      */
     @GetMapping("/detail/{menuNo}")
-    public ResponseEntity<?> menuDetail(@PathVariable Long menuNo) {
+    public ResponseEntity<?> menuDetail(@PathVariable Long menuNo,
+                                         @RequestParam(value = "menu_size", defaultValue = "defaultSize") String menuSize) {
         MemberResponse member = isLogin();
-        ResponseData<?> responseData = new ResponseData<>(null, menuService.menuDetail(menuNo, member));
-        return new ResponseEntity<>(responseData, HttpStatus.OK);
-    }
-
-
-    @GetMapping("/detail1/{menuNo}")
-    public ResponseEntity<?> menuDetail1(@PathVariable Long menuNo) {
-        MemberResponse member = isLogin();
-        ResponseData<?> responseData = new ResponseData<>(null, menuService.menuDetail1(menuNo, member));
-        return new ResponseEntity<>(responseData, HttpStatus.OK);
-    }
-
-
-    @GetMapping("/detail2/{menuNo}")
-    public ResponseEntity<?> menuDetail2(@PathVariable Long menuNo) {
-        MemberResponse member = isLogin();
-        ResponseData<?> responseData = new ResponseData<>(null, menuService.menuDetail2(menuNo, member));
-        return new ResponseEntity<>(responseData, HttpStatus.OK);
-    }
-
-
-    @GetMapping("/detail3/{menuNo}")
-    public ResponseEntity<?> menuDetail3(@PathVariable Long menuNo,
-                                         @RequestParam(value = "menu_size", defaultValue = "") String menuSize) {
-        MemberResponse member = isLogin();
-        ResponseData<?> responseData = new ResponseData<>(null, menuService.menuDetail3(menuNo, menuSize, member));
+        ResponseData<?> responseData = new ResponseData<>(null, menuService.menuDetail(menuNo, menuSize, member));
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
