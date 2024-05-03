@@ -30,7 +30,7 @@
             SELECT
                 MENU_NAME,
                 BRAND,
-                MIN(CAST(SUBSTRING_INDEX(VOLUMN, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_ZISE
+                MIN(CAST(SUBSTRING_INDEX(VOLUME, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_ZISE
             FROM MENU
             <where>
                 <if test="brand != null and brand != ''">
@@ -44,7 +44,7 @@
             ) AS M2
                 ON M1.MENU_NAME = M2.MENU_NAME
                     AND M1.BRAND = M2.BRAND
-                    AND CAST(SUBSTRING_INDEX(M1.VOLUMN, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_ZISE
+                    AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_ZISE
         ORDER BY
         <choose>
             <when test="sortBy == 'caffeine-desc'">
@@ -68,7 +68,7 @@
             SELECT
                 MENU_NAME,
                 BRAND,
-                MIN(CAST(SUBSTRING_INDEX(VOLUMN, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
+                MIN(CAST(SUBSTRING_INDEX(VOLUME, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
             FROM MENU
             <where>
                 <if test="brand != null and brand != ''">
@@ -82,7 +82,7 @@
             ) AS M2
                 ON M1.MENU_NAME = M2.MENU_NAME
                     AND M1.BRAND = M2.BRAND
-                    AND CAST(SUBSTRING_INDEX(M1.VOLUMN, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
+                    AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
     </select>
 
     <!-- 음료 검색 시, 가장 작은 사이즈를 기준으로 검색 -->
@@ -100,13 +100,13 @@
             SELECT
                 MENU_NAME,
                 BRAND,
-                MIN(CAST(SUBSTRING_INDEX(VOLUMN, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
+                MIN(CAST(SUBSTRING_INDEX(VOLUME, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
             FROM MENU
             GROUP BY MENU_NAME, BRAND
             ) AS M2
                 ON M1.MENU_NAME = M2.MENU_NAME
                     AND M1.BRAND = M2.BRAND
-                    AND CAST(SUBSTRING_INDEX(M1.VOLUMN, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
+                    AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
         <where>
             <if test="cond == 'caffeine-none'">
                 and M1.CAFFEINE = "0mg"
@@ -157,13 +157,13 @@
             SELECT
                 MENU_NAME,
                 BRAND,
-                MIN(CAST(SUBSTRING_INDEX(VOLUMN, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
+                MIN(CAST(SUBSTRING_INDEX(VOLUME, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
             FROM MENU
             GROUP BY MENU_NAME, BRAND
             ) AS M2
                 ON M1.MENU_NAME = M2.MENU_NAME
                     AND M1.BRAND = M2.BRAND
-                    AND CAST(SUBSTRING_INDEX(M1.VOLUMN, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
+                    AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
         <where>
             <if test="cond == 'caffeine-none'">
                 and M1.CAFFEINE = "0mg"
