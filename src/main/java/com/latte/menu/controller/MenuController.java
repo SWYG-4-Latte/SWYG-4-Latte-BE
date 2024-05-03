@@ -89,8 +89,50 @@ public class MenuController {
         } else {
             member = (MemberResponse) principal;
         }
-        MenuDetailResponse menuDetailResponse = menuService.menuDetail(menuNo, member);
-        ResponseData<?> responseData = new ResponseData<>(null, menuDetailResponse);
+        ResponseData<?> responseData = new ResponseData<>(null, menuService.menuDetail(menuNo, member));
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/detail1/{menuNo}")
+    public ResponseEntity<?> menuDetail1(@PathVariable Long menuNo) {
+        MemberResponse member;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if ("anonymousUser".equals(principal)) {
+            member = null;
+        } else {
+            member = (MemberResponse) principal;
+        }
+        ResponseData<?> responseData = new ResponseData<>(null, menuService.menuDetail1(menuNo, member));
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/detail2/{menuNo}")
+    public ResponseEntity<?> menuDetail2(@PathVariable Long menuNo) {
+        MemberResponse member;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if ("anonymousUser".equals(principal)) {
+            member = null;
+        } else {
+            member = (MemberResponse) principal;
+        }
+        ResponseData<?> responseData = new ResponseData<>(null, menuService.menuDetail2(menuNo, member));
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/detail3/{menuNo}")
+    public ResponseEntity<?> menuDetail3(@PathVariable Long menuNo,
+                                         @RequestParam(value = "menu_size", defaultValue = "") String menuSize) {
+        MemberResponse member;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if ("anonymousUser".equals(principal)) {
+            member = null;
+        } else {
+            member = (MemberResponse) principal;
+        }
+        ResponseData<?> responseData = new ResponseData<>(null, menuService.menuDetail3(menuNo, menuSize, member));
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 }

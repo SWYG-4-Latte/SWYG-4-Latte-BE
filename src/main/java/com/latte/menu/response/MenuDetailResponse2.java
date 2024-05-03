@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class MenuDetailResponse {
+public class MenuDetailResponse2 {
     private Long menuNo;
     private String brand;
     private String menuName;
@@ -17,6 +17,7 @@ public class MenuDetailResponse {
     private Level level;
     private String imageUrl;
     private List<MenuSimpleResponse> lowCaffeineMenus;
+    private List<OtherSize> otherSizes;
 
     @Data
     public static class Nutrient {
@@ -34,5 +35,11 @@ public class MenuDetailResponse {
         private String saltLevel;
         private String proteinLevel;
         private String satFatLevel;
+    }
+
+    @Data
+    public static class OtherSize {
+        private Long otherMenuNo;
+        private String otherMenuSize;
     }
 }
