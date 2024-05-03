@@ -1,6 +1,5 @@
 package com.latte.menu.repository;
 
-import com.latte.drink.response.DateStatusResponse;
 import com.latte.menu.response.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -38,11 +37,5 @@ public interface MenuMapper {
 
     List<MenuSimpleResponse> getRecentMenu(@Param("menus") String[] menus);
 
-    MenuDetailResponse getMenuDetail(@Param("no") Long no, @Param("maxCaffeine") Integer maxCaffeine);
-
-    List<MenuDetailResponse> getMenuDetail1(@Param("no") Long no, @Param("maxCaffeine") Integer maxCaffeine);
-
-    MenuDetailResponse2 getMenuDetail2(@Param("no") Long no, @Param("maxCaffeine") Integer maxCaffeine);
-
-    MenuDetailResponse3 getMenuDetail3(@Param("no") Long no, @Param("menuSize") String menuSize, @Param("maxCaffeine") Integer maxCaffeine);
+    MenuDetailResponse getMenuDetail(@Param("no") Long no, @Param("menuSize") String menuSize, @Param("maxCaffeine") Integer maxCaffeine);
 }

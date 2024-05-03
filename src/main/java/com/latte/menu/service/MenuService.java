@@ -130,39 +130,12 @@ public class MenuService {
     /**
      * 메뉴 상세 조회
      */
-    public MenuDetailResponse menuDetail(Long menuNo, MemberResponse member) {
+    public MenuDetailResponse menuDetail(Long menuNo, String menuSize, MemberResponse member) {
         Integer maxCaffeine = null;
         if (member != null) {
             maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
         }
-        return menuMapper.getMenuDetail(menuNo, maxCaffeine);
-    }
-
-
-    public List<MenuDetailResponse> menuDetail1(Long menuNo, MemberResponse member) {
-        Integer maxCaffeine = null;
-        if (member != null) {
-            maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
-        }
-        return menuMapper.getMenuDetail1(menuNo, maxCaffeine);
-    }
-
-
-    public MenuDetailResponse2 menuDetail2(Long menuNo, MemberResponse member) {
-        Integer maxCaffeine = null;
-        if (member != null) {
-            maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
-        }
-        return menuMapper.getMenuDetail2(menuNo, maxCaffeine);
-    }
-
-
-    public MenuDetailResponse3 menuDetail3(Long menuNo, String menuSize, MemberResponse member) {
-        Integer maxCaffeine = null;
-        if (member != null) {
-            maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
-        }
-        return menuMapper.getMenuDetail3(menuNo, menuSize, maxCaffeine);
+        return menuMapper.getMenuDetail(menuNo, menuSize, maxCaffeine);
     }
     
 }
