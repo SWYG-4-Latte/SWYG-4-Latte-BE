@@ -9,7 +9,6 @@
                 mbr_no
               ,  mbr_id
               , password
-              , mbr_name
               , age
               , nickname
               , image_url
@@ -46,7 +45,6 @@
                  mbr_no
               ,  mbr_id
               , password
-              , mbr_name
               , age
               , nickname
               , image_url
@@ -85,7 +83,7 @@
                   mbr_id
                 , delete_yn
             FROM tb_member
-            where email = #{email} and mbrName = #{mbrName}
+            where email = #{email} and nickname = #{nickname}
         ]]>
     </select>
 
@@ -98,7 +96,6 @@
         set
             `mbr_id` = #{mbrId}
           , `password` = #{password}
-          , `mbr_name` = #{mbrName}
           , `age` = #{age}
           , `nickname` = #{nickname}
           , `image_url` = #{imageUrl}
@@ -122,7 +119,6 @@
         UPDATE `tb_member`
         set
         `mbr_id` = #{mbrId}
-        , `mbr_name` = #{mbrName}
         , `age` = #{age}
         , `nickname` = #{nickname}
         , `image_url` = #{imageUrl}
@@ -141,7 +137,7 @@
     </update>
 
     <!--회원 삭제-->
-    <delete id="deleteMember" parameterType="String">
+    <delete id="deleteMember" parameterType="int">
         <!--AuthMapper.deleteMember-->
         UPDATE `tb_member`
         set
@@ -162,13 +158,24 @@
     </select>
 
 
+    <!-- 회원 수 카운팅 (닉네임 중복 체크) -->
+    <select id="countByNickname" parameterType="string" resultType="int">
+        /* AuthMapper.countByNickname */
+        SELECT
+            COUNT(*)
+        FROM
+            tb_member
+        WHERE
+            nickname = #{nickname}
+    </select>
+
+
     <!--회원 정보 등록-->
     <insert id="insertMember" parameterType="com.latte.member.request.MemberRequest" useGeneratedKeys="true" keyProperty="mbrNo">
         /* AuthMapper.insertMember */
         INSERT INTO tb_member (
                     mbr_id
                   , password
-                  , mbr_name
                   , age
                   , nickname
                   , image_url
@@ -187,7 +194,6 @@
         ) VALUES (
                    #{mbrId}
                  , #{password}
-                 , #{mbrName}
                  , #{age}
                  , #{nickname}
                  , #{imageUrl}

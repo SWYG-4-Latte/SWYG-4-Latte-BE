@@ -20,7 +20,7 @@ public class MemberResponse implements UserDetails {
 
     private String mbrId;          // ID
 
-    private String mbrName;         // 이름
+    //private String mbrName;         // 이름
 
     private String password;        // PW
 

@@ -84,12 +84,9 @@ public class AuthService {
     @Transactional
     public boolean save(MemberRequest request) {
 
-        int existId = authMapper.countByLoginId(request.getMbrId());
 
-        if(existId == 1) {
-            System.out.println("========아이디가 존재합니다 ==========");
-            return false;
-        } else {
+
+
             // 권한 부여
             request.setRole("USER");
             // 회원탈퇴 여부
@@ -97,8 +94,44 @@ public class AuthService {
 
             request.encodingPassword(passwordEncoder);
 
-            authMapper.insertMember(request);
+            return authMapper.insertMember(request);
 
+    }
+
+    /**
+     * 회원아이디 존재유무
+     * @param id
+     * @return
+     */
+    @Transactional
+    public boolean existIdYn(String id) {
+
+        int existId = authMapper.countByLoginId(id);
+
+        if(existId > 0) {
+            System.out.println("========아이디가 존재합니다 ==========");
+            return false;
+        } else {
+            return true;
+        }
+
+    }
+
+
+    /**
+     * 회원닉네임 존재유무
+     * @param nickname
+     * @return
+     */
+    @Transactional
+    public boolean existNicknameYn(String nickname) {
+
+        int existNickname = authMapper.countByNickname(nickname);
+
+        if(existNickname > 0) {
+            System.out.println("========닉네임이 존재합니다 ==========");
+            return false;
+        } else {
             return true;
         }
 
@@ -138,7 +171,7 @@ public class AuthService {
      * @param id
      */
     @Transactional
-    public boolean deleteMember(String id) {
+    public boolean deleteMember(int id) {
 
         return authMapper.deleteMember(id);
     }
