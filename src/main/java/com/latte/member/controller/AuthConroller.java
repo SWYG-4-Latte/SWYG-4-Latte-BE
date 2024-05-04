@@ -169,22 +169,32 @@ public class AuthConroller {
     @ResponseBody
     public ResponseEntity<?> saveMember(@RequestBody MemberRequest request){
 
-        boolean res = authService.save(request);
-
-        MemberResponse result = authService.getMemberInfo(request.getMbrId());
+        boolean existIdYn = authService.existIdYn(request.getMbrId());
+        boolean existNicknameYn = authService.existNicknameYn(request.getNickname());
         String message = "";
-
         Map<String, Object> dataMap = new HashMap<>();
 
-        if(res) {
-            dataMap.put("result", result); // MemberResponse를 Map에 추가
-            message = "회원 가입에 성공했습니다.";
+        if (!existIdYn) {
+            message = "아이디가 이미 존재합니다.";
+        } else if (!existNicknameYn) {
+            message = "닉네임이 이미 존재합니다.";
         } else {
-            message = "회원 가입에 실패했습니다.";
+            boolean res = authService.save(request);
+            if (res) {
+                MemberResponse result = authService.getMemberInfo(request.getMbrId());
+                dataMap.put("result", result); // MemberResponse를 Map에 추가
+                message = "회원 가입에 성공했습니다.";
+            } else {
+                message = "회원 가입에 실패했습니다.";
+            }
         }
 
+        dataMap.put("confirmId", existIdYn); // res 값을 Map에 추가
 
-        dataMap.put("confirmId", res); // res 값을 Map에 추가
+        if(existIdYn) {
+            dataMap.put("confirmNickname", existNicknameYn);
+        }
+
 
 
         ResponseData<?> responseData = new ResponseData<>(message, dataMap);
@@ -233,14 +243,14 @@ public class AuthConroller {
 
     /**
      * 회원 정보 삭제 (회원 탈퇴)
-     * @param id
+     * @param
      * @return
      */
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{seq}")
     @ResponseBody
-    public ResponseEntity<?> deleteMember(@PathVariable String id) {
+    public ResponseEntity<?> deleteMember(@PathVariable("seq") int seq) {
 
-        boolean res = authService.deleteMember(id);
+        boolean res = authService.deleteMember(seq);
         String data = "";
         String message = "";
         if (res) {

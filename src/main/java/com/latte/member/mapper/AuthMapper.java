@@ -20,11 +20,15 @@ public interface AuthMapper {
 
     List<MemberResponse> getMemberList();
 
-    void insertMember(MemberRequest request);
+    boolean insertMember(MemberRequest request);
 
     int countByLoginId(String id);
 
-    boolean deleteMember(String id);
+
+    int countByNickname(String nickname);
+
+
+    boolean deleteMember(int id);
 
     MemberResponse findById(String id);
 
