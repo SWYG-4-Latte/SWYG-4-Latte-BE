@@ -16,8 +16,8 @@
         FROM (
                  SELECT IFNULL(SUM(CAST(SUBSTRING(MENU.CAFFEINE, 1, LENGTH(MENU.CAFFEINE) - 2) AS UNSIGNED)), NULL) AS SUM_CAFFEINE
                  FROM DRINK
-                          JOIN MENU
-                               ON DRINK.MENU_NO = MENU.MENU_NO
+                    JOIN MENU
+                        ON DRINK.MENU_NO = MENU.MENU_NO
                  WHERE MBR_NO = #{mbrNo}
                    AND REQ_DATE = #{localDateTime}
              ) AS SUM_TABLE
@@ -58,10 +58,10 @@
                 </if>
             </where>
             GROUP BY MENU_NAME, BRAND
-            ) AS M2
-                ON M1.MENU_NAME = M2.MENU_NAME
-                    AND M1.BRAND = M2.BRAND
-                    AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_ZISE
+        ) AS M2
+            ON M1.MENU_NAME = M2.MENU_NAME
+                AND M1.BRAND = M2.BRAND
+                AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_ZISE
         ORDER BY
         <choose>
             <when test="sortBy == 'caffeine-desc'">
@@ -87,19 +87,19 @@
                 BRAND,
                 MIN(CAST(SUBSTRING_INDEX(VOLUME, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
             FROM MENU
-            <where>
-                <if test="brand != null and brand != ''">
-                    and BRAND = #{brand}
-                </if>
-                <if test="cond == 'caffeine-none'">
-                    and CAFFEINE = "0mg"
-                </if>
-            </where>
-            GROUP BY MENU_NAME, brand
-            ) AS M2
-                ON M1.MENU_NAME = M2.MENU_NAME
-                    AND M1.BRAND = M2.BRAND
-                    AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
+        <where>
+            <if test="brand != null and brand != ''">
+                and BRAND = #{brand}
+            </if>
+            <if test="cond == 'caffeine-none'">
+                and CAFFEINE = "0mg"
+            </if>
+        </where>
+        GROUP BY MENU_NAME, brand
+        ) AS M2
+            ON M1.MENU_NAME = M2.MENU_NAME
+                AND M1.BRAND = M2.BRAND
+                AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
     </select>
 
     <!-- 음료 검색 시, 가장 작은 사이즈를 기준으로 검색 -->
@@ -113,17 +113,17 @@
             M1.IMAGE_URL
         FROM MENU M1
         <!-- 용량이 가장 작은 음료들을 검색 -->
-            INNER JOIN (
+        INNER JOIN (
             SELECT
                 MENU_NAME,
                 BRAND,
                 MIN(CAST(SUBSTRING_INDEX(VOLUME, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
             FROM MENU
             GROUP BY MENU_NAME, BRAND
-            ) AS M2
-                ON M1.MENU_NAME = M2.MENU_NAME
-                    AND M1.BRAND = M2.BRAND
-                    AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
+        ) AS M2
+            ON M1.MENU_NAME = M2.MENU_NAME
+                AND M1.BRAND = M2.BRAND
+                AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
         <where>
             <if test="cond == 'caffeine-none'">
                 and M1.CAFFEINE = "0mg"
@@ -131,8 +131,9 @@
             <!-- 검색어 -->
             <if test="word != null and word != ''">
                 and (M1.MENU_NAME LIKE CONCAT('%', TRIM(#{word}), '%')
-                or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%')
                 or REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%'))
+                or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%')
+                or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', '%'), '%')
             </if>
         </where>
         ORDER BY
@@ -148,9 +149,10 @@
         <if test="word != null and word != ''">
             CASE
                 WHEN M1.MENU_NAME LIKE CONCAT('%', TRIM(#{word}), '%') THEN 1
-                WHEN M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%') THEN 2
-                WHEN REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%') THEN 3
-                ELSE 4
+                WHEN REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%') THEN 2
+                WHEN M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%') THEN 3
+                WHEN M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', '%'), '%') THEN 4
+                ELSE 5
             END,
         </if>
         <!-- 브랜드 정렬 기준 -->
@@ -162,7 +164,7 @@
             WHEN '빽다방' THEN 5
             ELSE 6
         END,
-        M1.MENU_NAME ASC  <!-- HOT, ICE 정렬 -->
+        M1.MENU_NAME ASC
         LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
     </select>
 
@@ -170,17 +172,17 @@
         SELECT COUNT(M1.MENU_NO)
         FROM MENU M1
         <!-- 용량이 가장 작은 음료들을 검색 -->
-            INNER JOIN (
+        INNER JOIN (
             SELECT
                 MENU_NAME,
                 BRAND,
                 MIN(CAST(SUBSTRING_INDEX(VOLUME, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
             FROM MENU
             GROUP BY MENU_NAME, BRAND
-            ) AS M2
-                ON M1.MENU_NAME = M2.MENU_NAME
-                    AND M1.BRAND = M2.BRAND
-                    AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
+        ) AS M2
+            ON M1.MENU_NAME = M2.MENU_NAME
+                AND M1.BRAND = M2.BRAND
+                AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
         <where>
             <if test="cond == 'caffeine-none'">
                 and M1.CAFFEINE = "0mg"
@@ -188,8 +190,9 @@
             <!-- 검색어 -->
             <if test="word != null and word != ''">
                 and (M1.MENU_NAME LIKE CONCAT('%', TRIM(#{word}), '%')
-                or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%')
                 or REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%'))
+                or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%')
+                or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', '%'), '%')
             </if>
         </where>
     </select>
@@ -254,7 +257,7 @@
 
     <select id="getMenuDetail" resultMap="menuDetailResultMap">
         SELECT MENU_NO, M1.BRAND, M1.MENU_NAME, CAFFEINE, PRICE, KCAL, SUGAR, SALT, PROTEIN, SAT_FAT, IMAGE_URL,
-        CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') AS MENU_SIZE,
+                CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') AS MENU_SIZE,
         <!-- 칼로리 높낮이 -->
         CASE
             WHEN CAST(SUBSTRING(KCAL, 1, LOCATE('kcal', KCAL) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '낮음'
@@ -303,8 +306,8 @@
         </where>
         <!-- 사이즈 미지정시, 가장 작은 사이즈 음료 출력 -->
         <if test="menuSize == 'defaultSize'">
-            ORDER BY MENU_NO ASC
-            LIMIT 1
+        ORDER BY MENU_NO ASC
+        LIMIT 1
         </if>
     </select>
 
@@ -331,7 +334,7 @@
     <select id="findOtherMenus" resultType="java.lang.String">
         SELECT CONCAT(M1.MENU_SIZE, '(', SUBSTRING_INDEX(M1.VOLUME, '(', 1), ')') AS OTHER_MENU_SIZE
         FROM MENU AS M1
-                 INNER JOIN (
+        INNER JOIN (
             SELECT BRAND, MENU_NAME
             FROM MENU
             WHERE MENU_NO = #{no}
