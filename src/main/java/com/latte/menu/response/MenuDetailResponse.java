@@ -9,6 +9,7 @@ public class MenuDetailResponse {
     private Long menuNo;
     private String brand;
     private String menuName;
+    private String menuSize;
     private String caffeine;
     private String percent;
     private int price;
@@ -16,6 +17,7 @@ public class MenuDetailResponse {
     private Level level;
     private String imageUrl;
     private List<MenuSimpleResponse> lowCaffeineMenus;
+    private List<String> otherSizes;
 
     @Data
     public static class Nutrient {

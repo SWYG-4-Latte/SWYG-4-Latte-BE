@@ -15,6 +15,7 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -26,6 +27,7 @@ import java.util.Set;
 public class MenuService {
 
     private final MenuMapper menuMapper;
+
     private final StandardValueCalculate standardValueCalculate;
     private final String rankingKey = "menuSearchRanking";
 
@@ -38,16 +40,38 @@ public class MenuService {
     }
 
 
+    /**
+     * 메뉴 추천 팝업
+     */
+    public RecommendPopupResponse popup(MemberResponse member) {
+        LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        int minNormal = standardValueCalculate.getMemberStandardValue(member).getMinNormal();
+        int maxNormal = standardValueCalculate.getMemberStandardValue(member).getMaxNormal();
+        String todayCaffeineStatus = menuMapper.findTodaySumCaffeine(member.getMbrNo(), today, minNormal, maxNormal);
+        return menuMapper.findRecommendMenu(todayCaffeineStatus);
+    }
+
+
+    /**
+     * 브랜드별 인기순 조회
+     */
     public List<BrandRankingResponse> findBrandRankingList(String brandName) {
         return menuMapper.findBrandRankingList(BrandType.valueOf(brandName.toUpperCase()).getValue());
     }
 
+
+    /**
+     * 카테고리 리스트 ( 브랜드별 리스트 )
+     */
     public Page<BrandCategoryResponse> findBrandCategoryList(String brandName, String sortBy, String cond, Pageable pageable) {
         List<BrandCategoryResponse> content = menuMapper.findBrandCategoryList(BrandType.valueOf(brandName.toUpperCase()).getValue(), sortBy, cond, pageable);
         int total = menuMapper.getBrandCategoryCnt(BrandType.valueOf(brandName.toUpperCase()).getValue(), cond);
         return new PageImpl<>(content, pageable, total);
     }
 
+    /**
+     * 메뉴 검색
+     */
     public Page<MenuSearchResponse> findMenuList(String sortBy, String cond, String word, Pageable pageable) {
         if ("".equals(word)) {
             return new PageImpl<>(new ArrayList<>(), pageable, 0L);
@@ -65,6 +89,9 @@ public class MenuService {
     }
 
 
+    /**
+     * 인기 검색어 조회
+     */
     public List<MenuSearchRankingResponse> getSearchWordRanking() {
         List<MenuSearchRankingResponse> rankingResponses = new ArrayList<>();
         Set<ZSetOperations.TypedTuple<String>> typedTuples = zSetOperations.reverseRangeWithScores(rankingKey, 0, 4);
@@ -84,6 +111,9 @@ public class MenuService {
     }
 
 
+    /**
+     * 메뉴 비교하기
+     */
     public MenuComparePageResponse menuCompare(Long menuNo1, Long menuNo2, String recent) {
         MenuComparePageResponse menuComparePageResponse = new MenuComparePageResponse();
         if (menuNo1 != null || menuNo2 != null) {
@@ -96,19 +126,16 @@ public class MenuService {
         return menuComparePageResponse;
     }
 
+
     /**
-     * 사용자에 따른 영양성분의 높음, 낮음, 카페인 섭취량의 % 계산 필요
+     * 메뉴 상세 조회
      */
-    public MenuDetailResponse menuDetail(Long menuNo, MemberResponse member) {
+    public MenuDetailResponse menuDetail(Long menuNo, String menuSize, MemberResponse member) {
         Integer maxCaffeine = null;
         if (member != null) {
             maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
         }
-        MenuDetailResponse menuDetail = menuMapper.getMenuDetail(menuNo, maxCaffeine);
-        // 낮은 함량의 카페인
-        int baseCaffeine = Integer.parseInt(menuDetail.getCaffeine().replace("mg", ""));
-        menuDetail.setLowCaffeineMenus(menuMapper.getLowCaffeineMenu(baseCaffeine));
-        return menuDetail;
+        return menuMapper.getMenuDetail(menuNo, menuSize, maxCaffeine);
     }
-    
+
 }

@@ -5,9 +5,9 @@
 
 <mapper namespace="com.latte.member.mapper.AuthMapper">
     <!-- tb_member 테이블 전체 컬럼 -->
-        <sql id="memberColumns">
-                mbr_no
-              ,  mbr_id
+    <sql id="memberColumns">
+        mbr_no
+        ,  mbr_id
               , password
               , age
               , nickname
@@ -24,16 +24,16 @@
               , delete_yn
               , reg_date
               , update_date
-        </sql>
+    </sql>
 
     <!--회원 정보 조회-->
     <select id="findById" parameterType="String" resultType="com.latte.member.response.MemberResponse">
         <!--AuthMapper.getMemberInfo-->
 
-            SELECT
-                <include refid="memberColumns" />
-            FROM tb_member
-            where mbr_id = #{mbrId}
+        SELECT
+        <include refid="memberColumns" />
+        FROM tb_member
+        where mbr_id = #{mbrId}
 
     </select>
 
@@ -94,23 +94,23 @@
         <!--AuthMapper.updateMember-->
         UPDATE `tb_member`
         set
-            `mbr_id` = #{mbrId}
-          , `password` = #{password}
-          , `age` = #{age}
-          , `nickname` = #{nickname}
-          , `image_url` = #{imageUrl}
-          , `allergy` = #{allergy}
-          , `cup_day` = #{cupDay}
-          , `gender` = #{gender}
-          , `cell_phone` = #{cellPhone}
-          , `email` = #{email}
-          , `pregnancy` = #{pregnancy}
-          , `preg_month` = #{pregMonth}
-          , `role` = #{role}
-          , `symptom` = #{symptom}
-          , `update_date` = NOW()
+        `mbr_id` = #{mbrId}
+        , `password` = #{password}
+        , `age` = #{age}
+        , `nickname` = #{nickname}
+        , `image_url` = #{imageUrl}
+        , `allergy` = #{allergy}
+        , `cup_day` = #{cupDay}
+        , `gender` = #{gender}
+        , `cell_phone` = #{cellPhone}
+        , `email` = #{email}
+        , `pregnancy` = #{pregnancy}
+        , `preg_month` = #{pregMonth}
+        , `role` = #{role}
+        , `symptom` = #{symptom}
+        , `update_date` = NOW()
         WHERE
-            `mbr_no`=#{mbrNo}
+        `mbr_no`=#{mbrNo}
     </update>
 
     <!--회원 비밀번호 찾기 후 수정-->
@@ -141,9 +141,9 @@
         <!--AuthMapper.deleteMember-->
         UPDATE `tb_member`
         set
-            delete_yn = 'Y'
+        delete_yn = 'Y'
         WHERE
-            `mbr_no`=#{mbrNo};
+        `mbr_no`=#{mbrNo};
     </delete>
 
     <!-- 회원 수 카운팅 (ID 중복 체크) -->
@@ -174,23 +174,23 @@
     <insert id="insertMember" parameterType="com.latte.member.request.MemberRequest" useGeneratedKeys="true" keyProperty="mbrNo">
         /* AuthMapper.insertMember */
         INSERT INTO tb_member (
-                    mbr_id
-                  , password
-                  , age
-                  , nickname
-                  , image_url
-                  , allergy
-                  , cup_day
-                  , gender
-                  , cell_phone
-                  , email
-                  , pregnancy
-                  , preg_month
-                  , role
-                  , symptom
-                  , delete_yn
-                  , reg_date
-                  , update_date
+                                mbr_id
+                              , password
+                              , age
+                              , nickname
+                              , image_url
+                              , allergy
+                              , cup_day
+                              , gender
+                              , cell_phone
+                              , email
+                              , pregnancy
+                              , preg_month
+                              , role
+                              , symptom
+                              , delete_yn
+                              , reg_date
+                              , update_date
         ) VALUES (
                    #{mbrId}
                  , #{password}

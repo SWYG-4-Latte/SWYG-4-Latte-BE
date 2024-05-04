@@ -72,9 +72,9 @@ public class AuthConroller {
 
     */
 /**
-     * 회원가입 페이지
-     * @return
-     *//*
+ * 회원가입 페이지
+ * @return
+ *//*
 
     @GetMapping("/signup")
     public String joinForm() {
@@ -94,7 +94,7 @@ public class AuthConroller {
         String id = request.getMbrId();
         String password = request.getPassword();
         log.info("request id = {}, password = {}", id, password);
-       // log.info("jwtToken accessToken = {}, refreshToken = {}", jwtToken.getAccessToken(), jwtToken.getRefreshToken());
+        // log.info("jwtToken accessToken = {}, refreshToken = {}", jwtToken.getAccessToken(), jwtToken.getRefreshToken());
 
 
         Map<String, Object> dataMap = new HashMap<>();

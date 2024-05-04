@@ -8,6 +8,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class HomeCaffeineResponse {
+    private String nickname;
     private String status;
     private String today;
     private String interval;
