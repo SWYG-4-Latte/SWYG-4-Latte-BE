@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9e4028c3-c845-4419-bd32-6d273623a210" name="Changes" comment="">
+<<<<<<< HEAD
       <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/config/SecurityUtil.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/service/EmailService.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/test/java/com/latte/latte/DatabaseCleanUp.java" afterDir="false" />
@@ -41,6 +42,9 @@
       <change beforePath="$PROJECT_DIR$/src/main/java/com/latte/member/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/latte/member/service/AuthService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/mapper/member/AuthMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/mapper/member/AuthMapper.xml" afterDir="false" />
+=======
+      <change beforePath="$PROJECT_DIR$/src/main/resources/mapper/MenuMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/mapper/MenuMapper.xml" afterDir="false" />
+>>>>>>> master
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,6 +109,7 @@
     <option name="showExcludedFiles" value="false" />
     <option name="showLibraryContents" value="true" />
   </component>
+<<<<<<< HEAD
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "DefaultHtmlFileTemplate": "HTML File",
@@ -139,11 +144,53 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+=======
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;false&quot;,
+    &quot;Gradle.Build latte.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.MemberControllerTest.executor&quot;: &quot;Debug&quot;,
+    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
+    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Spring Boot.LatteApplication (1).executor&quot;: &quot;Debug&quot;,
+    &quot;Spring Boot.LatteApplication.executor&quot;: &quot;Debug&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feat/Login&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/HwaJong/Desktop/Projects/SWYG-4-Latte-BE/src/main/java/com/latte&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;,
+    &quot;spring.configuration.checksum&quot;: &quot;213aee7b7243b1e5616b6222a8c23d74&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\HwaJong\Desktop\Projects\SWYG-4-Latte-BE\src\main\java\com\latte" />
+>>>>>>> master
       <recent name="C:\Users\김연지\Desktop\study\latte\src\main\resources\mapper\member" />
       <recent name="C:\Users\김연지\Desktop\study\latte\src\main\resources\templates\member" />
       <recent name="C:\Users\김연지\Desktop\study\latte\src\main\java\com\latte\member\response" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+<<<<<<< HEAD
+=======
+      <recent name="C:\Users\HwaJong\Desktop\Projects\SWYG-4-Latte-BE\src\main\resources\mapper" />
+      <recent name="C:\Users\HwaJong\Desktop\Projects\SWYG-4-Latte-BE\src\main\resources\mapper\member" />
+>>>>>>> master
       <recent name="C:\Users\김연지\Desktop\study\latte\src\main\resources\mapper\member" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
@@ -152,7 +199,11 @@
       <recent name="com.latte.member.request" />
     </key>
   </component>
+<<<<<<< HEAD
   <component name="RunManager" selected="Spring Boot.LatteApplication (1)">
+=======
+  <component name="RunManager" selected="Spring Boot.LatteApplication">
+>>>>>>> master
     <configuration name="MemberControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="latte.test" />
       <extension name="coverage">
@@ -168,6 +219,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+<<<<<<< HEAD
     <configuration name="LatteApplication (1)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="ACTIVE_PROFILES" />
       <module name="latte.main" />
@@ -176,6 +228,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+=======
+>>>>>>> master
     <configuration name="LatteApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="latte.main" />
@@ -186,7 +240,10 @@
     </configuration>
     <list>
       <item itemvalue="JUnit.MemberControllerTest" />
+<<<<<<< HEAD
       <item itemvalue="Spring Boot.LatteApplication (1)" />
+=======
+>>>>>>> master
       <item itemvalue="Spring Boot.LatteApplication" />
     </list>
     <recent_temporary>
@@ -220,6 +277,13 @@
       <workItem from="1714396940500" duration="4954000" />
       <workItem from="1714445567865" duration="3982000" />
       <workItem from="1714484449185" duration="28796000" />
+<<<<<<< HEAD
+=======
+      <workItem from="1714712633031" duration="8715000" />
+      <workItem from="1714724528293" duration="2093000" />
+      <workItem from="1714726709622" duration="173000" />
+      <workItem from="1714745017335" duration="1704000" />
+>>>>>>> master
     </task>
     <servers />
   </component>
@@ -245,11 +309,14 @@
           <option name="timeStamp" value="4" />
         </breakpoint>
         <line-breakpoint enabled="true" type="java-line">
+<<<<<<< HEAD
           <url>file://$PROJECT_DIR$/src/main/java/com/latte/member/controller/AuthConroller.java</url>
           <line>226</line>
           <option name="timeStamp" value="10" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
+=======
+>>>>>>> master
           <url>file://$PROJECT_DIR$/src/main/java/com/latte/member/config/jwt/CustomUserDetailsService.java</url>
           <line>37</line>
           <option name="timeStamp" value="25" />

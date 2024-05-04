@@ -7,6 +7,8 @@ import com.latte.drink.response.CalendarResponse;
 import com.latte.drink.response.DateStatusResponse;
 import com.latte.drink.response.DrinkMenuResponse;
 import com.latte.drink.service.DrinkService;
+import com.latte.member.mapper.AuthMapper;
+import com.latte.member.response.Gender;
 import com.latte.member.response.MemberResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,7 @@ import java.util.List;
 public class DrinkController {
 
     private final DrinkService drinkService;
+    private final AuthMapper authMapper;    // 테스트를 위한 임시
 
     /**
      * 홈화면
@@ -95,6 +98,9 @@ public class DrinkController {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
+    /**
+     * 마신 메뉴 등록
+     */
     @PostMapping("/date/menu")
     public ResponseEntity<?> saveDrinkMenu(@RequestBody DrinkMenuRequest drinkMenuRequest) {
         ResponseData<?> responseData;
@@ -114,10 +120,11 @@ public class DrinkController {
 
 
     private MemberResponse isLogin() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        /*Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if ("anonymousUser".equals(principal)) {
             throw new NotLoginException("로그인하지 않은 사용자입니다");
         }
-        return (MemberResponse) principal;
+        return (MemberResponse) principal;*/
+        return authMapper.findById("testUser");
     }
 }

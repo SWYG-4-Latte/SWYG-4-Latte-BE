@@ -8,7 +8,6 @@
         <sql id="memberColumns">
                 mbr_id
               , password
-              , mbr_name
               , age
               , nickname
               , image_url

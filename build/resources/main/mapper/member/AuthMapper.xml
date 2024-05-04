@@ -5,11 +5,10 @@
 
 <mapper namespace="com.latte.member.mapper.AuthMapper">
     <!-- tb_member 테이블 전체 컬럼 -->
-        <sql id="memberColumns">
-                mbr_no
-              ,  mbr_id
+    <sql id="memberColumns">
+        mbr_no
+        ,  mbr_id
               , password
-              , mbr_name
               , age
               , nickname
               , image_url
@@ -25,46 +24,27 @@
               , delete_yn
               , reg_date
               , update_date
-        </sql>
+    </sql>
 
     <!--회원 정보 조회-->
     <select id="findById" parameterType="String" resultType="com.latte.member.response.MemberResponse">
         <!--AuthMapper.getMemberInfo-->
-        <![CDATA[
-            SELECT
-                 mbr_no
-              ,  mbr_id
-              , password
-              , mbr_name
-              , age
-              , nickname
-              , image_url
-              , allergy
-              , cup_day
-              , gender
-              , cell_phone
-              , email
-              , pregnancy
-              , preg_month
-              , role
-              , symptom
-              , delete_yn
-              , reg_date
-              , update_date
-            FROM tb_member
-            where mbr_id = #{mbrId}
-        ]]>
+
+        SELECT
+        <include refid="memberColumns" />
+        FROM tb_member
+        where mbr_id = #{mbrId}
+
     </select>
 
     <!--회원 넘버 정보 조회-->
-    <select id="findBySeq" parameterType="String" resultType="com.latte.member.response.MemberResponse">
+    <select id="findBySeq" parameterType="int" resultType="com.latte.member.response.MemberResponse">
         <!--AuthMapper.getMemberInfo-->
         <![CDATA[
             SELECT
                  mbr_no
               ,  mbr_id
               , password
-              , mbr_name
               , age
               , nickname
               , image_url
@@ -93,39 +73,77 @@
         FROM tb_member
     </select>
 
+
+
+    <!--회원 이름과 이메일로 아이디 조회-->
+    <select id="findIdByNameEmail" parameterType="String" resultType="com.latte.member.response.FindIdResponse">
+        <!--AuthMapper.findIdByNameEmail-->
+        <![CDATA[
+            SELECT
+                  mbr_id
+                , delete_yn
+            FROM tb_member
+            where email = #{email} and nickname = #{nickname}
+        ]]>
+    </select>
+
+
+
     <!--회원 정보 수정-->
     <update id="updateMember" parameterType="com.latte.member.request.MemberRequest">
         <!--AuthMapper.updateMember-->
         UPDATE `tb_member`
         set
-            `mbr_id` = #{mbrId}
-          , `password` = #{password}
-          , `mbr_name` = #{mbrName}
-          , `age` = #{age}
-          , `nickname` = #{nickname}
-          , `image_url` = #{imageUrl}
-          , `allergy` = #{allergy}
-          , `cup_day` = #{cupDay}
-          , `gender` = #{gender}
-          , `cell_phone` = #{cellPhone}
-          , `email` = #{email}
-          , `pregnancy` = #{pregnancy}
-          , `preg_month` = #{pregMonth}
-          , `role` = #{role}
-          , `symptom` = #{symptom}
-          , `update_date` = NOW()
+        `mbr_id` = #{mbrId}
+        , `password` = #{password}
+        , `age` = #{age}
+        , `nickname` = #{nickname}
+        , `image_url` = #{imageUrl}
+        , `allergy` = #{allergy}
+        , `cup_day` = #{cupDay}
+        , `gender` = #{gender}
+        , `cell_phone` = #{cellPhone}
+        , `email` = #{email}
+        , `pregnancy` = #{pregnancy}
+        , `preg_month` = #{pregMonth}
+        , `role` = #{role}
+        , `symptom` = #{symptom}
+        , `update_date` = NOW()
         WHERE
-            `mbr_no`=#{mbrNo}
+        `mbr_no`=#{mbrNo}
+    </update>
+
+    <!--회원 비밀번호 찾기 후 수정-->
+    <update id="updatePassword" parameterType="com.latte.member.request.MemberRequest">
+        <!--AuthMapper.updateMember-->
+        UPDATE `tb_member`
+        set
+        `mbr_id` = #{mbrId}
+        , `age` = #{age}
+        , `nickname` = #{nickname}
+        , `image_url` = #{imageUrl}
+        , `allergy` = #{allergy}
+        , `cup_day` = #{cupDay}
+        , `gender` = #{gender}
+        , `cell_phone` = #{cellPhone}
+        , `email` = #{email}
+        , `pregnancy` = #{pregnancy}
+        , `preg_month` = #{pregMonth}
+        , `role` = #{role}
+        , `symptom` = #{symptom}
+        , `update_date` = NOW()
+        WHERE
+        `mbr_no`=#{mbrNo}
     </update>
 
     <!--회원 삭제-->
-    <delete id="deleteMember" parameterType="String">
+    <delete id="deleteMember" parameterType="int">
         <!--AuthMapper.deleteMember-->
         UPDATE `tb_member`
         set
-            delete_yn = 'Y'
+        delete_yn = 'Y'
         WHERE
-            `mbr_no`=#{mbrNo};
+        `mbr_no`=#{mbrNo};
     </delete>
 
     <!-- 회원 수 카운팅 (ID 중복 체크) -->
@@ -140,32 +158,42 @@
     </select>
 
 
+    <!-- 회원 수 카운팅 (닉네임 중복 체크) -->
+    <select id="countByNickname" parameterType="string" resultType="int">
+        /* AuthMapper.countByNickname */
+        SELECT
+            COUNT(*)
+        FROM
+            tb_member
+        WHERE
+            nickname = #{nickname}
+    </select>
+
+
     <!--회원 정보 등록-->
     <insert id="insertMember" parameterType="com.latte.member.request.MemberRequest" useGeneratedKeys="true" keyProperty="mbrNo">
         /* AuthMapper.insertMember */
         INSERT INTO tb_member (
-                    mbr_id
-                  , password
-                  , mbr_name
-                  , age
-                  , nickname
-                  , image_url
-                  , allergy
-                  , cup_day
-                  , gender
-                  , cell_phone
-                  , email
-                  , pregnancy
-                  , preg_month
-                  , role
-                  , symptom
-                  , delete_yn
-                  , reg_date
-                  , update_date
+                                mbr_id
+                              , password
+                              , age
+                              , nickname
+                              , image_url
+                              , allergy
+                              , cup_day
+                              , gender
+                              , cell_phone
+                              , email
+                              , pregnancy
+                              , preg_month
+                              , role
+                              , symptom
+                              , delete_yn
+                              , reg_date
+                              , update_date
         ) VALUES (
                    #{mbrId}
                  , #{password}
-                 , #{mbrName}
                  , #{age}
                  , #{nickname}
                  , #{imageUrl}

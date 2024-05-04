@@ -44,7 +44,7 @@ public class DrinkService {
             interval = (maxCaffeine - todayCaffeine) + "mg";
         }
 
-        return new HomeCaffeineResponse(status, todayCaffeine + "mg", interval, recent);
+        return new HomeCaffeineResponse(member.getNickname(), status, todayCaffeine + "mg", interval, recent);
     }
 
     public CalendarResponse findCaffeineByMonth(MemberResponse member, String dateTime) {

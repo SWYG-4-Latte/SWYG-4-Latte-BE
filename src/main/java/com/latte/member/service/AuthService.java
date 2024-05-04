@@ -87,14 +87,14 @@ public class AuthService {
 
 
 
-            // 권한 부여
-            request.setRole("USER");
-            // 회원탈퇴 여부
-            request.setDeleteYn("N");
+        // 권한 부여
+        request.setRole("USER");
+        // 회원탈퇴 여부
+        request.setDeleteYn("N");
 
-            request.encodingPassword(passwordEncoder);
+        request.encodingPassword(passwordEncoder);
 
-            return authMapper.insertMember(request);
+        return authMapper.insertMember(request);
 
     }
 

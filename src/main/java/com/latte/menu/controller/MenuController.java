@@ -1,6 +1,7 @@
 package com.latte.menu.controller;
 
 import com.latte.common.response.ResponseData;
+import com.latte.member.mapper.AuthMapper;
 import com.latte.member.response.MemberResponse;
 import com.latte.menu.response.*;
 import com.latte.menu.service.BrandType;
@@ -25,7 +26,21 @@ import java.util.List;
 public class MenuController {
 
     private final MenuService menuService;
+    private final AuthMapper authMapper;    // 테스트를 위한 임시
 
+    @GetMapping("/popup")
+    public ResponseEntity<?> menuPopup() {
+        MemberResponse member = isLogin();
+        if (member == null) {
+            new ResponseEntity<>(new ResponseData<>(null, null), HttpStatus.OK);
+        }
+        ResponseData<?> responseData = new ResponseData<>(null, menuService.popup(member));
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
+    /**
+     * 브랜드 조회
+     */
     @GetMapping("/brand")
     public ResponseEntity<?> brandList() {
         List<BrandListResponse> brandList = new ArrayList<>();
@@ -37,6 +52,9 @@ public class MenuController {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
+    /**
+     * 브랜드별 인기 메뉴 조회
+     */
     @GetMapping("/ranking/{brandName}")
     public ResponseEntity<?> brandRanking(@PathVariable String brandName) {
         List<BrandRankingResponse> brandRankingList = menuService.findBrandRankingList(brandName);
@@ -44,6 +62,9 @@ public class MenuController {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
+    /**
+     * 브랜드별 메뉴 조회
+     */
     @GetMapping("/{brandName}")
     public ResponseEntity<?> brandCategory(@PathVariable String brandName,
                                            @RequestParam(value = "sortBy", defaultValue = "") String sortBy,
@@ -54,6 +75,9 @@ public class MenuController {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
+    /**
+     * 검색 API
+     */
     @GetMapping("/list")
     public ResponseEntity<?> searchMenu(@RequestParam(value = "sortBy", defaultValue = "") String sortBy,
                                         @RequestParam(value = "cond", defaultValue = "") String cond,
@@ -64,6 +88,9 @@ public class MenuController {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
+    /**
+     * 인기 검색어 조회
+     */
     @GetMapping("/ranking/word")
     public ResponseEntity<?> searchWordRanking() {
         List<MenuSearchRankingResponse> searchWordRanking = menuService.getSearchWordRanking();
@@ -71,6 +98,9 @@ public class MenuController {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
+    /**
+     * 비교하기
+     */
     @GetMapping("/compare")
     public ResponseEntity<?> compareMenu(@RequestParam(value = "menu1", defaultValue = "") Long menuNo1,
                                          @RequestParam(value = "menu2", defaultValue = "") Long menuNo2,
@@ -80,17 +110,23 @@ public class MenuController {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
+    /**
+     * 상세 조회
+     */
     @GetMapping("/detail/{menuNo}")
-    public ResponseEntity<?> menuDetail(@PathVariable Long menuNo) {
-        MemberResponse member;
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if ("anonymousUser".equals(principal)) {
-            member = null;
-        } else {
-            member = (MemberResponse) principal;
-        }
-        MenuDetailResponse menuDetailResponse = menuService.menuDetail(menuNo, member);
-        ResponseData<?> responseData = new ResponseData<>(null, menuDetailResponse);
+    public ResponseEntity<?> menuDetail(@PathVariable Long menuNo,
+                                        @RequestParam(value = "menu_size", defaultValue = "defaultSize") String menuSize) {
+        MemberResponse member = isLogin();
+        ResponseData<?> responseData = new ResponseData<>(null, menuService.menuDetail(menuNo, menuSize, member));
         return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
+    private MemberResponse isLogin() {
+        /*Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if ("anonymousUser".equals(principal)) {
+            return null;
+        }
+        return (MemberResponse) principal;*/
+        return authMapper.findById("testUser");
     }
 }
