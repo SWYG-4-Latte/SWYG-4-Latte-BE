@@ -1,6 +1,7 @@
 package com.latte.drink.controller;
 
 import com.latte.common.response.ResponseData;
+import com.latte.drink.exception.NotEnoughInfoException;
 import com.latte.drink.exception.NotLoginException;
 import com.latte.drink.request.DrinkMenuRequest;
 import com.latte.drink.response.CalendarResponse;
@@ -8,7 +9,6 @@ import com.latte.drink.response.DateStatusResponse;
 import com.latte.drink.response.DrinkMenuResponse;
 import com.latte.drink.service.DrinkService;
 import com.latte.member.mapper.AuthMapper;
-import com.latte.member.response.Gender;
 import com.latte.member.response.MemberResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -44,6 +45,10 @@ public class DrinkController {
             responseData = new ResponseData<>(null, drinkService.findHomeResponse(member));
         } catch (NotLoginException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
+            return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
+        } catch (NotEnoughInfoException exception) {
+            responseData = new ResponseData<>(exception.getMessage(), null);
+            return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -62,6 +67,10 @@ public class DrinkController {
             responseData = new ResponseData<>(null, calendar);
         } catch (NotLoginException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
+            return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
+        } catch (NotEnoughInfoException exception) {
+            responseData = new ResponseData<>(exception.getMessage(), null);
+            return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -78,12 +87,17 @@ public class DrinkController {
             responseData = new ResponseData<>(null, caffeineByToday);
         } catch (NotLoginException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
+            return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
+        } catch (NotEnoughInfoException exception) {
+            responseData = new ResponseData<>(exception.getMessage(), null);
+            return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
     /**
      * 날짜별 마신 음료 조회
+     * 부가정보 입력하지 않아도 가능
      */
     @GetMapping("/date/menu")
     public ResponseEntity<?> findMenuByDate(@RequestParam("datetime") LocalDateTime dateTime) {
@@ -94,12 +108,14 @@ public class DrinkController {
             responseData = new ResponseData<>(null, menuByToday);
         } catch (NotLoginException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
+            return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
     /**
      * 마신 메뉴 등록
+     * 부가정보 입력하지 않아도 가능
      */
     @PostMapping("/date/menu")
     public ResponseEntity<?> saveDrinkMenu(@RequestBody DrinkMenuRequest drinkMenuRequest) {
@@ -120,11 +136,18 @@ public class DrinkController {
 
 
     private MemberResponse isLogin() {
-        /*Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        /*
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = "";
         if ("anonymousUser".equals(principal)) {
             throw new NotLoginException("로그인하지 않은 사용자입니다");
+        } else {
+            User tokenUser = (User) principal;
+            username = tokenUser.getUsername();
+            log.info("username = {}", username);
         }
-        return (MemberResponse) principal;*/
+        return authMapper.findById(username);
+        */
         return authMapper.findById("testUser");
     }
 }
