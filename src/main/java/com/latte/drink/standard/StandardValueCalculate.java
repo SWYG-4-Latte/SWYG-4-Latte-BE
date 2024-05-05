@@ -1,14 +1,20 @@
 package com.latte.drink.standard;
 
+import com.latte.drink.exception.NotEnoughInfoException;
 import com.latte.member.response.Gender;
 import com.latte.member.response.MemberResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Component
 public class StandardValueCalculate {
     public StandardValue getMemberStandardValue(MemberResponse member) {
+
+        if (member.getGender() == null || !StringUtils.hasText(member.getAllergy())) {
+            throw new NotEnoughInfoException("부가정보를 입력하지 않은 사용자입니다");
+        }
 
         log.info("member = {}", member.getMbrId());
 
