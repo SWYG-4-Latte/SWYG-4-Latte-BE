@@ -1,7 +1,10 @@
 package com.latte.member.config.auth;
 
 import com.latte.member.response.MemberResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
@@ -16,9 +19,16 @@ public class PrincipalDetails implements UserDetails {
         this.user = user;
     }
 
+    public MemberResponse getMember() {
+        return user;
+    }
+
     // 해당 User의 권한을 리턴하는 곳
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        return user.getAuthorities();
+    }
+/*    public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> collection = new ArrayList<>();
         collection.add(new GrantedAuthority() {
             @Override
@@ -28,7 +38,7 @@ public class PrincipalDetails implements UserDetails {
         });
 
         return collection;
-    }
+    }*/
 
     @Override
     public String getPassword() {
@@ -61,5 +71,16 @@ public class PrincipalDetails implements UserDetails {
         return true;
     }
 
+    // 추가 메서드: SecurityContextHolder에 memberResponse를 저장하는 메서드
+    public void setAuthenticationInContext() {
+        // 현재 SecurityContext에서 Authentication을 가져옵니다.
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // 만약 현재 인증된 사용자가 없다면, 새로운 UsernamePasswordAuthenticationToken을 생성하여 설정합니다.
+        if (authentication == null) {
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(this, null, this.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        }
+    }
     
 }
