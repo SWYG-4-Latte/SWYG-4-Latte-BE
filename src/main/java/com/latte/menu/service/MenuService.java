@@ -142,5 +142,5 @@ public class MenuService {
         }
         return menuMapper.getMenuDetail(menuNo, menuSize, maxCaffeine);
     }
-    
+
 }
