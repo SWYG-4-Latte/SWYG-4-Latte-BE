@@ -5,19 +5,20 @@
 <mapper namespace="com.latte.drink.repository.DrinkMapper">
 
     <select id="findHomeResponse" resultType="DrinkMenuResponse">
-        SELECT MENU.MENU_NO,
-               MENU.MENU_NAME,
-               MENU.BRAND,
-               MENU.CAFFEINE,
-               MENU.MENU_SIZE,
-               MENU.IMAGE_URL
+        SELECT DISTINCT
+            MENU.MENU_NO,
+            MENU.MENU_NAME,
+            MENU.BRAND,
+            MENU.CAFFEINE,
+            MENU.MENU_SIZE,
+            MENU.IMAGE_URL
         FROM DRINK
-                 JOIN MENU
-                      ON DRINK.MENU_NO = MENU.MENU_NO
+        JOIN MENU
+            ON DRINK.MENU_NO = MENU.MENU_NO
         WHERE MBR_NO = #{mbrNo}
-          AND REQ_DATE &lt;= #{today}
-        ORDER BY REQ_DATE DESC, DRINK_NO DESC
-            LIMIT 5
+            AND REQ_DATE &lt;= #{today}
+        ORDER BY (SELECT DRINK_NO FROM DRINK WHERE DRINK.MENU_NO = MENU.MENU_NO ORDER BY DRINK_NO DESC LIMIT 1) DESC
+        LIMIT 5
     </select>
 
 
@@ -65,8 +66,7 @@
 
 
     <select id="findMenuByDate" resultType="DrinkMenuResponse">
-        SELECT DISTINCT
-               MENU.MENU_NO,
+        SELECT MENU.MENU_NO,
                MENU.MENU_NAME,
                MENU.BRAND,
                MENU.CAFFEINE,
