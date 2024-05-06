@@ -116,12 +116,21 @@ public class MenuController {
      */
     @GetMapping("/compare")
     public ResponseEntity<?> compareMenu(@RequestParam(value = "menu1", defaultValue = "") Long menuNo1,
-                                         @RequestParam(value = "menu2", defaultValue = "") Long menuNo2,
-                                         @RequestParam(value = "recent", defaultValue = "") String recent) {
-        MenuComparePageResponse menuComparePageResponse = menuService.menuCompare(menuNo1, menuNo2, recent);
-        ResponseData<?> responseData = new ResponseData<>(null, menuComparePageResponse);
+                                         @RequestParam(value = "menu2", defaultValue = "") Long menuNo2) {
+        ResponseData<?> responseData = new ResponseData<>(null, menuService.menuCompare(menuNo1, menuNo2));
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
+
+
+    /**
+     * 최근 확인한 메뉴
+     */
+    @GetMapping("/recent")
+    public ResponseEntity<?> vieRecentMenu(@RequestParam(value = "menus", defaultValue = "") String recent) {
+        ResponseData<?> responseData = new ResponseData<>(null, menuService.recentMenu(recent));
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+    
 
     /**
      * 상세 조회
