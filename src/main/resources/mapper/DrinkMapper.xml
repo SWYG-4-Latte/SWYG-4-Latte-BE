@@ -65,7 +65,8 @@
 
 
     <select id="findMenuByDate" resultType="DrinkMenuResponse">
-        SELECT MENU.MENU_NO,
+        SELECT DISTINCT
+               MENU.MENU_NO,
                MENU.MENU_NAME,
                MENU.BRAND,
                MENU.CAFFEINE,
