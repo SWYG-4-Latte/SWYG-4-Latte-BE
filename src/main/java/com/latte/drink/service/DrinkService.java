@@ -131,7 +131,8 @@ public class DrinkService {
         return drinkMapper.findMenuByDate(member.getMbrNo(), dateTime);
     }
 
-    public void saveDrinkMenu(MemberResponse member, Long menuNo, LocalDateTime dateTime) {
+    public void saveDrinkMenu(MemberResponse member, Long menuNo) {
+        LocalDateTime dateTime = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
         drinkMapper.saveDrinkMenu(member.getMbrNo(), menuNo, dateTime);
     }
 }
