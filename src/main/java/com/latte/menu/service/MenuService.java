@@ -1,5 +1,6 @@
 package com.latte.menu.service;
 
+import com.latte.drink.exception.NotEnoughInfoException;
 import com.latte.drink.standard.StandardValueCalculate;
 import com.latte.member.response.MemberResponse;
 import com.latte.menu.repository.MenuMapper;
@@ -132,8 +133,12 @@ public class MenuService {
      */
     public MenuDetailResponse menuDetail(Long menuNo, String menuSize, MemberResponse member) {
         Integer maxCaffeine = null;
-        if (member != null) {
-            maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
+        try {
+            if (member != null) {
+                maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
+            }
+        } catch (NotEnoughInfoException exception) {
+            maxCaffeine = null;
         }
         return menuMapper.getMenuDetail(menuNo, menuSize, maxCaffeine);
     }
