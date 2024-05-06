@@ -232,6 +232,11 @@
             #{no}
         </foreach>
         )
+        ORDER BY FIELD(MENU_NO,
+        <foreach item="no" collection="menus" index="index" separator=",">
+            #{no}
+        </foreach>
+        )
     </select>
 
 
