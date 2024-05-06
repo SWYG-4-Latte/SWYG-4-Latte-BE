@@ -17,7 +17,7 @@
         WHERE MBR_NO = #{mbrNo}
           AND REQ_DATE &lt;= #{today}
         ORDER BY REQ_DATE DESC, DRINK_NO DESC
-        LIMIT 5
+            LIMIT 5
     </select>
 
 
@@ -36,8 +36,8 @@
     <select id="findSumCaffeineByMonth" resultType="int">
         SELECT IFNULL(SUM(CAST(SUBSTRING(MENU.CAFFEINE, 1, LENGTH(MENU.CAFFEINE) - 2) AS UNSIGNED)), -1)
         FROM DRINK
-            JOIN MENU
-                ON DRINK.MENU_NO = MENU.MENU_NO
+                 JOIN MENU
+                      ON DRINK.MENU_NO = MENU.MENU_NO
         WHERE MBR_NO = #{mbrNo}
           AND REQ_DATE &gt;= #{startDateTime}
           AND REQ_DATE &lt;= #{lastDateTime}

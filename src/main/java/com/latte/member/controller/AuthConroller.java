@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,7 @@ import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.OK;
 
+// 로그인, 로그아웃
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -59,30 +61,6 @@ public class AuthConroller {
     private final JavaMailSender javaMailSender;
 
 
-
-    /**
-     * 로그인 페이지
-     * @return
-     */
-/*
-    @GetMapping("/login")
-    public String loginForm() {
-        return "member/loginForm";
-    }
-
-    */
-/**
-     * 회원가입 페이지
-     * @return
-     *//*
-
-    @GetMapping("/signup")
-    public String joinForm() {
-        return "member/joinForm";
-    }
-*/
-
-
     /**
      * 로그인 API
      * @param request
@@ -94,9 +72,7 @@ public class AuthConroller {
         String id = request.getMbrId();
         String password = request.getPassword();
         log.info("request id = {}, password = {}", id, password);
-       // log.info("jwtToken accessToken = {}, refreshToken = {}", jwtToken.getAccessToken(), jwtToken.getRefreshToken());
-
-
+        // log.info("jwtToken accessToken = {}, refreshToken = {}", jwtToken.getAccessToken(), jwtToken.getRefreshToken());
         Map<String, Object> dataMap = new HashMap<>();
 
         String message = "";
@@ -107,9 +83,16 @@ public class AuthConroller {
             message =  "로그인에 성공했습니다";
 
         } catch (BadCredentialsException e) {
-            // 아이디 또는 비밀번호가 틀렸을 때
+            int existIdYn = authService.countMemberByLoginId(request.getMbrId());
             dataMap.put("jwtToken", null);
-            message =  "아이디 또는 비밀번호를 잘못 입력했습니다.";
+            // 아이디가 존재하지 않다면
+            if(existIdYn == 0) {
+                // 아이디가 틀렸을 때
+                message =  "아이디를 잘못 입력했습니다.";
+            } else {
+                // 비밀번호가 틀렸을 때
+                message =  "비밀번호를 잘못 입력했습니다.";
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -158,33 +141,50 @@ public class AuthConroller {
     /**
      * [API] 회원가입
      *
-     *
-     *
-     *
-     *
-     *
      * @return
      */
     @PostMapping("/signup")
     @ResponseBody
-    public ResponseEntity<?> saveMember(@RequestBody MemberRequest request){
+    public ResponseEntity<?> saveMember(@RequestBody MemberRequest request) {
 
-        boolean res = authService.save(request);
+        String existIdYn = null;
+        String existNicknameYn = null;
+        String existIdEmailYn = null;
 
-        MemberResponse result = authService.getMemberInfo(request.getMbrId());
+        int countMemberById = authService.countMemberByLoginId(request.getMbrId());
+        int countMemberByName = authService.countMemberByNickname(request.getNickname());
+        int countMemberByEmail = authService.countMemberByEmail(request.getEmail());
         String message = "";
-
         Map<String, Object> dataMap = new HashMap<>();
 
-        if(res) {
-            dataMap.put("result", result); // MemberResponse를 Map에 추가
-            message = "회원 가입에 성공했습니다.";
+        if (countMemberById > 0) {
+            existIdYn = "false";
+            message = "아이디가 이미 존재합니다.";
+        } else if (countMemberByName > 0) {
+            existNicknameYn = "false";
+            message = "닉네임이 이미 존재합니다.";
+        } else if (countMemberByEmail > 0) {
+            existIdEmailYn = "false";
+            message = "이메일이 이미 존재합니다.";
         } else {
-            message = "회원 가입에 실패했습니다.";
+            existIdYn = "true";
+            existNicknameYn = "true";
+            existIdEmailYn = "true";
+            boolean res = authService.save(request);
+            if (res) {
+                MemberResponse result = authService.getMemberInfo(request.getMbrId());
+                dataMap.put("result", result); // MemberResponse를 Map에 추가
+                message = "회원 가입에 성공했습니다.";
+            } else {
+                message = "회원 가입에 실패했습니다.";
+            }
         }
 
+        dataMap.put("confirmId", existIdYn); // res 값을 Map에 추가
+        dataMap.put("confirmNickname", existNicknameYn);
+        dataMap.put("confirmEmail", existIdEmailYn);
 
-        dataMap.put("confirmId", res); // res 값을 Map에 추가
+
 
 
         ResponseData<?> responseData = new ResponseData<>(message, dataMap);
@@ -193,54 +193,70 @@ public class AuthConroller {
 
     /**
      * [API] 회원수정
-     * @param id
-     *
-     *
+     * @param seq
      * @param request
      * @return
      */
-    @PostMapping("/update/{id}")
-    public ResponseEntity<?> update(@PathVariable String id, @RequestBody @Validated final MemberRequest request) {
+    @PostMapping("/update/{seq}")
+    public ResponseEntity<?> update(@PathVariable int seq, @RequestBody @Validated final MemberRequest request) {
 
 
+        String existIdYn = null;
+        String existNicknameYn = null;
+        String existIdEmailYn = null;
+
+        int countMemberById = authService.countMemberByLoginId(request.getMbrId());
+        int countMemberByName = authService.countMemberByNickname(request.getNickname());
+        int countMemberByEmail = authService.countMemberByEmail(request.getEmail());
         String message = "";
-
-        MemberResponse bfData = authService.getMemberInfo(id);
-        int seq = bfData.getMbrNo();
-        request.setMbrNo(seq);
-        boolean res = authService.update(request);
-
         Map<String, Object> dataMap = new HashMap<>();
 
 
-        if(res) {
-            MemberResponse result = authService.getMemberSeq(seq);
-            dataMap.put("result", result); // MemberResponse를 Map에 추가
-            message = "회원 수정에 성공했습니다.";
+        if (countMemberById > 0) {
+            existIdYn = "false";
+            message = "아이디가 이미 존재합니다.";
+        } else if (countMemberByName > 0) {
+            existNicknameYn = "false";
+            message = "닉네임이 이미 존재합니다.";
+        } else if (countMemberByEmail > 0) {
+            existIdEmailYn = "false";
+            message = "이메일이 이미 존재합니다.";
         } else {
-            message = "회원 수정에 실패했습니다.";
+            existIdYn = "true";
+            existNicknameYn = "true";
+            existIdEmailYn = "true";
+            request.setMbrNo(seq);
+            boolean res = authService.update(request);
+            if (res) {
+                MemberResponse result = authService.getMemberSeq(seq);
+                dataMap.put("result", result); // MemberResponse를 Map에 추가
+                message = "회원 수정에 성공했습니다.";
+            } else {
+                message = "회원 수정에 실패했습니다.";
+            }
         }
 
-
-        dataMap.put("confirmId", res); // res 값을 Map에 추가
+        dataMap.put("confirmId", existIdYn); // res 값을 Map에 추가
+        dataMap.put("confirmNickname", existNicknameYn);
+        dataMap.put("confirmEmail", existIdEmailYn);
 
 
         ResponseData<?> responseData = new ResponseData<>(message, dataMap);
-        return new ResponseEntity<>(responseData, HttpStatus.OK);
+        return new ResponseEntity<>(responseData, OK);
     }
 
 
 
     /**
      * 회원 정보 삭제 (회원 탈퇴)
-     * @param id
+     * @param
      * @return
      */
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{seq}")
     @ResponseBody
-    public ResponseEntity<?> deleteMember(@PathVariable String id) {
+    public ResponseEntity<?> deleteMember(@PathVariable("seq") int seq) {
 
-        boolean res = authService.deleteMember(id);
+        boolean res = authService.deleteMember(seq);
         String data = "";
         String message = "";
         if (res) {
@@ -298,13 +314,45 @@ public class AuthConroller {
         return new ResponseEntity<>(responseData, OK);
     }
 
+
+    @PostMapping("/findPw")
+    public ResponseEntity<?> forgotPassword(@RequestParam("mbrId") String id, @RequestParam("email") String email) {
+
+        MemberResponse member = authService.getMemberInfo(id);
+
+        // 유효회원 여부 검사
+        int existUserId = authService.countMemberByLoginId(id);
+
+        int existUserEmail = authService.countMemberByEmail(email);
+
+        int countByIdEmail = authService.countByIdEmail(id, email);
+
+        boolean authInfo = false;
+
+        String message = "";
+
+        if(countByIdEmail == 0) {
+            message = "아이디와 이메일을 다시 확인해주세요";
+/*        } else if(existUserEmail == 0) {
+            message = "해당 정보로 가입한 이메일이 없습니다.";*/
+        } else {
+                authInfo = authService.saveTempAuthInfo(member.getMbrNo());
+        }
+
+        ResponseData<?> responseData = new ResponseData<>(message, authInfo);
+        return new ResponseEntity<>(responseData, OK);
+
+    }
+
+
+
     // [API] 비밀번호 변경 > 본인인증번호 발송
-/*    @PostMapping("/sendOtp")
+   /* @PostMapping("/sendOtp")
     public SendOtpResponse sendOtp(String mbrId, String email ) {
 
         // 유효회원 여부 검사
         boolean existsUser = false;
-            existsUser = tbMemberRepository.existsByUserIdAndUserEmail(request.getUserId(), request.getUserInfo());
+            existsUser = authService.findIdByNameEmail(mbrId, email);
 
         // 인증번호 발송
         if(!existsUser) {
@@ -327,6 +375,8 @@ public class AuthConroller {
                 if(ettAuthLog!=null) {
                     ettAuthLog.setAuthNum(resOtp);
                     ettAuthLog.setAuthType(request.getOptType().equals("E") ? "MAIL" : "PN");
+
+
                     ettAuthLog.setAuthLoc(request.getUserInfo());
                     ettAuthLog.setModId(request.getUserId());
                     ettAuthLog.setModDate(getToday());
@@ -349,8 +399,12 @@ public class AuthConroller {
         }
 
         return new SendOtpResponse(true, "");
-    }
+    }*/
 
+
+
+
+/*
     // [API] 비밀번호 변경 > 본인인증번호 비교 확인
     @PostMapping("/checkOtp")
     public CheckOtpResponse checkOtp(CheckOtpRequest request) {
@@ -364,7 +418,8 @@ public class AuthConroller {
         request.setUserId(SessionUtil.getUserId(session));
 
         return memberService.pwChange(request);
-    }*/
+    }
+*/
 
 
 

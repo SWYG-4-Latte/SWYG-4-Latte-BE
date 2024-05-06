@@ -4,13 +4,13 @@ import com.latte.member.config.jwt.JwtToken;
 import com.latte.member.config.jwt.JwtTokenProvider;
 import com.latte.member.mapper.AuthMapper;
 import com.latte.member.request.MemberRequest;
-import com.latte.member.request.SendOtpRequest;
 import com.latte.member.response.FindIdResponse;
 import com.latte.member.response.MemberResponse;
-import com.latte.member.response.SendOtpResponse;
+import com.latte.member.response.TempAuthResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -19,23 +19,35 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
+
 @Service
 public class AuthService {
 
 
-
-    @Autowired
     private final AuthMapper authMapper;
 
-    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
+    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final ApplicationEventPublisher eventPublisher;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public AuthService(AuthMapper authMapper, PasswordEncoder passwordEncoder, AuthenticationManagerBuilder authenticationManagerBuilder, JwtTokenProvider jwtTokenProvider) {
+    private static final String CHAR_LOWER = "abcdefghijklmnopqrstuvwxyz";
+    private static final String CHAR_UPPER = CHAR_LOWER.toUpperCase();
+    private static final String NUMBER = "0123456789";
+    private static final String SPECIAL_CHARACTERS = "!@#$%^&*()-_=+[]{}|;:,.<>?";
+
+    private static final String PASSWORD_ALLOW = CHAR_LOWER + CHAR_UPPER + NUMBER + SPECIAL_CHARACTERS;
+    private static SecureRandom random = new SecureRandom();
+
+    public AuthService(AuthMapper authMapper, EmailService emailService, PasswordEncoder passwordEncoder, AuthenticationManagerBuilder authenticationManagerBuilder, ApplicationEventPublisher eventPublisher, JwtTokenProvider jwtTokenProvider) {
         this.authMapper = authMapper;
+        this.emailService = emailService;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManagerBuilder = authenticationManagerBuilder;
+        this.eventPublisher = eventPublisher;
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
@@ -84,25 +96,58 @@ public class AuthService {
     @Transactional
     public boolean save(MemberRequest request) {
 
-        int existId = authMapper.countByLoginId(request.getMbrId());
 
-        if(existId == 1) {
+
+
+        // 권한 부여
+        request.setRole("USER");
+        // 회원탈퇴 여부
+        request.setDeleteYn("N");
+
+        request.encodingPassword(passwordEncoder);
+
+        return authMapper.insertMember(request);
+
+    }
+
+/*    *//**
+     * 회원아이디 존재유무
+     * @param id
+     * @return
+     *//*
+    @Transactional
+    public boolean existIdYn(String id) {
+
+        int existId = authMapper.countByLoginId(id);
+
+        if(existId > 0) {
             System.out.println("========아이디가 존재합니다 ==========");
             return false;
         } else {
-            // 권한 부여
-            request.setRole("USER");
-            // 회원탈퇴 여부
-            request.setDeleteYn("N");
-
-            request.encodingPassword(passwordEncoder);
-
-            authMapper.insertMember(request);
-
             return true;
         }
 
     }
+
+
+    *//**
+     * 회원닉네임 존재유무
+     * @param nickname
+     * @return
+     *//*
+    @Transactional
+    public boolean existNicknameYn(String nickname) {
+
+        int existNickname = authMapper.countByNickname(nickname);
+
+        if(existNickname > 0) {
+            System.out.println("========닉네임이 존재합니다 ==========");
+            return false;
+        } else {
+            return true;
+        }
+
+    }*/
 
     /**
      * 회원정보 수정
@@ -111,12 +156,6 @@ public class AuthService {
     @Transactional
     public boolean update(MemberRequest request) {
 
-        int existId = authMapper.countByLoginId(request.getMbrId());
-
-        if(existId == 1) {
-            System.out.println("========아이디가 존재합니다 ==========");
-            return false;
-        } else {
             // 권한 부여
             request.setRole("USER");
             // 회원탈퇴 여부
@@ -124,10 +163,9 @@ public class AuthService {
 
             request.encodingPassword(passwordEncoder);
 
-            authMapper.updateMember(request);
 
-            return true;
-        }
+            return authMapper.updateMember(request);
+
 
     }
 
@@ -138,7 +176,7 @@ public class AuthService {
      * @param id
      */
     @Transactional
-    public boolean deleteMember(String id) {
+    public boolean deleteMember(int id) {
 
         return authMapper.deleteMember(id);
     }
@@ -148,8 +186,36 @@ public class AuthService {
      * @param
      * @return 회원 수
      */
-    public int countMemberByLoginId(final String loginId) {
+    public int countMemberByLoginId(String loginId) {
         return authMapper.countByLoginId(loginId);
+    }
+
+    /**
+     * 회원 수 카운팅 (Email 중복 체크)
+     * @param
+     * @return 회원 수
+     */
+    public int countMemberByEmail(String email) {
+        return authMapper.countByEmail(email);
+    }
+
+
+    /**
+     * 회원 수 카운팅 (nickname 중복 체크)
+     * @param nickname
+     * @return
+     */
+    public int countMemberByNickname(String nickname) {
+        return authMapper.countByNickname(nickname);
+    }
+
+    /**
+     * 회원 수 카운팅(Id 및 Email 중복 체크)
+     * @param email
+     * @return
+     */
+    public int countByIdEmail(String id, String email) {
+        return authMapper.countByIdEmail(id, email);
     }
 
 
@@ -298,4 +364,41 @@ public class AuthService {
 
         return true;
     }
+
+    @Transactional
+    public boolean saveTempAuthInfo(int seq) {
+        // 임시 비밀번호 생성
+        String tempPassword = instancePasswordGenerator();
+
+        MemberResponse member = authMapper.findBySeq(seq);
+
+        // 임시 유저정보 생성
+        TempAuthResponse tempAuthInfo = new TempAuthResponse();
+        tempAuthInfo.setEmail(member.getEmail());
+        tempAuthInfo.setPassword(tempPassword);
+
+        // 임시 유저비밀번호로 setting
+        member.setPassword(passwordEncoder.encode(tempPassword));
+
+        // 이메일 발송
+        emailService.sendPasswordForgotMessage(tempAuthInfo);
+
+        return true;
+    }
+
+    // 임시 비밀번호 생성 메소드
+    private static String instancePasswordGenerator() {
+        int passwordLength = random.nextInt(9) + 8; // 8에서 16 사이의 랜덤 길이
+
+        StringBuilder password = new StringBuilder();
+
+        for (int i = 0; i < passwordLength; i++) {
+            int randomIndex = random.nextInt(PASSWORD_ALLOW.length());
+            char randomChar = PASSWORD_ALLOW.charAt(randomIndex);
+            password.append(randomChar);
+        }
+        return password.toString();
+    }
+
+
 }
