@@ -1,6 +1,8 @@
 package com.latte.member.config.jwt;
 
 
+import com.latte.member.config.auth.PrincipalDetails;
+import com.latte.member.response.MemberResponse;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -45,7 +47,11 @@ public class JwtTokenProvider {
         // 권한 가져오기
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
+
+
                 .collect(Collectors.joining(","));
+
+        MemberResponse user = ((PrincipalDetails) authentication.getPrincipal()).getMember();
 
         Date now = new Date();
         Date accessTokenExpiration = new Date(now.getTime() + accessTokenExpirationMs);
@@ -69,6 +75,7 @@ public class JwtTokenProvider {
                 .grantType("Bearer")
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                //.memberResponse(user)
                 .build();
     }
 
