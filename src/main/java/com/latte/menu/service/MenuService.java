@@ -115,16 +115,25 @@ public class MenuService {
     /**
      * 메뉴 비교하기
      */
-    public MenuComparePageResponse menuCompare(Long menuNo1, Long menuNo2, String recent) {
-        MenuComparePageResponse menuComparePageResponse = new MenuComparePageResponse();
+    public List<MenuCompareResponse> menuCompare(Long menuNo1, Long menuNo2) {
+        List<MenuCompareResponse> menuCompareResponses = new ArrayList<>();
         if (menuNo1 != null || menuNo2 != null) {
-            menuComparePageResponse.setCompare(menuMapper.compare(menuNo1, menuNo2));
+            menuCompareResponses = menuMapper.compare(menuNo1, menuNo2);
         }
+        return menuCompareResponses;
+    }
+
+
+    /**
+     * 최근 확인한 메뉴
+     */
+    public List<MenuSimpleResponse> recentMenu(String recent) {
+        List<MenuSimpleResponse> menuSimpleResponses = new ArrayList<>();
         if (!"".equals(recent)) {
             String[] split = recent.split(",");
-            menuComparePageResponse.setRecent(menuMapper.getRecentMenu(split));
+            menuSimpleResponses = menuMapper.getRecentMenu(split);
         }
-        return menuComparePageResponse;
+        return menuSimpleResponses;
     }
 
 
