@@ -139,7 +139,7 @@ public class MenuController {
      */
     @GetMapping("/detail/{menuNo}")
     public ResponseEntity<?> menuDetail(@PathVariable Long menuNo,
-                                         @RequestParam(value = "menu_size", defaultValue = "defaultSize") String menuSize) {
+                                         @RequestParam(value = "menu_size", defaultValue = "") String menuSize) {
         MemberResponse member;
         ResponseData<?> responseData;
         try {
