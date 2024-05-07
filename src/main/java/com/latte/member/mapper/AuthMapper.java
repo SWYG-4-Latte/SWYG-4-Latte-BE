@@ -4,6 +4,7 @@ import com.latte.member.request.MemberRequest;
 import com.latte.member.response.FindIdResponse;
 import com.latte.member.response.MemberResponse;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -33,7 +34,7 @@ public interface AuthMapper {
     // 회원 등록
     boolean insertMember(MemberRequest request);
 
-    int countByIdEmail(String id, String email);
+    int countByIdEmail(@Param("id") String id, @Param("email") String email);
 
     // 아이디 중복 여부
     int countByLoginId(String id);
