@@ -1,6 +1,8 @@
 package com.latte.menu.controller;
 
 import com.latte.common.response.ResponseData;
+import com.latte.drink.exception.NotEnoughInfoException;
+import com.latte.drink.exception.NotLoginException;
 import com.latte.member.mapper.AuthMapper;
 import com.latte.member.response.MemberResponse;
 import com.latte.menu.response.*;
@@ -14,6 +16,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -28,13 +31,23 @@ public class MenuController {
     private final MenuService menuService;
     private final AuthMapper authMapper;    // 테스트를 위한 임시
 
+    /**
+     * 토큰이 전달되지 않았으면 빈 값 반환
+     * 부가 정보를 입력하지 않았으면 빈 값 반환
+     */
     @GetMapping("/popup")
     public ResponseEntity<?> menuPopup() {
-        MemberResponse member = isLogin();
-        if (member == null) {
-            new ResponseEntity<>(new ResponseData<>(null, null), HttpStatus.OK);
+        ResponseData<?> responseData;
+        try {
+            MemberResponse member = isLogin();
+            responseData = new ResponseData<>(null, menuService.popup(member));
+        } catch (NotLoginException exception) {
+            responseData = new ResponseData<>(exception.getMessage(), null);
+            return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
+        } catch (NotEnoughInfoException exception) {
+            responseData = new ResponseData<>(exception.getMessage(), null);
+            return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
         }
-        ResponseData<?> responseData = new ResponseData<>(null, menuService.popup(member));
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
@@ -103,30 +116,54 @@ public class MenuController {
      */
     @GetMapping("/compare")
     public ResponseEntity<?> compareMenu(@RequestParam(value = "menu1", defaultValue = "") Long menuNo1,
-                                         @RequestParam(value = "menu2", defaultValue = "") Long menuNo2,
-                                         @RequestParam(value = "recent", defaultValue = "") String recent) {
-        MenuComparePageResponse menuComparePageResponse = menuService.menuCompare(menuNo1, menuNo2, recent);
-        ResponseData<?> responseData = new ResponseData<>(null, menuComparePageResponse);
+                                         @RequestParam(value = "menu2", defaultValue = "") Long menuNo2) {
+        ResponseData<?> responseData = new ResponseData<>(null, menuService.menuCompare(menuNo1, menuNo2));
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
+
+    /**
+     * 최근 확인한 메뉴
+     */
+    @GetMapping("/recent")
+    public ResponseEntity<?> vieRecentMenu(@RequestParam(value = "menus", defaultValue = "") String recent) {
+        ResponseData<?> responseData = new ResponseData<>(null, menuService.recentMenu(recent));
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+    
+
     /**
      * 상세 조회
+     * 토큰이 전달되지 않아도 일부는 전달 되어야함
+     * 부가정보가 입력되지 않아도 일부는 전달 되어야함
      */
     @GetMapping("/detail/{menuNo}")
     public ResponseEntity<?> menuDetail(@PathVariable Long menuNo,
-                                        @RequestParam(value = "menu_size", defaultValue = "defaultSize") String menuSize) {
-        MemberResponse member = isLogin();
-        ResponseData<?> responseData = new ResponseData<>(null, menuService.menuDetail(menuNo, menuSize, member));
+                                         @RequestParam(value = "menu_size", defaultValue = "defaultSize") String menuSize) {
+        MemberResponse member;
+        ResponseData<?> responseData;
+        try {
+            member = isLogin();
+        } catch (NotLoginException exception) {
+            member = null;
+        }
+        responseData = new ResponseData<>(null, menuService.menuDetail(menuNo, menuSize, member));
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
     private MemberResponse isLogin() {
-        /*Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        /*
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = "";
         if ("anonymousUser".equals(principal)) {
-            return null;
+            throw new NotLoginException("로그인하지 않은 사용자입니다");
+        } else {
+            User tokenUser = (User) principal;
+            username = tokenUser.getUsername();
+            log.info("username = {}", username);
         }
-        return (MemberResponse) principal;*/
+        return authMapper.findById(username);
+        */
         return authMapper.findById("testUser");
     }
 }

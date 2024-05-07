@@ -122,7 +122,7 @@ public class DrinkController {
         ResponseData<?> responseData;
         try {
             MemberResponse member = isLogin();
-            drinkService.saveDrinkMenu(member, drinkMenuRequest.getMenuNo(), drinkMenuRequest.getDateTime());
+            drinkService.saveDrinkMenu(member, drinkMenuRequest.getMenuNo());
             responseData = new ResponseData<>("기록이 완료되었습니다", null);
         } catch (NotLoginException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
