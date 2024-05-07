@@ -50,7 +50,7 @@ dependencies {	implementation 'org.springframework.boot:spring-boot-starter-secu
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	//implementation 'org.apache.commons:commons-email:1.2'
 	implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
-	implementation 'com.sun.mail:javax.mail:1.6.2'
+	implementation 'com.sun.mail:javax.mail:1.6.7'
 
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation group: 'org.bgee.log4jdbc-log4j2', name:'log4jdbc-log4j2-jdbc4.1', version: '1.16'
