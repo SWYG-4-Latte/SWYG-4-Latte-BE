@@ -366,7 +366,7 @@ public class AuthService {
     }
 
     @Transactional
-    public boolean saveTempAuthInfo(int seq) {
+    public boolean saveTempAuthInfo(int seq) throws Exception {
         // 임시 비밀번호 생성
         String tempPassword = instancePasswordGenerator();
 
@@ -381,7 +381,7 @@ public class AuthService {
         member.setPassword(passwordEncoder.encode(tempPassword));
 
         // 이메일 발송
-        emailService.sendPasswordForgotMessage(tempAuthInfo);
+        emailService.sendEmail(tempAuthInfo);
 
         return true;
     }

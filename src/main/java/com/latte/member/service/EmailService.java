@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.lang.reflect.Member;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
 
 import com.latte.member.mapper.AuthMapper;
 import com.latte.member.response.*;
@@ -15,12 +17,17 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+
+import javax.mail.Message;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +39,6 @@ public class EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
-
     @Autowired
     private JavaMailSenderImpl javaMailSender;
 
@@ -41,20 +47,21 @@ public class EmailService {
 
 
     //@Async("threadPoolTaskExecutor")
-    public void sendPasswordForgotMessage(TempAuthResponse tempAuthResponse) {
+    public void sendEmail(TempAuthResponse tempAuthResponse) throws Exception {
         log.info("send Email");
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("kimyeonji715@gmail.com");
-        message.setTo(tempAuthResponse.getEmail());
-        message.setSubject("라떼 임시 비밀번호 발송 안내");
-        message.setText("임시비밀번호 : " + tempAuthResponse.getPassword());
-        mailSender.send(message);
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom("duswlskfk42@naver.com");
+            message.setTo(tempAuthResponse.getEmail());
+            message.setSubject("라떼 임시 비밀번호 발송 안내");
+            message.setText("임시비밀번호 : " + tempAuthResponse.getPassword());
+
+            mailSender.send(message);
+        }catch (MailException mailException){
+            mailException.printStackTrace();
+            throw new IllegalAccessException();
+        }
     }
 
-
-    // SSL 연결 사용하지 않도록 설정
-    public void configureMailSender() {
-        javaMailSender.getJavaMailProperties().setProperty("mail.smtp.ssl.enable", "false");
-    }
 
 }
