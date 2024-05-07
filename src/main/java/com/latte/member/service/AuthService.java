@@ -381,7 +381,9 @@ public class AuthService {
         member.setPassword(passwordEncoder.encode(tempPassword));
 
         // 이메일 발송
-        return emailService.sendEmail(tempAuthInfo);
+        emailService.sendEmail(tempAuthInfo);
+
+        return true;
     }
 
     // 임시 비밀번호 생성 메소드

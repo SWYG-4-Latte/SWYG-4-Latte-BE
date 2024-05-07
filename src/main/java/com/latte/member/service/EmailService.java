@@ -25,6 +25,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import javax.mail.Message;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -35,24 +39,24 @@ public class EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
-
+    @Autowired
+    private JavaMailSenderImpl javaMailSender;
 
     @Autowired
     private AuthMapper authMapper;
 
 
     //@Async("threadPoolTaskExecutor")
-    public boolean sendEmail(TempAuthResponse tempAuthResponse) throws Exception {
+    public void sendEmail(TempAuthResponse tempAuthResponse) throws Exception {
         log.info("send Email");
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("illywilly2750@gmail.com");
+            message.setFrom("duswlskfk42@naver.com");
             message.setTo(tempAuthResponse.getEmail());
-            message.setSubject("임시 비밀번호 발송 안내");
+            message.setSubject("라떼 임시 비밀번호 발송 안내");
             message.setText("임시비밀번호 : " + tempAuthResponse.getPassword());
 
             mailSender.send(message);
-            return true;
         }catch (MailException mailException){
             mailException.printStackTrace();
             throw new IllegalAccessException();
