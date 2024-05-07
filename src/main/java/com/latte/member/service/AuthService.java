@@ -4,6 +4,7 @@ import com.latte.member.config.jwt.JwtToken;
 import com.latte.member.config.jwt.JwtTokenProvider;
 import com.latte.member.mapper.AuthMapper;
 import com.latte.member.request.MemberRequest;
+import com.latte.member.request.PwChangeRequest;
 import com.latte.member.response.FindIdResponse;
 import com.latte.member.response.MemberResponse;
 import com.latte.member.response.TempAuthResponse;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
+import java.util.Random;
 
 @Service
 public class AuthService {
@@ -33,13 +35,7 @@ public class AuthService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final ApplicationEventPublisher eventPublisher;
     private final JwtTokenProvider jwtTokenProvider;
-
-    private static final String CHAR_LOWER = "abcdefghijklmnopqrstuvwxyz";
-    private static final String CHAR_UPPER = CHAR_LOWER.toUpperCase();
     private static final String NUMBER = "0123456789";
-    private static final String SPECIAL_CHARACTERS = "!@#$%^&*()-_=+[]{}|;:,.<>?";
-
-    private static final String PASSWORD_ALLOW = CHAR_LOWER + CHAR_UPPER + NUMBER + SPECIAL_CHARACTERS;
     private static SecureRandom random = new SecureRandom();
 
     public AuthService(AuthMapper authMapper, EmailService emailService, PasswordEncoder passwordEncoder, AuthenticationManagerBuilder authenticationManagerBuilder, ApplicationEventPublisher eventPublisher, JwtTokenProvider jwtTokenProvider) {
@@ -226,20 +222,18 @@ public class AuthService {
      * @param email
      * @return
      */
-    public FindIdResponse findIdByNameEmail(String name, String email) {
+    public FindIdResponse findIdByNameEmail(String nickname, String email) {
 
-        System.out.println("==============service" +  authMapper.findIdByNameEmail(name, email));
-
-        FindIdResponse member = authMapper.findIdByNameEmail(name, email);
+        FindIdResponse member = authMapper.findIdByNameEmail(nickname, email);
 
         if(member == null) {
-            return new FindIdResponse(false, null);
+            return new FindIdResponse(false, null, null);
         }
 
-        String strUserId = member.getFindId();
+        String strUserId = member.getMbrId();
 
 
-        return new FindIdResponse(true, strUserId);
+        return new FindIdResponse(true, strUserId, member.getDeleteYn());
     }
 
     /**
@@ -366,36 +360,50 @@ public class AuthService {
     }
 
     @Transactional
-    public boolean saveTempAuthInfo(int seq) throws Exception {
-        // 임시 비밀번호 생성
-        String tempPassword = instancePasswordGenerator();
+    public String saveTempAuthInfo(int seq) throws Exception {
+        // 인증번호 생성
+        String authNumber = instancePasswordGenerator();
 
         MemberResponse member = authMapper.findBySeq(seq);
 
-        // 임시 유저정보 생성
+        // 인증번호 정보 넣기
         TempAuthResponse tempAuthInfo = new TempAuthResponse();
+        tempAuthInfo.setMbrNo(seq);
         tempAuthInfo.setEmail(member.getEmail());
-        tempAuthInfo.setPassword(tempPassword);
+        tempAuthInfo.setAuthNumber(authNumber);
 
-        // 임시 유저비밀번호로 setting
-        member.setPassword(passwordEncoder.encode(tempPassword));
+
+        String number = emailService.sendEmail(tempAuthInfo);
+
+/*        if(success) {
+
+            // 임시 유저비밀번호로 setting
+            PwChangeRequest pwChange = PwChangeRequest.builder().mbrNo(seq).mbrId(member.getMbrId()).password(passwordEncoder.encode(tempPassword)).build();
+            //member.setPassword(passwordEncoder.encode(tempPassword));
+            authMapper.updatePassword(pwChange);
+        }*/
 
         // 이메일 발송
-        return emailService.sendEmail(tempAuthInfo);
+        return number;
     }
 
-    // 임시 비밀번호 생성 메소드
+    @Transactional
+    public boolean updatePassword(int mbrNo, String password) throws Exception {
+
+        PwChangeRequest pwChange = PwChangeRequest.builder().mbrNo(mbrNo).password(passwordEncoder.encode(password)).build();
+
+        return authMapper.updatePassword(pwChange);
+    }
+
+    // 인증번호 생성 메소드
     private static String instancePasswordGenerator() {
-        int passwordLength = random.nextInt(9) + 8; // 8에서 16 사이의 랜덤 길이
+        StringBuffer key = new StringBuffer();
+        Random rnd = new Random();
 
-        StringBuilder password = new StringBuilder();
-
-        for (int i = 0; i < passwordLength; i++) {
-            int randomIndex = random.nextInt(PASSWORD_ALLOW.length());
-            char randomChar = PASSWORD_ALLOW.charAt(randomIndex);
-            password.append(randomChar);
+        for (int i = 0; i < 6; i++) { // 인증코드 6자리
+            key.append((rnd.nextInt(10)));
         }
-        return password.toString();
+        return key.toString();
     }
 
 

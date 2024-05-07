@@ -1,10 +1,12 @@
 package com.latte.member.mapper;
 
 import com.latte.member.request.MemberRequest;
+import com.latte.member.request.PwChangeRequest;
 import com.latte.member.response.FindIdResponse;
 import com.latte.member.response.MemberResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 
@@ -16,6 +18,9 @@ public interface AuthMapper {
     // 회원정보 수정
     boolean updateMember(MemberRequest request);
 
+    // 회원 비밀번호 수정
+    boolean updatePassword(PwChangeRequest request);
+
     //public MemberResponse getMemberInfo(String Id);
 
     // 회원번호로 회원정보 찾기
@@ -25,7 +30,7 @@ public interface AuthMapper {
     MemberResponse findById(String id);
 
     // 회원아이디 찾기
-    FindIdResponse findIdByNameEmail(String name, String email);
+    FindIdResponse findIdByNameEmail(@Param("nickname") String nickname, @Param("email") String email);
 
 
     // 전체 회원 목록

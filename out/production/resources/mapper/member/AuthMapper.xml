@@ -114,23 +114,11 @@
     </update>
 
     <!--회원 비밀번호 찾기 후 수정-->
-    <update id="updatePassword" parameterType="com.latte.member.request.MemberRequest">
-        <!--AuthMapper.updateMember-->
+    <update id="updatePassword" parameterType="com.latte.member.request.PwChangeRequest">
+        <!--AuthMapper.updatePassword-->
         UPDATE `tb_member`
         set
-        `mbr_id` = #{mbrId}
-        , `age` = #{age}
-        , `nickname` = #{nickname}
-        , `image_url` = #{imageUrl}
-        , `allergy` = #{allergy}
-        , `cup_day` = #{cupDay}
-        , `gender` = #{gender}
-        , `cell_phone` = #{cellPhone}
-        , `email` = #{email}
-        , `pregnancy` = #{pregnancy}
-        , `preg_month` = #{pregMonth}
-        , `role` = #{role}
-        , `symptom` = #{symptom}
+        `password` = #{password}
         , `update_date` = NOW()
         WHERE
         `mbr_no`=#{mbrNo}
