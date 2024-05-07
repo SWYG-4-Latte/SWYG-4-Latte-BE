@@ -144,9 +144,9 @@
             <!-- 검색어 -->
             <if test="word != null and word != ''">
                 and (M1.MENU_NAME LIKE CONCAT('%', TRIM(#{word}), '%')
-                or REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%'))
+                or REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%')
                 or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%')
-                or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', '%'), '%')
+                or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', '%'), '%'))
             </if>
         </where>
         ORDER BY
@@ -203,9 +203,9 @@
             <!-- 검색어 -->
             <if test="word != null and word != ''">
                 and (M1.MENU_NAME LIKE CONCAT('%', TRIM(#{word}), '%')
-                or REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%'))
+                or REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%')
                 or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%')
-                or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', '%'), '%')
+                or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', '%'), '%'))
             </if>
         </where>
     </select>
@@ -311,22 +311,20 @@
         </if>
         FROM MENU AS M1
         INNER JOIN (
-            SELECT BRAND, MENU_NAME, MIN(MENU_NO) AS MIN_SIZE
+            SELECT BRAND, MENU_NAME
             FROM MENU
             WHERE MENU_NO = #{no}
         ) AS M2
             ON M1.BRAND = M2.BRAND
                 AND M1.MENU_NAME = M2.MENU_NAME
         <where>
-            <if test="menuSize != 'defaultSize'">
+            <if test="menuSize != null and menuSize != ''">
                 and CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') = #{menuSize}
             </if>
+            <if test="menuSize == null or menuSize == ''">
+                and M1.MENU_NO = #{no}
+            </if>
         </where>
-        <!-- 사이즈 미지정시, 가장 작은 사이즈 음료 출력 -->
-        <if test="menuSize == 'defaultSize'">
-        ORDER BY MENU_NO ASC
-        LIMIT 1
-        </if>
     </select>
 
 
