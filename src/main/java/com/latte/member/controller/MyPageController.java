@@ -62,11 +62,11 @@ public class MyPageController {
         // 알레르기 정보
         allergy = Objects.equals(String.valueOf(member.getAllergy()), "") ? null : String.valueOf(member.getAllergy());
 
-        dataMap.put("gender " , gender);
-        dataMap.put("pregnancy ", preg);
-        dataMap.put("pregMonth ", pregMonth);
-        dataMap.put("caffeinIntake ", maxCaffeine);
-        dataMap.put("allergy ", allergy);
+        dataMap.put("gender" , gender);
+        dataMap.put("pregnancy", preg);
+        dataMap.put("pregMonth", pregMonth);
+        dataMap.put("caffeinIntake", maxCaffeine);
+        dataMap.put("allergy", allergy);
 
         ResponseData<?> responseData = new ResponseData<>(null, dataMap);
         return new ResponseEntity<>(responseData, OK);
