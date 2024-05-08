@@ -1,6 +1,6 @@
 package com.latte.drink.standard;
 
-public abstract class StandardValueConstants {
+public interface StandardValueConstants {
     /**
      * MN = 남성 + 카페인 부작용 X
      * MY = 남성 + 카페인 부작용 O
@@ -15,32 +15,32 @@ public abstract class StandardValueConstants {
      * MAX_CAFFEINE : 카페인 섭취 최대량
      */
 
-    public static final int MN_MIN_NORMAL = 134;
-    public static final int MN_MAX_NORMAL = 267;
-    public static final int MN_MAX_CAFFEINE = 400;
+    int MN_MIN_NORMAL = 134;
+   int MN_MAX_NORMAL = 267;
+    int MN_MAX_CAFFEINE = 400;
 
 
-    public static final int MY_MIN_NORMAL = 74;
-    public static final int MY_MAX_NORMAL = 133;
-    public static final int MY_MAX_CAFFEINE = 268;
+    int MY_MIN_NORMAL = 74;
+    int MY_MAX_NORMAL = 133;
+    int MY_MAX_CAFFEINE = 268;
 
-    public static final int FNN_MIN_NORMAL = 134;
-    public static final int FNN_MAX_NORMAL = 267;
-    public static final int FNN_MAX_CAFFEINE = 400;
+    int FNN_MIN_NORMAL = 134;
+    int FNN_MAX_NORMAL = 267;
+    int FNN_MAX_CAFFEINE = 400;
 
-    public static final int FNY_MIN_NORMAL = 60;
-    public static final int FNY_MAX_NORMAL = 133;
-    public static final int FNY_MAX_CAFFEINE = 268;
+    int FNY_MIN_NORMAL = 60;
+    int FNY_MAX_NORMAL = 133;
+    int FNY_MAX_CAFFEINE = 268;
 
-    public static final int FYE_MIN_NORMAL = 0;
-    public static final int FYE_MAX_NORMAL = 0;
-    public static final int FYE_MAX_CAFFEINE = 0;
+    int FYE_MIN_NORMAL = 0;
+    int FYE_MAX_NORMAL = 0;
+   int FYE_MAX_CAFFEINE = 0;
 
-    public static final int FYM_MIN_NORMAL = 51;
-    public static final int FYM_MAX_NORMAL = 200;
-    public static final int FYM_MAX_CAFFEINE = 200;
+    int FYM_MIN_NORMAL = 51;
+    int FYM_MAX_NORMAL = 200;
+    int FYM_MAX_CAFFEINE = 200;
 
-    public static final int FYL_MIN_NORMAL = 51;
-    public static final int FYL_MAX_NORMAL = 200;
-    public static final int FYL_MAX_CAFFEINE = 200;
+    int FYL_MIN_NORMAL = 51;
+    int FYL_MAX_NORMAL = 200;
+    int FYL_MAX_CAFFEINE = 200;
 }
