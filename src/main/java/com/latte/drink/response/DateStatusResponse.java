@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class DateStatusResponse {
     private String status;
     private String caffeine;
+    private String sentence;
 }
