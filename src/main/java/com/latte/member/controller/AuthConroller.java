@@ -1,6 +1,7 @@
 package com.latte.member.controller;
 
 import com.latte.member.config.jwt.JwtToken;
+import com.latte.member.request.LoginRequest;
 import com.latte.member.request.MemberRequest;
 import com.latte.member.response.FindIdResponse;
 import com.latte.member.response.MemberResponse;
@@ -56,22 +57,22 @@ public class AuthConroller {
      */
     @PostMapping("/login")
     @ResponseBody
-    public ResponseEntity<?> login(@RequestParam("mbrId") String id, @RequestParam("password") String password, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         //String id = request.getMbrId();
         //String password = request.getPassword();
-        log.info("request id = {}, password = {}", id, password);
+        log.info("request id = {}, password = {}", request.getMbrId(), request.getPassword());
         // log.info("jwtToken accessToken = {}, refreshToken = {}", jwtToken.getAccessToken(), jwtToken.getRefreshToken());
         Map<String, Object> dataMap = new HashMap<>();
 
         String message = "";
 
         try {
-            JwtToken jwtToken = authService.signIn(id, password, response);
+            JwtToken jwtToken = authService.signIn(request.getMbrId(), request.getPassword(), response);
             dataMap.put("jwtToken", jwtToken);
             message =  "로그인에 성공했습니다";
 
         } catch (BadCredentialsException e) {
-            int existIdYn = authService.countMemberByLoginId(id);
+            int existIdYn = authService.countMemberByLoginId(request.getMbrId());
             dataMap.put("jwtToken", null);
             // 아이디가 존재하지 않다면
             if(existIdYn == 0) {
