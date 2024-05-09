@@ -36,14 +36,14 @@ public interface DateSentence {
     static String getLowSentence() {
         int lowLength = 8;
         Random random = new Random();
-        int randomLowNumber = random.nextInt(lowLength) + 1;
+        int randomLowNumber = random.nextInt(lowLength);
         return lowSentence[randomLowNumber];
     }
 
     static String getHighSentence() {
         int highLength = 12;
         Random random = new Random();
-        int randomHighNumber = random.nextInt(highLength) + 1;
+        int randomHighNumber = random.nextInt(highLength);
         return highSentence[randomHighNumber];
     }
 }
