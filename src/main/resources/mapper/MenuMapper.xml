@@ -54,7 +54,7 @@
             M1.CAFFEINE,
             M1.PRICE,
             M1.IMAGE_URL
-        FROM menu M1
+        FROM MENU M1
         <!-- 용량이 가장 작은 음료들 -->
         INNER JOIN (
             SELECT
