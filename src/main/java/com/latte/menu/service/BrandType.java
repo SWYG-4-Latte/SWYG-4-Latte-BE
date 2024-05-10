@@ -10,7 +10,7 @@ public enum BrandType {
     COMPOSE("컴포즈", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvli9CjxHPgJxDR1IbUhk35awK3TOLEt5e1qTc-3ijCQ&s"),
     TWOSOME("투썸플레이스", "https://www.twosome.co.kr/resources/images/content/bi_img_logo_.svg"),
     PAIK("빽다방", "https://firebasestorage.googleapis.com/v0/b/latte-e8266.appspot.com/o/327294194_929628688477291_6295134427025366399_n.png?alt=media"),
-    EDIYA("이디야", "https://ediyastore.com/web/upload/goodymall/kr/main/logo01.png");
+    EDIYA("이디야", "https://firebasestorage.googleapis.com/v0/b/latte-e8266.appspot.com/o/C0CCB5F0BEDFB7CEB0ED_28129.png?alt=media");
 
     String value;
     String imageUrl;
