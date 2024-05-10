@@ -125,7 +125,7 @@ public class JwtTokenProvider {
     // 주어진 Access token을 복호화하고, 만료된 토큰인 경우에도 Claims 반환
     // JWT 토큰의 검증과 파싱을 모두 수행
     // accessToken
-    private Claims parseClaims(String accessToken) {
+    public Claims parseClaims(String accessToken) {
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(key)

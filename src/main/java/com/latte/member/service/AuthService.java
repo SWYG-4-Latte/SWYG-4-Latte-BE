@@ -8,6 +8,7 @@ import com.latte.member.request.PwChangeRequest;
 import com.latte.member.response.FindIdResponse;
 import com.latte.member.response.MemberResponse;
 import com.latte.member.response.TempAuthResponse;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -406,5 +407,24 @@ public class AuthService {
         return key.toString();
     }
 
+
+    public MemberResponse getMemberInfoFromToken(String token) {
+        // 토큰 유효성 검사
+        if (jwtTokenProvider.validateToken(token)) {
+            // 토큰에서 회원 식별자(userId) 추출
+            Claims claims = jwtTokenProvider.parseClaims(token);
+            System.out.println("==============claims");
+            System.out.println(claims);
+            String userId = claims.get("sub", String.class);
+
+            // 회원 정보 조회
+            MemberResponse member = authMapper.findById(userId);
+            if (member != null) {
+                // 회원 정보를 MemberResponse 객체로 변환하여 반환
+                return member;
+            }
+        }
+        return null; // 유효한 토큰이 아니거나 회원 정보가 없는 경우 null 반환
+    }
 
 }
