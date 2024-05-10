@@ -84,7 +84,7 @@
                 CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) ASC
             </when>
             <otherwise>
-                MENU_NAME ASC
+                MENU_NO ASC
             </otherwise>
         </choose>
         LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
