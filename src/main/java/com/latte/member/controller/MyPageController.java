@@ -9,6 +9,7 @@ import com.latte.response.ResponseData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ import static org.springframework.http.HttpStatus.OK;
 @Slf4j
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/myPage")
+@RequestMapping("/mypage")
 public class MyPageController {
 
     @Autowired
@@ -32,7 +33,7 @@ public class MyPageController {
     private AuthService authService;
 
 
-    @PostMapping("/memberInfo")
+    @GetMapping("/memberInfo")
     @ResponseBody
     public ResponseEntity<?> memberInfo(@RequestParam("mbrNo") int mbrNo) {
 
@@ -72,6 +73,32 @@ public class MyPageController {
         ResponseData<?> responseData = new ResponseData<>(null, dataMap);
         return new ResponseEntity<>(responseData, OK);
 
+    }
+
+
+    /**
+     * 토큰을 통한 회원정보
+     * @param token
+     * @return
+     */
+    @GetMapping("/tokenInfo")
+    public ResponseEntity<?> getUserInfo(@RequestHeader("Authorization") String token) {
+        // Authorization 헤더에서 토큰 추출 (Bearer 토큰)
+        String jwtToken = token; // "Bearer " 이후의 토큰 부분만 추출
+
+        String message = "";
+
+        // 토큰을 사용하여 회원 정보 확인
+        MemberResponse member = authService.getMemberInfoFromToken(jwtToken);
+        if (member != null) {
+            message = "회원 정보입니다.";
+        } else {
+            message = String.valueOf(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token"));
+            //return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token"); // 토큰이 유효하지 않은 경우 401 Unauthorized 반환
+        }
+
+        ResponseData<?> responseData = new ResponseData<>(message, member);
+        return new ResponseEntity<>(responseData, OK);
     }
 
 

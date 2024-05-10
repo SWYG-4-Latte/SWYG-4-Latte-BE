@@ -66,9 +66,13 @@ public class AuthConroller {
 
         String message = "";
 
+        MemberResponse member = authService.getMemberInfo(request.getMbrId());
+        int mbrNo = member.getMbrNo();
+
         try {
             JwtToken jwtToken = authService.signIn(request.getMbrId(), request.getPassword(), response);
             dataMap.put("jwtToken", jwtToken);
+            dataMap.put("mbrNo", mbrNo);
             message =  "로그인에 성공했습니다";
 
         } catch (BadCredentialsException e) {
