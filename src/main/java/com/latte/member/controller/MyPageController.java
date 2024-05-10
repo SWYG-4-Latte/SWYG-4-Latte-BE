@@ -33,6 +33,7 @@ public class MyPageController {
     private AuthService authService;
 
 
+/*
     @GetMapping("/memberInfo")
     @ResponseBody
     public ResponseEntity<?> memberInfo(@RequestParam("mbrNo") int mbrNo) {
@@ -74,6 +75,7 @@ public class MyPageController {
         return new ResponseEntity<>(responseData, OK);
 
     }
+*/
 
 
     /**
@@ -96,7 +98,7 @@ public class MyPageController {
             String maxCaffeine = String.valueOf(standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine());
 
             dataMap.put("member", member);
-            dataMap.put("maxCaffeine", maxCaffeine);
+            dataMap.put("caffeinIntake", maxCaffeine);
             message = "회원 정보입니다.";
 
         } else {
