@@ -87,17 +87,25 @@ public class MyPageController {
         String jwtToken = token; // "Bearer " 이후의 토큰 부분만 추출
 
         String message = "";
+        Map<String, Object> dataMap = new HashMap<>();
 
         // 토큰을 사용하여 회원 정보 확인
         MemberResponse member = authService.getMemberInfoFromToken(jwtToken);
         if (member != null) {
+
+            String maxCaffeine = String.valueOf(standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine());
+
+            dataMap.put("member", member);
+            dataMap.put("maxCaffeine", maxCaffeine);
             message = "회원 정보입니다.";
+
         } else {
             message = String.valueOf(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token"));
             //return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token"); // 토큰이 유효하지 않은 경우 401 Unauthorized 반환
         }
 
-        ResponseData<?> responseData = new ResponseData<>(message, member);
+
+        ResponseData<?> responseData = new ResponseData<>(message, dataMap);
         return new ResponseEntity<>(responseData, OK);
     }
 
