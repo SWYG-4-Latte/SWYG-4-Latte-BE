@@ -24,11 +24,13 @@ public class ArticleResponse {
 
     private int writerNo;           // 작성자 번호
 
-    private int view_cnt;           // 조회수
+    private String mbrId;           // 작성자 아이디
+
+    private int viewCnt;           // 조회수
 
     private int likeCnt;            // 좋아요(추천수)
 
-    private boolean deleteYn;       // 삭제여부
+    private String deleteYn;       // 삭제여부
 
     private Timestamp regDate;      // 등록일
 
