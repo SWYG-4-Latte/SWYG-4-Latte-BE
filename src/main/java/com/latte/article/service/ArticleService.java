@@ -5,6 +5,7 @@ package com.latte.article.service;
 import com.latte.article.repository.ArticleMapper;
 import com.latte.article.request.ArticleRequest;
 import com.latte.article.response.ArticleResponse;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,27 +24,36 @@ public class ArticleService {
      *
      * @param request
      */
-    public void insertArticle(ArticleRequest request) {
+    public boolean insertArticle(ArticleRequest request) {
 
-        mapper.insertArticle(request);
+        request.setDeleteYn("N");
+        request.setLikeCnt(0);
+        request.setViewCnt(0);
+
+        return mapper.insertArticle(request);
     }
+
 
     /**
      * 아티클 게시글 수정
      * @param request
      */
-    public void updateArticle(ArticleRequest request) {
+    public boolean updateArticle(ArticleRequest request) {
 
-        mapper.updateArticle(request);
+        request.setDeleteYn("N");
+
+        return mapper.updateArticle(request);
     }
 
     /**
      * 아티클 게시글 삭제
      * @param articleNo
      */
-    public void deleteArticle(int articleNo) {
+    public boolean deleteArticle(int articleNo) {
 
-        mapper.deleteArticle(articleNo);
+
+        return mapper.deleteArticle(articleNo);
+
     }
 
 
@@ -66,6 +76,37 @@ public class ArticleService {
 
         return mapper.detailArticle(articleNo);
     }
+
+
+    /**
+     * 아티클 작성자 확인
+     * @param writerNo
+     * @return
+     */
+    public boolean isArticleAuthor(@Param("articleNo") int articleNo, @Param("writerNo") int writerNo) {
+
+        int result = mapper.isArticleAuthor(articleNo, writerNo);
+
+        // 작성자가 맞음
+        if (result > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    /**
+     * 아티클 조회수 증가
+     * @param viewsNumber
+     */
+    public void viewCount(int viewsNumber) {
+
+        mapper.viewCount(viewsNumber);
+    }
+
+
+
 
 
 

@@ -4,34 +4,43 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.latte.article.repository.ArticleMapper">
-    <!-- tb_member 테이블 전체 컬럼 -->
-        <sql id="articleColumns">
-              article_no
-            , image_url
-            , title
-            , content
-            , writer_no
-            , view_cnt
-            , like_cnt
-            , delete_yn
-            , reg_date
-            , update_date
-        </sql>
 
     <!--아티클 목록 조회-->
-    <select id="getArticleList" resultType="list">
+    <select id="getArticleList" resultType="com.latte.article.response.ArticleResponse">
         SELECT
-        <include refid="articleColumns" />
-        FROM article
+            A.article_no
+             , A.image_url
+             , A.title
+             , A.content
+             , A.writer_no
+             , M.mbr_id
+             , A.view_cnt
+             , A.like_cnt
+             , A.delete_yn
+             , A.reg_date
+             , A.update_date
+        FROM ARTICLE A LEFT JOIN tb_member M ON A.writer_no = M.mbr_no
+        WHERE A.delete_yn = 'N'
     </select>
 
 
     <!--아티클 상세 조회-->
     <select id="detailArticle" parameterType="int" resultType="com.latte.article.response.ArticleResponse">
         SELECT
-        <include refid="articleColumns" />
-        FROM article
-        where article_no = #{articleNo}
+               A.article_no
+             , A.image_url
+             , A.title
+             , A.content
+             , A.writer_no
+             , M.mbr_id
+             , A.view_cnt
+             , A.like_cnt
+             , A.delete_yn
+             , A.reg_date
+             , A.update_date
+        FROM ARTICLE A LEFT JOIN tb_member M ON A.writer_no = M.mbr_no
+        WHERE A.delete_yn = 'N'
+            and `article_no` = #{articleNo}
     </select>
 
 
@@ -43,7 +52,6 @@
           `image_url` = #{imageUrl}
         , `title` = #{title}
         , `content` = #{content}
-        , `writer_no` = #{writerNo}
         , `update_date` = NOW()
         WHERE
         `article_no`=#{articleNo}
@@ -56,20 +64,29 @@
         set
         delete_yn = 'Y'
         WHERE
-        `article_no`=#{articleNo};
+        `article_no`=#{articleNo}
     </delete>
 
-    <!-- 회원 수 카운팅 (ID 중복 체크) -->
-    <select id="countByLoginId" parameterType="string" resultType="int">
-        /* AuthMapper.countByLoginId */
+
+    <!-- 작성자 확인 여부 -->
+    <select id="isArticleAuthor" parameterType="int" resultType="int">
+        /* ArticleMapper.isArticleAuthor */
         SELECT
             COUNT(*)
         FROM
-            tb_member
+            ARTICLE
         WHERE
-            mbr_id = #{mbrId}
+            `article_no` = #{articleNo}
+            AND `writer_no` = #{writerNo}
     </select>
 
+
+    <!--조회 수-->
+    <update id="viewCount">
+        UPDATE ARTICLE
+        SET view_cnt = view_cnt + 1
+        WHERE `article_no`=#{articleNo}
+    </update>
 
     <!--아티클 등록-->
     <insert id="insertArticle" parameterType="com.latte.article.request.ArticleRequest" useGeneratedKeys="true" keyProperty="articleNo">

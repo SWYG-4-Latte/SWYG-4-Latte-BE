@@ -59,7 +59,8 @@ public class JwtTokenProvider {
 
         // Access Token 생성
         String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
+                //.setSubject(authentication.getName())
+                .setSubject(String.valueOf(user.getMbrNo()))
                 .claim("auth", authorities)
                 .setExpiration(accessTokenExpiration)
                 .signWith(key, SignatureAlgorithm.HS256)
