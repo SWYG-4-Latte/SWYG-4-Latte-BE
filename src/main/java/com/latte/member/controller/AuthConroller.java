@@ -65,11 +65,18 @@ public class AuthConroller {
         Map<String, Object> dataMap = new HashMap<>();
 
         String message = "";
-
-        MemberResponse member = authService.getMemberInfo(request.getMbrId());
-        int mbrNo = member.getMbrNo();
-
         try {
+            MemberResponse member = authService.getMemberInfo(request.getMbrId());
+            int mbrNo = member.getMbrNo();
+
+            // 회원 탈퇴 여부 확인
+            if ("Y".equals(member.getDeleteYn())) {
+                message = "회원 탈퇴한 아이디로는 로그인이 불가능합니다.";
+                dataMap.put("jwtToken", "delete");
+                ResponseData<?> responseData = new ResponseData<>(message, dataMap);
+                return new ResponseEntity<>(responseData, OK);
+            }
+
             JwtToken jwtToken = authService.signIn(request.getMbrId(), request.getPassword(), response);
             dataMap.put("jwtToken", jwtToken);
             dataMap.put("mbrNo", mbrNo);
@@ -199,12 +206,12 @@ public class AuthConroller {
 
     /**
      * [API] 회원수정
-     * @param seq
+     * @param mbrNo
      * @param request
      * @return
      */
-    @PostMapping("/update/{seq}")
-    public ResponseEntity<?> update(@PathVariable("seq") int seq, @RequestBody @Validated final MemberRequest request) {
+    @PostMapping("/update/{mbrNo}")
+    public ResponseEntity<?> update(@PathVariable("mbrNo") int mbrNo, @RequestBody @Validated final MemberRequest request) {
 
 
         String existIdYn = null;
@@ -231,10 +238,10 @@ public class AuthConroller {
             existIdYn = "true";
             existNicknameYn = "true";
             existIdEmailYn = "true";
-            request.setMbrNo(seq);
+            request.setMbrNo(mbrNo);
             boolean res = authService.update(request);
             if (res) {
-                MemberResponse result = authService.getMemberSeq(seq);
+                MemberResponse result = authService.getMemberSeq(mbrNo);
                 dataMap.put("result", result); // MemberResponse를 Map에 추가
                 message = "회원 수정에 성공했습니다.";
             } else {
@@ -258,11 +265,11 @@ public class AuthConroller {
      * @param
      * @return
      */
-    @DeleteMapping("/delete/{seq}")
+    @DeleteMapping("/delete/{mbrNo}")
     @ResponseBody
-    public ResponseEntity<?> deleteMember(@PathVariable("seq") int seq) {
+    public ResponseEntity<?> deleteMember(@PathVariable("mbrNo") int mbrNo) {
 
-        boolean res = authService.deleteMember(seq);
+        boolean res = authService.deleteMember(mbrNo);
         String data = "";
         String message = "";
         if (res) {
