@@ -208,33 +208,35 @@ public class AuthConroller {
     public ResponseEntity<?> update(@PathVariable("seq") int seq, @RequestBody MemberRequest request) {
 
 
-        String existIdYn = null;
+        //String existIdYn = null;
         String existNicknameYn = null;
         String existIdEmailYn = null;
 
         MemberResponse user = authService.getMemberSeq(seq);
 
 
-        int countMemberById = authService.countMemberByLoginId(request.getMbrId());
-        int countMemberByName = authService.countMemberByNickname(request.getNickname());
-        int countMemberByEmail = authService.countMemberByEmail(request.getEmail());
+        //int countMemberById = authService.countMemberByLoginId(request.getMbrId());
+        //int countMemberByName = authService.countMemberByNickname(request.getNickname());
+       // int countMemberByEmail = authService.countMemberByEmail(request.getEmail());
         String message = "";
         Map<String, Object> dataMap = new HashMap<>();
 
-        if (!user.getMbrId().equals(request.getMbrId()) && authService.countMemberByLoginId(request.getMbrId()) > 0) {
+/*        if (!user.getMbrId().equals(request.getMbrId()) && authService.countMemberByLoginId(request.getMbrId()) > 0) {
             message = "아이디가 이미 존재합니다.";
-            existIdYn = "false";
-        } else if (!user.getNickname().equals(request.getNickname()) && authService.countMemberByNickname(request.getNickname()) > 0) {
+            existIdYn = "false";*/
+        if (!user.getNickname().equals(request.getNickname()) && authService.countMemberByNickname(request.getNickname()) > 0) {
             message = "닉네임이 이미 존재합니다.";
             existNicknameYn = "false";
         } else if (!user.getEmail().equals(request.getEmail()) && authService.countMemberByEmail(request.getEmail()) > 0) {
             message = "이메일이 이미 존재합니다.";
             existIdEmailYn = "false";
         } else {
-            existIdYn = "true";
+            //existIdYn = "true";
             existNicknameYn = "true";
             existIdEmailYn = "true";
+            MemberResponse bfResult = authService.getMemberSeq(seq);
             request.setMbrNo(seq);
+            request.setMbrId(bfResult.getMbrId());
             boolean res = authService.update(request);
             if (res) {
                 MemberResponse result = authService.getMemberSeq(seq);
@@ -245,7 +247,7 @@ public class AuthConroller {
             }
         }
 
-        dataMap.put("confirmId", existIdYn); // res 값을 Map에 추가
+        //dataMap.put("confirmId", existIdYn); // res 값을 Map에 추가
         dataMap.put("confirmNickname", existNicknameYn);
         dataMap.put("confirmEmail", existIdEmailYn);
 
