@@ -150,7 +150,7 @@ public class AuthService {
      * 회원정보 수정
      * @param
      */
-    @Transactional
+    //@Transactional
     public boolean update(MemberRequest request) {
 
             // 권한 부여
