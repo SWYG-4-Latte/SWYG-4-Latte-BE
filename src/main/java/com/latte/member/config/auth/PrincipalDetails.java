@@ -1,15 +1,22 @@
 package com.latte.member.config.auth;
 
 import com.latte.member.response.MemberResponse;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
+@Getter
+@RequiredArgsConstructor
 // 생성된 Security session에 Authentication 타입 객체에서 UserDetails
 public class PrincipalDetails implements UserDetails {
 
@@ -28,10 +35,25 @@ public class PrincipalDetails implements UserDetails {
     }
 
     // 해당 User의 권한을 리턴하는 곳
-    @Override
+/*    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return user.getAuthorities() != null ? user.getAuthorities() : new ArrayList<>();
+    }*/
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(user.getRole()));
+        return authorities;
     }
+
+/*    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("USER"));
+
+        return authorities;
+    }*/
 
     @Override
     public String getPassword() {

@@ -33,11 +33,19 @@ public class PrincipalDetailsService implements UserDetailsService  {
 
         MemberResponse memberEntity = authMapper.findById(mbrId);
         if (memberEntity != null) {
-            return new PrincipalDetails(memberEntity);
+            //return new PrincipalDetails(memberEntity);
+            return new User(memberEntity.getMbrId(), memberEntity.getPassword(), memberEntity.getAuthorities());
         }
 
         throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + mbrId);
     }
+
+
+
+
+
+
+
     // 해당하는 User 의 데이터가 존재한다면 UserDetails 객체로 만들어서 return
     private UserDetails createUserDetails(MemberResponse member) {
         return User.builder()
