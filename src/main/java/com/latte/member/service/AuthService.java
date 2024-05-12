@@ -153,6 +153,9 @@ public class AuthService {
     //@Transactional
     public boolean update(MemberRequest request) {
 
+            MemberResponse bfResult = getMemberSeq(request.getMbrNo());
+            request.updateFrom(bfResult);
+
             // 권한 부여
             request.setRole("USER");
             // 회원탈퇴 여부

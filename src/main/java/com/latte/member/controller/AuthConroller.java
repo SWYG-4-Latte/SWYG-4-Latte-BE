@@ -214,10 +214,6 @@ public class AuthConroller {
 
         MemberResponse user = authService.getMemberSeq(seq);
 
-
-        //int countMemberById = authService.countMemberByLoginId(request.getMbrId());
-        //int countMemberByName = authService.countMemberByNickname(request.getNickname());
-       // int countMemberByEmail = authService.countMemberByEmail(request.getEmail());
         String message = "";
         Map<String, Object> dataMap = new HashMap<>();
 
@@ -234,9 +230,7 @@ public class AuthConroller {
             //existIdYn = "true";
             existNicknameYn = "true";
             existIdEmailYn = "true";
-            MemberResponse bfResult = authService.getMemberSeq(seq);
             request.setMbrNo(seq);
-            request.setMbrId(bfResult.getMbrId());
             boolean res = authService.update(request);
             if (res) {
                 MemberResponse result = authService.getMemberSeq(seq);

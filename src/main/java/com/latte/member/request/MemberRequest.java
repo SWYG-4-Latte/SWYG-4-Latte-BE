@@ -1,6 +1,7 @@
 package com.latte.member.request;
 
 import com.latte.member.response.Gender;
+import com.latte.member.response.MemberResponse;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -68,37 +69,22 @@ public class MemberRequest {
         password = passwordEncoder.encode(password);
     }
 
+    public void updateFrom(MemberResponse response) {
+        // 각 필드가 null이 아닌 경우에만 업데이트
+        if (this.mbrId == null) this.mbrId = response.getMbrId();
+        if (this.password == null) this.password = response.getPassword();
+        if (this.nickname == null) this.nickname = response.getNickname();
+        if (this.cellPhone == null) this.cellPhone = response.getCellPhone();
+        if (this.email == null) this.email = response.getEmail();
+        if (this.gender == null) this.gender = response.getGender();
+        if (!this.pregnancy) this.pregnancy = response.isPregnancy();
+        if (this.pregMonth == 0) this.pregMonth = response.getPregMonth();
+        if (this.allergy == null) this.allergy = response.getAllergy();
+        if (this.symptom == null) this.symptom = response.getSymptom();
+        if (this.imageUrl == null) this.imageUrl = response.getImgUrl();
+        if (this.age == null) this.age = response.getAge();
+        if (this.cupDay == null) this.cupDay = response.getCupDay();
 
-/*    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(this.role));
     }
-
-
-    @Override
-    public String getUsername() {
-        return mbrId;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }*/
-
 
 }
