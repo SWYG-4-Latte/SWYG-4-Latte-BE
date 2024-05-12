@@ -24,7 +24,7 @@ public class ArticleResponse {
 
     private int writerNo;           // 작성자 번호
 
-    private String mbrId;           // 작성자 아이디
+    private String nickname;           // 작성자 닉네임
 
     private int viewCnt;           // 조회수
 
