@@ -30,19 +30,8 @@ public class PrincipalDetails implements UserDetails {
     // 해당 User의 권한을 리턴하는 곳
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return user.getAuthorities();
+        return user.getAuthorities() != null ? user.getAuthorities() : new ArrayList<>();
     }
-/*    public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> collection = new ArrayList<>();
-        collection.add(new GrantedAuthority() {
-            @Override
-            public String getAuthority() {
-                return user.getRole();
-            }
-        });
-
-        return collection;
-    }*/
 
     @Override
     public String getPassword() {
