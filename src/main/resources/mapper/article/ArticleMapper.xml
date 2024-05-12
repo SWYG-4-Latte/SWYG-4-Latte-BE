@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- mapper DTD 선언 -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.latte.article.repository.ArticleMapper">
+
+    <!--아티클 목록 조회-->
+    <select id="getArticleList" resultType="com.latte.article.response.ArticleResponse">
+        SELECT
+            A.article_no
+             , A.image_url
+             , A.title
+             , A.content
+             , A.writer_no
+             , M.mbr_id
+             , A.view_cnt
+             , A.like_cnt
+             , A.delete_yn
+             , A.reg_date
+             , A.update_date
+        FROM ARTICLE A LEFT JOIN tb_member M ON A.writer_no = M.mbr_no
+        WHERE A.delete_yn = 'N'
+    </select>
+
+
+    <!--아티클 상세 조회-->
+    <select id="detailArticle" parameterType="int" resultType="com.latte.article.response.ArticleResponse">
+        SELECT
+               A.article_no
+             , A.image_url
+             , A.title
+             , A.content
+             , A.writer_no
+             , M.mbr_id
+             , A.view_cnt
+             , A.like_cnt
+             , A.delete_yn
+             , A.reg_date
+             , A.update_date
+        FROM ARTICLE A LEFT JOIN tb_member M ON A.writer_no = M.mbr_no
+        WHERE A.delete_yn = 'N'
+            and `article_no` = #{articleNo}
+    </select>
+
+
+    <!--아티클 내용 수정-->
+    <update id="updateArticle" parameterType="com.latte.article.request.ArticleRequest">
+        <!--ArticleMapper.updateArticle-->
+        UPDATE `ARTICLE`
+        set
+          `image_url` = #{imageUrl}
+        , `title` = #{title}
+        , `content` = #{content}
+        , `update_date` = NOW()
+        WHERE
+        `article_no`=#{articleNo}
+    </update>
+
+    <!--아티클 삭제-->
+    <delete id="deleteArticle" parameterType="int">
+        <!--ArticleMapper.deleteArticle-->
+        UPDATE `ARTICLE`
+        set
+        delete_yn = 'Y'
+        WHERE
+        `article_no`=#{articleNo}
+    </delete>
+
+
+    <!-- 작성자 확인 여부 -->
+    <select id="isArticleAuthor" parameterType="int" resultType="int">
+        /* ArticleMapper.isArticleAuthor */
+        SELECT
+            COUNT(*)
+        FROM
+            ARTICLE
+        WHERE
+            `article_no` = #{articleNo}
+            AND `writer_no` = #{writerNo}
+    </select>
+
+
+    <!--조회 수-->
+    <update id="viewCount">
+        UPDATE ARTICLE
+        SET view_cnt = view_cnt + 1
+        WHERE `article_no`=#{articleNo}
+    </update>
+
+    <!--아티클 등록-->
+    <insert id="insertArticle" parameterType="com.latte.article.request.ArticleRequest" useGeneratedKeys="true" keyProperty="articleNo">
+        /* ArticleMapper.insertMember */
+        INSERT INTO ARTICLE (
+                              article_no
+                            , image_url
+                            , title
+                            , content
+                            , writer_no
+                            , view_cnt
+                            , like_cnt
+                            , delete_yn
+                            , reg_date
+                            , update_date
+        ) VALUES (
+                   #{articleNo}
+                 , #{imageUrl}
+                 , #{title}
+                 , #{content}
+                 , #{writerNo}
+                 , #{viewCnt}
+                 , #{likeCnt}
+                 , "N"
+                 , NOW()
+                 , NULL
+                 )
+    </insert>
+
+</mapper>

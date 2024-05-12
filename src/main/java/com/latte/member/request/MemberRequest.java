@@ -1,40 +1,30 @@
 package com.latte.member.request;
 
 import com.latte.member.response.Gender;
+import com.latte.member.response.MemberResponse;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
-@Getter
-@Setter
-@ToString
-@Builder
-@AllArgsConstructor
-public class MemberRequest implements UserDetails {
-
-
-    public MemberRequest(){
-
-    }
-
+@Data
+public class MemberRequest {
+//public class MemberRequest implements UserDetails {
 
     private int mbrNo;          // 회원 번호
 
     //@NotBlank(message = "아이디는 필수 입력 값입니다.")
     private String mbrId;          // ID
 
-    //@NotBlank(message = "이름은 필수 입력 값입니다.")
-    //private String mbrName;         // 이름
-
-    //@NotBlank(message = "비밀번호는 필수 입력 값입니다.")
-    //@Pattern(regexp = "(?=.*[0-9])(?=.*[a-zA-Z])(?=.*\\W)(?=\\S+$).{8,16}", message = "비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.")
     private String password;        // PW
 
    // @NotEmpty(message = "닉네임을 입력해주세요")
@@ -63,7 +53,7 @@ public class MemberRequest implements UserDetails {
 
     private String imageUrl;         // 이미지
 
-    private String role;            // 권한(role_user, role_admin)
+    private String role;            // 권한(user, admin)
 
     //@NotEmpty(message = "나이를 입력해주세요")
     private String age;        // 나이
@@ -79,35 +69,22 @@ public class MemberRequest implements UserDetails {
         password = passwordEncoder.encode(password);
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
-    }
+    public void updateFrom(MemberResponse response) {
+        // 각 필드가 null이 아닌 경우에만 업데이트
+        if (this.mbrId == null) this.mbrId = response.getMbrId();
+        if (this.password == null) this.password = response.getPassword();
+        if (this.nickname == null) this.nickname = response.getNickname();
+        if (this.cellPhone == null) this.cellPhone = response.getCellPhone();
+        if (this.email == null) this.email = response.getEmail();
+        if (this.gender == null) this.gender = response.getGender();
+        if (!this.pregnancy) this.pregnancy = response.isPregnancy();
+        if (this.pregMonth == 0) this.pregMonth = response.getPregMonth();
+        if (this.allergy == null) this.allergy = response.getAllergy();
+        if (this.symptom == null) this.symptom = response.getSymptom();
+        if (this.imageUrl == null) this.imageUrl = response.getImgUrl();
+        if (this.age == null) this.age = response.getAge();
+        if (this.cupDay == null) this.cupDay = response.getCupDay();
 
-    @Override
-    public String getUsername() {
-        return mbrId;
     }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
 
 }

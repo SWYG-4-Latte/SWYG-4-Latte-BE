@@ -13,5 +13,5 @@ public class TempAuthResponse {
 
     private String email;
 
-    private String password;
+    private String authNumber;
 }

@@ -1,43 +1,30 @@
 package com.latte.member.controller;
 
-import com.latte.member.config.SecurityUtil;
 import com.latte.member.config.jwt.JwtToken;
-import com.latte.member.request.FindIdRequest;
 import com.latte.member.request.LoginRequest;
 import com.latte.member.request.MemberRequest;
-import com.latte.member.request.PwChangeRequest;
 import com.latte.member.response.FindIdResponse;
 import com.latte.member.response.MemberResponse;
-import com.latte.member.response.PwChangeResponse;
-import com.latte.member.response.SendOtpResponse;
 import com.latte.member.service.AuthService;
 import com.latte.member.service.EmailService;
 import com.latte.response.ResponseData;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMailMessage;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.mail.internet.MimeMessage;
-import java.io.IOException;
-import java.util.Arrays;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 
 import static org.springframework.http.HttpStatus.OK;
@@ -58,28 +45,34 @@ public class AuthConroller {
     @Value("${spring.mail.username")
     private String from;
 
+    @Autowired
     private final JavaMailSender javaMailSender;
+
 
 
     /**
      * 로그인 API
-     * @param request
+     * @param
      * @return
      */
     @PostMapping("/login")
     @ResponseBody
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletResponse response) {
-        String id = request.getMbrId();
-        String password = request.getPassword();
-        log.info("request id = {}, password = {}", id, password);
+        //String id = request.getMbrId();
+        //String password = request.getPassword();
+        log.info("request id = {}, password = {}", request.getMbrId(), request.getPassword());
         // log.info("jwtToken accessToken = {}, refreshToken = {}", jwtToken.getAccessToken(), jwtToken.getRefreshToken());
         Map<String, Object> dataMap = new HashMap<>();
 
         String message = "";
 
+        MemberResponse member = authService.getMemberInfo(request.getMbrId());
+        int mbrNo = member.getMbrNo();
+
         try {
-            JwtToken jwtToken = authService.signIn(id, password, response);
+            JwtToken jwtToken = authService.signIn(request.getMbrId(), request.getPassword(), response);
             dataMap.put("jwtToken", jwtToken);
+            dataMap.put("mbrNo", mbrNo);
             message =  "로그인에 성공했습니다";
 
         } catch (BadCredentialsException e) {
@@ -109,34 +102,47 @@ public class AuthConroller {
      * @param
      * @return
      */
-/*    @PostMapping("/logout")
-    public void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Optional<Cookie> refreshTokenCookie = Arrays.stream(request.getCookies())
-                .filter(cookie -> cookie.getName().equals("refreshToken"))
-                .findFirst();
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        String jwtToken = extractTokenFromRequest(request);
 
-        if (refreshTokenCookie.isPresent()) {
-            refreshTokenCookie.get().setMaxAge(0);
-            refreshTokenCookie.get().setPath("/"); // 쿠키 경로 설정
-            response.addCookie(refreshTokenCookie.get());
-        } // refreshTokenCookie 삭제. HttpOnly여서 서버에서 삭제
-
-        String accessToken = request.getHeader(JwtTokenConstants.HEADER_AUTHORIZATION)
-                .replace(JwtTokenConstants.TOKEN_PREFIX, "");
-
-        Jwt jwt = tokenService.getAccessTokenInfo(accessToken);
-        Long loggedoutId = kakaoLogout(jwt.getSocialAccessToken()); // 카카오 로그아웃
-
-        if (loggedoutId == null) {
-            throw new RuntimeException("logout failed");
+        // JWT 토큰이 존재하는 경우, 토큰을 삭제하여 로그아웃 처리
+        if (jwtToken != null) {
+            // JWT 토큰 삭제 로직: 쿠키나 헤더에서 토큰을 제거
+            deleteTokenFromClient(request, response);
+            ResponseData<?> responseData = new ResponseData<>("로그아웃 되었습니다.", null);
+            return new ResponseEntity<>(responseData, OK);
+        } else {
+            ResponseData<?> responseData = new ResponseData<>("로그아웃이 실패하였습니다.", null);
+            return new ResponseEntity<>(responseData, OK);
         }
-    }*/
-
-    @PostMapping("/test")
-    @ResponseBody
-    public String test() {
-        return SecurityUtil.getCurrentUsername();
     }
+
+    private String extractTokenFromRequest(HttpServletRequest request) {
+        // 클라이언트의 요청에서 JWT 토큰 추출
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7); // "Bearer " 다음의 토큰 부분만 추출
+        }
+
+        return null;
+    }
+
+    private void deleteTokenFromClient(HttpServletRequest request, HttpServletResponse response) {
+        // 클라이언트의 쿠키나 헤더에서 JWT 토큰 삭제 로직 구현
+        // 예시: 쿠키에서 삭제하는 경우
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("jwtToken")) {
+                    cookie.setMaxAge(0); // 쿠키 만료시킴으로써 삭제
+                    response.addCookie(cookie);
+                    break;
+                }
+            }
+        }
+    }
+
 
     /**
      * [API] 회원가입
@@ -198,31 +204,30 @@ public class AuthConroller {
      * @return
      */
     @PostMapping("/update/{seq}")
-    public ResponseEntity<?> update(@PathVariable int seq, @RequestBody @Validated final MemberRequest request) {
+    @ResponseBody
+    public ResponseEntity<?> update(@PathVariable("seq") int seq, @RequestBody MemberRequest request) {
 
 
-        String existIdYn = null;
+        //String existIdYn = null;
         String existNicknameYn = null;
         String existIdEmailYn = null;
 
-        int countMemberById = authService.countMemberByLoginId(request.getMbrId());
-        int countMemberByName = authService.countMemberByNickname(request.getNickname());
-        int countMemberByEmail = authService.countMemberByEmail(request.getEmail());
+        MemberResponse user = authService.getMemberSeq(seq);
+
         String message = "";
         Map<String, Object> dataMap = new HashMap<>();
 
-
-        if (countMemberById > 0) {
-            existIdYn = "false";
+/*        if (!user.getMbrId().equals(request.getMbrId()) && authService.countMemberByLoginId(request.getMbrId()) > 0) {
             message = "아이디가 이미 존재합니다.";
-        } else if (countMemberByName > 0) {
-            existNicknameYn = "false";
+            existIdYn = "false";*/
+        if (!user.getNickname().equals(request.getNickname()) && authService.countMemberByNickname(request.getNickname()) > 0) {
             message = "닉네임이 이미 존재합니다.";
-        } else if (countMemberByEmail > 0) {
-            existIdEmailYn = "false";
+            existNicknameYn = "false";
+        } else if (!user.getEmail().equals(request.getEmail()) && authService.countMemberByEmail(request.getEmail()) > 0) {
             message = "이메일이 이미 존재합니다.";
+            existIdEmailYn = "false";
         } else {
-            existIdYn = "true";
+            //existIdYn = "true";
             existNicknameYn = "true";
             existIdEmailYn = "true";
             request.setMbrNo(seq);
@@ -236,7 +241,7 @@ public class AuthConroller {
             }
         }
 
-        dataMap.put("confirmId", existIdYn); // res 값을 Map에 추가
+        //dataMap.put("confirmId", existIdYn); // res 값을 Map에 추가
         dataMap.put("confirmNickname", existNicknameYn);
         dataMap.put("confirmEmail", existIdEmailYn);
 
@@ -273,61 +278,43 @@ public class AuthConroller {
 
 
 
-    //등록된 이메일로 임시비밀번호를 발송하고 발송된 임시비밀번호로 사용자의 pw를 변경하는 컨트롤러
-/*    @PostMapping("/find-password")
-    public @ResponseBody void findPassword(String userName, String userEmail) {
-        MailDto dto = sendEmailService.createMailAndChangePassword(userEmail, userName);
-        sendEmailService.mailSend(dto);
-
-        MemberResponse member = authService.findByEmail(userEmail);
-        if(member.getEmail() != null && !member.getEmail().equals("")) {
-            String password = authService.getTempPassword();
-            member.pa
-        }
-
-
-        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-        mimeMessageHelper.setFrom(from);
-        mimeMessageHelper.setTo();
-
-    }*/
-
-
     // [API] 아이디 찾기
     @PostMapping("/findId")
-    public ResponseEntity<?> findId(FindIdRequest request) {
+    public ResponseEntity<?> findId(@RequestParam("nickname") String nickname, @RequestParam("email") String email) throws Exception {
 
-        FindIdResponse member = authService.findIdByNameEmail(request.getUserName(), request.getEmail());
+        FindIdResponse member = authService.findIdByNameEmail(nickname, email);
+
+        MemberResponse user = authService.getMemberInfo(member.getMbrId());
 
         String message = "";
-        String data = "";
-
-        if(member.getFindId() == null || member.getFindId() == "") {
+        String authInfo = null;
+        if(member.getMbrId() == null || member.getMbrId() == "") {
             message = "해당 정보로 가입한 아이디가 없습니다.";
+        } else if (member.getDeleteYn().equals("Y")) {
+            message = "해당 아이디는 탈퇴한 회원입니다.";
         } else {
-            message = "회원님의 아이디는 " + member.getFindId() + "입니다.";
-            data = String.valueOf(member);
+            authInfo = authService.saveTempAuthInfo(user.getMbrNo());
+            message = "회원님의 아이디는 " + member.getMbrId() + "입니다.";
         }
 
-        ResponseData<?> responseData = new ResponseData<>(message, data);
+        ResponseData<?> responseData = new ResponseData<>(message, authInfo);
         return new ResponseEntity<>(responseData, OK);
     }
 
 
     @PostMapping("/findPw")
-    public ResponseEntity<?> forgotPassword(@RequestParam("mbrId") String id, @RequestParam("email") String email) {
+    public ResponseEntity<?> forgotPassword(@RequestParam("mbrId") String id, @RequestParam("email") String email) throws Exception {
 
         MemberResponse member = authService.getMemberInfo(id);
 
         // 유효회원 여부 검사
-        int existUserId = authService.countMemberByLoginId(id);
+        //int existUserId = authService.countMemberByLoginId(id);
 
-        int existUserEmail = authService.countMemberByEmail(email);
+        //int existUserEmail = authService.countMemberByEmail(email);
 
         int countByIdEmail = authService.countByIdEmail(id, email);
 
-        boolean authInfo = false;
+        String authInfo = null;
 
         String message = "";
 
@@ -336,7 +323,8 @@ public class AuthConroller {
 /*        } else if(existUserEmail == 0) {
             message = "해당 정보로 가입한 이메일이 없습니다.";*/
         } else {
-                authInfo = authService.saveTempAuthInfo(member.getMbrNo());
+            authInfo = authService.saveTempAuthInfo(member.getMbrNo());
+            message = "인증번호를 전송하였습니다. 이메일을 확인해주세요";
         }
 
         ResponseData<?> responseData = new ResponseData<>(message, authInfo);
@@ -345,81 +333,26 @@ public class AuthConroller {
     }
 
 
-
-    // [API] 비밀번호 변경 > 본인인증번호 발송
-   /* @PostMapping("/sendOtp")
-    public SendOtpResponse sendOtp(String mbrId, String email ) {
-
-        // 유효회원 여부 검사
-        boolean existsUser = false;
-            existsUser = authService.findIdByNameEmail(mbrId, email);
-
-        // 인증번호 발송
-        if(!existsUser) {
-            return new SendOtpResponse(false, "해당 정보로 가입한 아이디가 없습니다.");
-        }
-        else {
-            String resOtp = "false";
-
-            // 발송로직
-            resOtp = mailSend.balsongMailSend(request.getUserInfo());
+    @PostMapping("/update_pw")
+    public ResponseEntity<?> updatePassword(@RequestParam("mbrNo") int mbrNo, @RequestParam("password") String password) throws Exception {
 
 
-            // 발송된 인증번호 저장
-            if(resOtp.equals("false")) {
-                return new SendOtpResponse(false, "인증번호 발송에 실패했습니다. 다시 요청해주세요");
-            }
-            else {
-                TbAuthLog ettAuthLog = tbAuthLogRepository.findByUserId(request.getUserId());
+        boolean change = authService.updatePassword(mbrNo, password);
 
-                if(ettAuthLog!=null) {
-                    ettAuthLog.setAuthNum(resOtp);
-                    ettAuthLog.setAuthType(request.getOptType().equals("E") ? "MAIL" : "PN");
+        String message = null;
 
-
-                    ettAuthLog.setAuthLoc(request.getUserInfo());
-                    ettAuthLog.setModId(request.getUserId());
-                    ettAuthLog.setModDate(getToday());
-                }
-                else {
-                    ettAuthLog = new TbAuthLog();
-                    ettAuthLog.setUserId(request.getUserId());
-                    ettAuthLog.setAuthNum(resOtp);
-                    ettAuthLog.setAuthType(request.getOptType().equals("E") ? "MAIL" : "PN");
-                    ettAuthLog.setAuthLoc(request.getUserInfo());
-                    ettAuthLog.setRegId(request.getUserId());
-                    ettAuthLog.setRegDate(getToday());
-                    ettAuthLog.setModId(request.getUserId());
-                    ettAuthLog.setModDate(getToday());
-                }
-
-                tbAuthLogRepository.save(ettAuthLog);
-            }
-
+        if(change) {
+            message = "비밀번호 변경에 성공하였습니다.";
+        } else {
+            message = "비밀번호 변경에 실패하였습니다.";
         }
 
-        return new SendOtpResponse(true, "");
-    }*/
+        ResponseData<?> responseData = new ResponseData<>(message, change);
+        return new ResponseEntity<>(responseData, OK);
 
-
-
-
-/*
-    // [API] 비밀번호 변경 > 본인인증번호 비교 확인
-    @PostMapping("/checkOtp")
-    public CheckOtpResponse checkOtp(CheckOtpRequest request) {
-
-        return memberService.checkOtp(request);
     }
 
-    // [API] 비밀번호 변경
-    @PostMapping("/pwChange")
-    public PwChangeResponse pwChange(HttpSession session, PwChangeRequest request) {
-        request.setUserId(SessionUtil.getUserId(session));
 
-        return memberService.pwChange(request);
-    }
-*/
 
 
 

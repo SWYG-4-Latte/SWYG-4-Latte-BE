@@ -59,7 +59,8 @@ public class JwtTokenProvider {
 
         // Access Token 생성
         String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
+                //.setSubject(authentication.getName())
+                .setSubject(String.valueOf(user.getMbrNo()))
                 .claim("auth", authorities)
                 .setExpiration(accessTokenExpiration)
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -125,7 +126,7 @@ public class JwtTokenProvider {
     // 주어진 Access token을 복호화하고, 만료된 토큰인 경우에도 Claims 반환
     // JWT 토큰의 검증과 파싱을 모두 수행
     // accessToken
-    private Claims parseClaims(String accessToken) {
+    public Claims parseClaims(String accessToken) {
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(key)

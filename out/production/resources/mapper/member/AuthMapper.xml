@@ -5,14 +5,10 @@
 
 <mapper namespace="com.latte.member.mapper.AuthMapper">
     <!-- tb_member 테이블 전체 컬럼 -->
-        <sql id="memberColumns">
-                mbr_no
-              ,  mbr_id
+    <sql id="memberColumns">
+        mbr_no
+        ,  mbr_id
               , password
-<<<<<<< HEAD
-=======
-              , mbr_name
->>>>>>> master
               , age
               , nickname
               , image_url
@@ -28,16 +24,16 @@
               , delete_yn
               , reg_date
               , update_date
-        </sql>
+    </sql>
 
     <!--회원 정보 조회-->
     <select id="findById" parameterType="String" resultType="com.latte.member.response.MemberResponse">
         <!--AuthMapper.getMemberInfo-->
 
-            SELECT
-                <include refid="memberColumns" />
-            FROM tb_member
-            where mbr_id = #{mbrId}
+        SELECT
+        <include refid="memberColumns" />
+        FROM tb_member
+        where mbr_id = #{mbrId}
 
     </select>
 
@@ -49,10 +45,6 @@
                  mbr_no
               ,  mbr_id
               , password
-<<<<<<< HEAD
-=======
-              , mbr_name
->>>>>>> master
               , age
               , nickname
               , image_url
@@ -91,11 +83,7 @@
                   mbr_id
                 , delete_yn
             FROM tb_member
-<<<<<<< HEAD
             where email = #{email} and nickname = #{nickname}
-=======
-            where email = #{email} and mbrName = #{mbrName}
->>>>>>> master
         ]]>
     </select>
 
@@ -106,39 +94,8 @@
         <!--AuthMapper.updateMember-->
         UPDATE `tb_member`
         set
-            `mbr_id` = #{mbrId}
-          , `password` = #{password}
-<<<<<<< HEAD
-=======
-          , `mbr_name` = #{mbrName}
->>>>>>> master
-          , `age` = #{age}
-          , `nickname` = #{nickname}
-          , `image_url` = #{imageUrl}
-          , `allergy` = #{allergy}
-          , `cup_day` = #{cupDay}
-          , `gender` = #{gender}
-          , `cell_phone` = #{cellPhone}
-          , `email` = #{email}
-          , `pregnancy` = #{pregnancy}
-          , `preg_month` = #{pregMonth}
-          , `role` = #{role}
-          , `symptom` = #{symptom}
-          , `update_date` = NOW()
-        WHERE
-            `mbr_no`=#{mbrNo}
-    </update>
-
-    <!--회원 비밀번호 찾기 후 수정-->
-    <update id="updatePassword" parameterType="com.latte.member.request.MemberRequest">
-        <!--AuthMapper.updateMember-->
-        UPDATE `tb_member`
-        set
         `mbr_id` = #{mbrId}
-<<<<<<< HEAD
-=======
-        , `mbr_name` = #{mbrName}
->>>>>>> master
+        , `password` = #{password}
         , `age` = #{age}
         , `nickname` = #{nickname}
         , `image_url` = #{imageUrl}
@@ -156,18 +113,25 @@
         `mbr_no`=#{mbrNo}
     </update>
 
+    <!--회원 비밀번호 찾기 후 수정-->
+    <update id="updatePassword" parameterType="com.latte.member.request.PwChangeRequest">
+        <!--AuthMapper.updatePassword-->
+        UPDATE `tb_member`
+        set
+        `password` = #{password}
+        , `update_date` = NOW()
+        WHERE
+        `mbr_no`=#{mbrNo}
+    </update>
+
     <!--회원 삭제-->
-<<<<<<< HEAD
     <delete id="deleteMember" parameterType="int">
-=======
-    <delete id="deleteMember" parameterType="String">
->>>>>>> master
         <!--AuthMapper.deleteMember-->
         UPDATE `tb_member`
         set
-            delete_yn = 'Y'
+        delete_yn = 'Y'
         WHERE
-            `mbr_no`=#{mbrNo};
+        `mbr_no`=#{mbrNo};
     </delete>
 
     <!-- 회원 수 카운팅 (ID 중복 체크) -->
@@ -182,7 +146,6 @@
     </select>
 
 
-<<<<<<< HEAD
     <!-- 회원 수 카운팅 (닉네임 중복 체크) -->
     <select id="countByNickname" parameterType="string" resultType="int">
         /* AuthMapper.countByNickname */
@@ -195,40 +158,55 @@
     </select>
 
 
-=======
->>>>>>> master
+    <!-- 회원 수 카운팅 (이메일 중복 체크) -->
+    <select id="countByEmail" parameterType="string" resultType="int">
+        /* AuthMapper.countByEmail */
+        SELECT
+            COUNT(*)
+        FROM
+            tb_member
+        WHERE
+            email = #{email}
+    </select>
+
+
+
+    <!-- 회원 수 카운팅 (이메일 및 아이디 중복 체크) -->
+    <select id="countByIdEmail" parameterType="string" resultType="int">
+        /* AuthMapper.countByIdEmail */
+        SELECT
+            COUNT(*)
+        FROM
+            tb_member
+        WHERE
+            mbr_id = #{id}
+         AND   email = #{email}
+    </select>
+
     <!--회원 정보 등록-->
     <insert id="insertMember" parameterType="com.latte.member.request.MemberRequest" useGeneratedKeys="true" keyProperty="mbrNo">
         /* AuthMapper.insertMember */
         INSERT INTO tb_member (
-                    mbr_id
-                  , password
-<<<<<<< HEAD
-=======
-                  , mbr_name
->>>>>>> master
-                  , age
-                  , nickname
-                  , image_url
-                  , allergy
-                  , cup_day
-                  , gender
-                  , cell_phone
-                  , email
-                  , pregnancy
-                  , preg_month
-                  , role
-                  , symptom
-                  , delete_yn
-                  , reg_date
-                  , update_date
+                                mbr_id
+                              , password
+                              , age
+                              , nickname
+                              , image_url
+                              , allergy
+                              , cup_day
+                              , gender
+                              , cell_phone
+                              , email
+                              , pregnancy
+                              , preg_month
+                              , role
+                              , symptom
+                              , delete_yn
+                              , reg_date
+                              , update_date
         ) VALUES (
                    #{mbrId}
                  , #{password}
-<<<<<<< HEAD
-=======
-                 , #{mbrName}
->>>>>>> master
                  , #{age}
                  , #{nickname}
                  , #{imageUrl}

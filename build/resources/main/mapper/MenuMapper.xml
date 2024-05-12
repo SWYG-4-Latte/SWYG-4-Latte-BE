@@ -33,6 +33,19 @@
     </select>
 
 
+    <!-- 카페 브랜드별 랭킹(인기순) -->
+    <select id="findBrandRankingList" resultType="BrandRankingResponse">
+        SELECT MENU.MENU_NO, MENU_NAME, BRAND, CAFFEINE, CONCAT(MENU.MENU_SIZE, '(', SUBSTRING_INDEX(MENU.VOLUME, '(', 1), ')') AS MENU_SIZE, IMAGE_URL
+        FROM MENU
+        LEFT OUTER JOIN DRINK
+            ON MENU.MENU_NO = DRINK.MENU_NO
+        WHERE BRAND = #{brand}
+        GROUP BY MENU.MENU_NO, MENU_NAME, BRAND, CAFFEINE, IMAGE_URL
+        ORDER BY COUNT(DRINK.MENU_NO) DESC
+            LIMIT 10
+    </select>
+
+
     <select id="findBrandCategoryList" resultType="BrandCategoryResponse">
         SELECT
             M1.MENU_NO,
