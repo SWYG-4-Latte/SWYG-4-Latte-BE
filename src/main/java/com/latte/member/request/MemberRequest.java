@@ -12,17 +12,12 @@ import org.springframework.util.StringUtils;
 
 import java.util.Collection;
 
-@Getter
-@Setter
-@ToString
-@Builder
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class MemberRequest implements UserDetails {
 
 
-    public MemberRequest(){
-
-    }
 
 
     private int mbrNo;          // 회원 번호
