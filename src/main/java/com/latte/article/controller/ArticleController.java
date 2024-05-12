@@ -3,6 +3,7 @@ package com.latte.article.controller;
 
 import com.fasterxml.jackson.core.JsonToken;
 import com.latte.article.request.ArticleRequest;
+import com.latte.article.request.LikeRequest;
 import com.latte.article.response.ArticleResponse;
 import com.latte.article.service.ArticleService;
 import com.latte.member.config.SecurityUtil;
@@ -67,8 +68,9 @@ public class ArticleController {
         if("anonymousUser".equals(authentication)) {
             message = "로그인 후 등록해주세요";
         } else {
-            int mbrNo = Integer.parseInt(SecurityUtil.getCurrentUsername());
-            request.setWriterNo(mbrNo);
+            String mbrId = SecurityUtil.getCurrentUsername();
+            MemberResponse member = authService.getMemberInfo(mbrId);
+            request.setWriterNo(member.getMbrNo());
             result = articleService.insertArticle(request);
 
             ArticleResponse article = articleService.detailArticle(request.getArticleNo());
@@ -112,9 +114,10 @@ public class ArticleController {
 
         } else {
 
-            int mbrNo = Integer.parseInt(SecurityUtil.getCurrentUsername());
+            String mbrId = SecurityUtil.getCurrentUsername();
+            MemberResponse member = authService.getMemberInfo(mbrId);
             // 요청된 글의 작성자 확인
-            boolean isAuthor = articleService.isArticleAuthor(articleNo, mbrNo);
+            boolean isAuthor = articleService.isArticleAuthor(articleNo, member.getMbrNo());
 
             // 작성자인 경우에만 수정 권한 부여
             if (isAuthor) {
@@ -164,12 +167,12 @@ public class ArticleController {
             message = "로그인을 해주세요";
 
         } else {
-
-            int mbrNo = Integer.parseInt(SecurityUtil.getCurrentUsername());
+            String mbrId = SecurityUtil.getCurrentUsername();
+            MemberResponse member = authService.getMemberInfo(mbrId);
             // 요청된 글의 작성자 확인
-            boolean isAuthor = articleService.isArticleAuthor(articleNo, mbrNo);
+            boolean isAuthor = articleService.isArticleAuthor(articleNo, member.getMbrNo());
             boolean isAdmin = false;
-            MemberResponse user = authService.getMemberSeq(mbrNo);
+            MemberResponse user = authService.getMemberSeq(member.getMbrNo());
             // 관리자일 경우
             if(user.getRole().equals("ADMIN")) {
                 isAdmin = true;
@@ -231,6 +234,44 @@ public class ArticleController {
         }
 
         ResponseData<?> responseData = new ResponseData<>(message, articleResponse);
+        return new ResponseEntity<>(responseData, OK);
+    }
+
+
+    /**
+     * 좋아요 API
+     * @param articleNo
+     * @return
+     */
+    @PostMapping("/like/{articleNo}")
+    public ResponseEntity<?> like(@PathVariable("articleNo") int articleNo) {
+
+        // 현재 사용자 인증 정보 가져오기
+        Object authentication = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Map<String, Object> dataMap = new HashMap<>();
+        boolean result = false;
+        String message = "";
+
+        // 로그인 상태 확인
+        if("anonymousUser".equals(authentication)) {
+            message = "로그인을 해주세요";
+
+        } else {
+            String mbrId = SecurityUtil.getCurrentUsername();
+            MemberResponse member = authService.getMemberInfo(mbrId);
+            result = articleService.likeCount(articleNo, member.getMbrNo());
+            ArticleResponse articleResponse = articleService.detailArticle(articleNo);
+            if (!result) {
+                message = "좋아요가 실패하였습니다.";
+
+            } else {
+                dataMap.put("articleInfo", articleResponse);
+                message = "좋아요가 성공하였습니다.";
+            }
+        }
+
+        ResponseData<?> responseData = new ResponseData<>(message, dataMap);
         return new ResponseEntity<>(responseData, OK);
     }
 

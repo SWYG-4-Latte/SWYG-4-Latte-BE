@@ -51,8 +51,7 @@ public class JwtTokenProvider {
 
                 .collect(Collectors.joining(","));
 
-        MemberResponse user = ((PrincipalDetails) authentication.getPrincipal()).getMember();
-
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         Date now = new Date();
         Date accessTokenExpiration = new Date(now.getTime() + accessTokenExpirationMs);
         Date refreshTokenExpiration = new Date(now.getTime() + refreshTokenExpirationMs);
@@ -60,7 +59,7 @@ public class JwtTokenProvider {
         // Access Token 생성
         String accessToken = Jwts.builder()
                 //.setSubject(authentication.getName())
-                .setSubject(String.valueOf(user.getMbrNo()))
+                .setSubject(String.valueOf(userDetails.getUsername()))
                 .claim("auth", authorities)
                 .setExpiration(accessTokenExpiration)
                 .signWith(key, SignatureAlgorithm.HS256)
