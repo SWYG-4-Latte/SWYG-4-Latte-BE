@@ -77,6 +77,7 @@
                       ON DRINK.MENU_NO = MENU.MENU_NO
         WHERE MBR_NO = #{mbrNo}
           AND REQ_DATE = #{localDateTime}
+        ORDER BY DRINK_NO DESC
     </select>
 
 
