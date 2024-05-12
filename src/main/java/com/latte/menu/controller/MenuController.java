@@ -3,8 +3,8 @@ package com.latte.menu.controller;
 import com.latte.common.response.ResponseData;
 import com.latte.drink.exception.NotEnoughInfoException;
 import com.latte.drink.exception.NotLoginException;
-import com.latte.member.mapper.AuthMapper;
 import com.latte.member.response.MemberResponse;
+import com.latte.member.service.AuthService;
 import com.latte.menu.response.*;
 import com.latte.menu.service.BrandType;
 import com.latte.menu.service.MenuService;
@@ -29,7 +29,7 @@ import java.util.List;
 public class MenuController {
 
     private final MenuService menuService;
-    private final AuthMapper authMapper;    // 테스트를 위한 임시
+    private final AuthService authService;
 
     /**
      * 토큰이 전달되지 않았으면 빈 값 반환
@@ -162,8 +162,8 @@ public class MenuController {
             username = tokenUser.getUsername();
             log.info("username = {}", username);
         }
-        return authMapper.findById(username);
+        return authService.getMemberInfo(username);
         */
-        return authMapper.findById("testUser");
+        return authService.getMemberInfo("testUser");
     }
 }
