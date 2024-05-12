@@ -16,7 +16,8 @@ import java.util.Collections;
 import java.util.List;
 
 @Data
-public class MemberRequest implements UserDetails {
+public class MemberRequest {
+//public class MemberRequest implements UserDetails {
 
     private int mbrNo;          // 회원 번호
 
@@ -68,7 +69,7 @@ public class MemberRequest implements UserDetails {
     }
 
 
-    @Override
+/*    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(this.role));
     }
@@ -97,7 +98,7 @@ public class MemberRequest implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
+    }*/
 
 
 }
