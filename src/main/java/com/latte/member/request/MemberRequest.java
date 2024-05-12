@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -60,7 +61,7 @@ public class MemberRequest implements UserDetails {
 
     private String imageUrl;         // 이미지
 
-    private String role;            // 권한(role_user, role_admin)
+    private String role;            // 권한(user, admin)
 
     //@NotEmpty(message = "나이를 입력해주세요")
     private String age;        // 나이
@@ -76,10 +77,11 @@ public class MemberRequest implements UserDetails {
         password = passwordEncoder.encode(password);
     }
 
-    @Override
+
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority(role));
+        return List.of(new SimpleGrantedAuthority(this.role));
     }
+
 
     @Override
     public String getUsername() {
