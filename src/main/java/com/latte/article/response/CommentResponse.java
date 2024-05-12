@@ -1,9 +1,7 @@
 package com.latte.article.response;
 
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.w3c.dom.Text;
 
 import java.sql.Timestamp;
@@ -17,18 +15,19 @@ public class CommentResponse {
 
     private int articleNo;			// 아티클 번호
 
-    private Text content;			// 내용
+    private String content;			// 내용
 
     private int likeCnt;			// 좋아요(추천수)
 
-    private int coWriter;			// 작성자 번호
+    private int writerNo;			// 작성자 번호
 
+    private String nickname;         // 작성자 닉네임
 
-    private boolean deleteYn;		// 삭제여부
+    private String deleteYn;		// 삭제여부
 
     private int reportCount;		// 신고횟수
 
-    private Timestamp reqDate;		// 등록일
+    private Timestamp regDate;		// 등록일
 
     private Timestamp updateDate;	// 변경일
 

@@ -88,6 +88,47 @@
         WHERE `article_no`=#{articleNo}
     </update>
 
+
+    <!--좋아요 추가-->
+    <insert id="likeCount">
+        INSERT INTO ARTICLE_LIKE (
+             article_no
+            , reg_no
+            , reg_date
+        ) VALUES (
+                  #{articleNo}
+                 , #{regNo}
+                 , NOW()
+        )
+    </insert>
+
+    <!--좋아요 삭제-->
+    <delete id="unlikeCount" parameterType="int">
+        DELETE FROM ARTICLE_LIKE
+        WHERE like_no = #{likeNo}
+    </delete>
+
+    <!--아티클 좋아요 수정-->
+    <update id="updateArticleLike"  parameterType="int">
+        UPDATE ARTICLE
+        SET
+            like_cnt = (SELECT COUNT(*)
+                             FROM ARTICLE_LIKE
+                             WHERE article_no = #{articleNo})
+        WHERE article_no = #{articleNo}
+    </update>
+
+
+    <!--등록자 좋아요-->
+    <select id="findLikeByArticleRegNo" parameterType="int" resultType="Integer">
+        SELECT like_no
+        FROM ARTICLE_LIKE
+        WHERE article_no = #{articleNo}
+          AND reg_no = #{regNo}
+    </select>
+
+
+
     <!--아티클 등록-->
     <insert id="insertArticle" parameterType="com.latte.article.request.ArticleRequest" useGeneratedKeys="true" keyProperty="articleNo">
         /* ArticleMapper.insertMember */

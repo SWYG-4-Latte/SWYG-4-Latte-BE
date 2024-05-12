@@ -26,9 +26,9 @@ public class PrincipalDetails implements UserDetails {
         this.user = user;
     }
 
-    public MemberResponse getMember() {
+/*    public MemberResponse getMember() {
         return user;
-    }
+    }*/
 
     public int getMemberNo() {
         return user.getMbrNo();

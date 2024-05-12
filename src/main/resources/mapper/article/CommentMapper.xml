@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- mapper DTD 선언 -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.latte.article.repository.CommentMapper">
+
+
+    <!-- comment 테이블 전체 컬럼 -->
+    <sql id="commentColumns">
+            comment_no
+            , article_no
+            , content
+            , like_cnt
+            , writer_no
+            , delete_yn
+            , report_count
+            , reg_date
+            , update_date
+    </sql>
+
+
+    <!-- 댓글 저장 -->
+    <insert id="save" parameterType="com.latte.article.request.CommentRequest" useGeneratedKeys="true" keyProperty="commentNo">
+        INSERT INTO COMMENT (
+        <include refid="commentColumns" />
+        ) VALUES (
+         #{commentNo}
+        , #{articleNo}
+        , #{content}
+        , #{likeCnt}
+        , #{writerNo}
+        , 'N'
+        , 0
+        , NOW()
+        , NULL
+        )
+    </insert>
+
+
+    <!-- 댓글 상세정보 조회 -->
+    <select id="findByComment" parameterType="int" resultType="com.latte.article.response.CommentResponse">
+        /* CommentMapper.findByComment */
+        SELECT
+        <include refid="commentColumns" />
+        FROM
+        COMMENT
+        WHERE comment_no = #{commentNo}
+    </select>
+
+
+    <!-- 댓글 수정 -->
+    <update id="update" parameterType="com.latte.article.request.CommentRequest">
+        /* CommentMapper.update */
+        UPDATE COMMENT
+        SET
+            update_date = NOW()
+          , content = #{content}
+        WHERE
+            comment_no = #{commentNo}
+    </update>
+
+
+    <!-- 댓글 삭제 -->
+    <delete id="deleteByComment" parameterType="int">
+        /* CommentMapper.deleteByComment */
+        UPDATE COMMENT
+        SET
+            delete_yn = 'Y'
+        WHERE
+            comment_no = #{commentNo}
+    </delete>
+
+
+    <!-- 댓글 리스트 조회 -->
+    <select id="findAll" parameterType="int" resultType="com.latte.article.response.CommentResponse">
+        /* CommentMapper.findAll */
+        SELECT
+        <include refid="commentColumns" />
+        FROM COMMENT
+        WHERE delete_yn = 'N'
+            AND article_no = #{articleNo}
+        ORDER BY comment_no ASC
+    </select>
+
+
+    <!-- 작성자 확인 여부 -->
+    <select id="isCommentAuthor" parameterType="int" resultType="int">
+        /* CommentMapper.isCommentAuthor */
+        SELECT
+            COUNT(*)
+        FROM
+            COMMENT
+        WHERE
+            `comment_no` = #{commentNo}
+          AND `writer_no` = #{writerNo}
+    </select>
+
+    <!--댓글 신고 증가-->
+    <update id="reportCount">
+        UPDATE COMMENT
+        SET report_count = report_count + 1
+        WHERE `comment_no`=#{commentNo}
+    </update>
+
+
+</mapper>

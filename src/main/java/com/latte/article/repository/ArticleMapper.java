@@ -1,6 +1,7 @@
 package com.latte.article.repository;
 
 import com.latte.article.request.ArticleRequest;
+import com.latte.article.request.LikeRequest;
 import com.latte.article.response.ArticleResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -32,4 +33,18 @@ public interface ArticleMapper {
     // 아티클 조회수 증가
     void viewCount(int articleNo);
 
+    // 아티클 좋아요 수 추가
+    void likeCount(@Param("articleNo") int articleNo, @Param("regNo") int regNo);
+
+    // 아티클 좋아요 삭제
+    void unlikeCount(int likeNo);
+
+    // 아티클 테이블에 좋아요 수정
+    int updateArticleLike(@Param("articleNo") int articleNo);
+
+    // 작성자가 좋아요를 눌렀는지 여부 확인
+    Integer findLikeByArticleRegNo(@Param("articleNo") int articleNo, @Param("regNo") int regNo);
+
 }
+
+

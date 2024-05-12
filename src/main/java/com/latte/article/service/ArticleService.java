@@ -4,10 +4,16 @@ package com.latte.article.service;
 
 import com.latte.article.repository.ArticleMapper;
 import com.latte.article.request.ArticleRequest;
+import com.latte.article.request.LikeRequest;
 import com.latte.article.response.ArticleResponse;
+import com.latte.article.response.CommentResponse;
+import com.latte.member.response.MemberResponse;
+import com.latte.member.service.AuthService;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,6 +23,9 @@ public class ArticleService {
 
     @Autowired
     public ArticleMapper mapper;
+
+    @Autowired
+    public AuthService authService;
 
 
     /**
@@ -63,7 +72,14 @@ public class ArticleService {
      */
     public List<ArticleResponse> articleList() {
 
-        return mapper.getArticleList();
+        List<ArticleResponse> list =  mapper.getArticleList();
+        for (ArticleResponse article : list) {
+            MemberResponse member = authService.getMemberSeq(article.getWriterNo());
+            article.setNickname(member.getNickname());
+        }
+
+        return list;
+
     }
 
 
@@ -74,7 +90,12 @@ public class ArticleService {
      */
     public ArticleResponse detailArticle(int articleNo) {
 
-        return mapper.detailArticle(articleNo);
+        ArticleResponse user = mapper.detailArticle(articleNo);
+
+        MemberResponse member = authService.getMemberSeq(user.getWriterNo());
+        user.setNickname(member.getNickname());
+
+        return user;
     }
 
 
@@ -98,13 +119,51 @@ public class ArticleService {
 
     /**
      * 아티클 조회수 증가
-     * @param viewsNumber
+     * @param articleNo
      */
-    public void viewCount(int viewsNumber) {
+    public void viewCount(int articleNo) {
 
-        mapper.viewCount(viewsNumber);
+        mapper.viewCount(articleNo);
     }
 
+
+    /**
+     * 아티클 좋아요
+     * @param articleNo
+     */
+    @Transactional
+    public boolean likeCount(int articleNo, int regNo) {
+
+        // 작성자 여부 확인
+        Integer likeNo = mapper.findLikeByArticleRegNo(articleNo, regNo);
+
+
+        //MemberResponse memberResponse = authService.getMemberSeq(mbrNo);
+
+        LikeRequest likeRequest = new LikeRequest();
+        likeRequest.setArticleNo(articleNo);
+        likeRequest.setRegNo(regNo);
+
+
+        // 해당 아티클에 작성자가 like를 누른 적이 없을 때
+
+        if(likeNo == null) {
+            mapper.likeCount(articleNo, regNo);
+        } else {
+
+            mapper.unlikeCount(likeNo);
+        }
+
+        int res = mapper.updateArticleLike(articleNo);
+
+        if(res > 0) {
+            return true;
+        } else {
+            return false;
+        }
+
+
+    }
 
 
 
