@@ -204,6 +204,7 @@ public class AuthConroller {
      * @return
      */
     @PostMapping("/update/{seq}")
+    @ResponseBody
     public ResponseEntity<?> update(@PathVariable("seq") int seq, @RequestBody MemberRequest request) {
 
 
