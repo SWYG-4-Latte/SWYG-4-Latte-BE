@@ -1,5 +1,6 @@
 package com.latte.menu.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.latte.common.response.ResponseData;
 import com.latte.drink.exception.NotEnoughInfoException;
 import com.latte.drink.exception.NotLoginException;
@@ -139,7 +140,7 @@ public class MenuController {
      */
     @GetMapping("/detail/{menuNo}")
     public ResponseEntity<?> menuDetail(@PathVariable Long menuNo,
-                                         @RequestParam(value = "menu_size", defaultValue = "") String menuSize) {
+                                         @RequestParam(value = "menu_size", defaultValue = "") String menuSize) throws JsonProcessingException {
         MemberResponse member;
         ResponseData<?> responseData;
         try {

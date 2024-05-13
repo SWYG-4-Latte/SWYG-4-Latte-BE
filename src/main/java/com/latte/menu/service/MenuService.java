@@ -1,5 +1,7 @@
 package com.latte.menu.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latte.drink.exception.NotEnoughInfoException;
 import com.latte.drink.standard.StandardValueCalculate;
 import com.latte.member.response.MemberResponse;
@@ -12,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -138,15 +139,34 @@ public class MenuService {
         return menuSimpleResponses;
     }
 
-
+    
     /**
      * 메뉴 상세 조회
-     * 메뉴 사이즈가 없으면 메뉴 번호로 조회
-     * 메뉴 사이즈가 있으면 브랜드명, 음료명, 사이즈로 조회
      */
-    public MenuDetailResponse menuDetail(Long menuNo, String menuSize, MemberResponse member) {
+    public MenuDetailResponse menuDetail(Long menuNo, String menuSize, MemberResponse member) throws JsonProcessingException {
+        /**
+         * 사이즈 정보가 포함된 경우는 반드시 첫 상세 조회 이후임을 보장
+         * 로그인 한 사용자는 아이디가 key 값, 로그인 하지 않은 사용자는 브랜드명+메뉴명이 key 값
+         */
+        String key;
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        if (StringUtils.hasText(menuSize)) {
+            if (member == null) {
+                log.info("##################### 비로그인 사용자 Redis 에서 상세 조회 #####################");
+                key = menuMapper.findMenuById(menuNo);
+            } else {
+                log.info("##################### 로그인 사용자 Redis 에서 상세 조회 #####################");
+                key = member.getMbrId();
+            }
+            Map<Object, Object> entries = hashOperations.entries(key);
+            return objectMapper.readValue((String) entries.get(menuSize), MenuDetailResponse.class);
+        }
+
+        /**
+         * 로그인 한 사용자의 경우, 현재 메뉴가 최대 카페인 섭취량의 몇 % 를 차지하는지 정보가 필요
+         */
         Integer maxCaffeine = null;
-        String brand = "", menuName = "";
         try {
             if (member != null) {
                 maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
@@ -156,33 +176,48 @@ public class MenuService {
         }
 
         /**
-         * 사이즈 변경 조회 시, Redis 에서 메뉴번호를 통해 브랜드명과 메뉴명을 조회
-         * 첫 상세 조회 이후 가능하기 때문에 메뉴번호의 존재를 보장
+         * 해당 메뉴의 모든 사이즈를 조회하고, Redis 에 저장
          */
-        if (StringUtils.hasText(menuSize)) {
-            Map<Object, Object> entries = hashOperations.entries(String.valueOf(menuNo));
-            brand = (String) entries.get("brand");
-            menuName = (String) entries.get("menuName");
+        List<MenuDetailResponse> menuDetailList = menuMapper.getMenuDetail(menuNo, menuSize, maxCaffeine);
+        if (member == null) {
+            log.info("##################### 비로그인 사용자 최초 상세 조회 #####################");
+            key = menuDetailList.get(0).getBrand() + "_" + menuDetailList.get(0).getMenuName();
+        } else {
+            log.info("##################### 로그인 사용자 최초 상세 조회 #####################");
+            key = member.getMbrId();
         }
-        
-        MenuDetailResponse menuDetail = menuMapper.getMenuDetail(menuNo, menuSize, maxCaffeine, brand, menuName);
-
-        /**
-         * 현재 메뉴의 브랜드명, 메뉴명을 redis 에 저장
-         */
-        saveCache(menuDetail);
-        return menuDetail;
+        return saveCache(menuNo, key, menuDetailList);
     }
 
 
     /**
-     * 조회된 메뉴 번호를 기준으로 브랜드명, 메뉴명을 저장
-     * 사이즈 변경 조회 시, 최적화를 위해 이전 메뉴 번호를 기준으로 필요한 정보를 조회
+     * 최초 상세 조회 시, 모든 사이즈에 대한 상세 정보를 모두 가져와 Redis 에 저장
+     * 외부 key 값은 memberId, 내부 Map 의 key 값은 각 사이즈
+     * 로그인 하지 않은 사용자라면 브랜드명+메뉴명을 외부 key 값으로 사용
+     * 저장하면서 요청에 맞는 메뉴 상세 정보 기록 및 반환
      */
-    private void saveCache(MenuDetailResponse menuDetail) {
+    private MenuDetailResponse saveCache(Long menuNo, String key, List<MenuDetailResponse> menuDetailList) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
         Map<String, String> map = new HashMap<>();
-        map.put("brand", menuDetail.getBrand());
-        map.put("menuName", menuDetail.getMenuName());
-        hashOperations.putAll(String.valueOf(menuDetail.getMenuNo()), map);
+        MenuDetailResponse detailResponse = null;  // 반환할 정보
+        List<String> others = new ArrayList<>();    // 다른 사이즈 저장
+
+        // 다른 사이즈 정보 추출
+        for (MenuDetailResponse menuDetailResponse : menuDetailList) {
+            others.add(menuDetailResponse.getMenuSize());
+        }
+
+        for (MenuDetailResponse menuDetailResponse : menuDetailList) {
+            menuDetailResponse.setOtherSizes(others);
+            map.put(menuDetailResponse.getMenuSize(), objectMapper.writeValueAsString(menuDetailResponse));
+            if (Objects.equals(menuNo, menuDetailResponse.getMenuNo())) {
+                detailResponse = menuDetailResponse;
+            }
+        }
+        hashOperations.putAll(key, map);
+        return detailResponse;
     }
+
+
+
 }
