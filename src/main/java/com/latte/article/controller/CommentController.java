@@ -56,9 +56,10 @@ public class CommentController {
         if("anonymousUser".equals(authentication)) {
             message = "로그인 후 등록해주세요";
         } else {
-            int mbrNo = Integer.parseInt(SecurityUtil.getCurrentUsername());
+            String mbrId = SecurityUtil.getCurrentUsername();
+            MemberResponse member = authService.getMemberInfo(mbrId);
             request.setArticleNo(articleNo);
-            request.setWriterNo(mbrNo);
+            request.setWriterNo(member.getMbrNo());
 
             result = commentService.saveComment(request);
             CommentResponse comment = commentService.findCommentById(request.getCommentNo());
@@ -98,10 +99,11 @@ public class CommentController {
         if("anonymousUser".equals(authentication)) {
             message = "로그인 후 등록해주세요";
         } else {
-            int mbrNo = Integer.parseInt(SecurityUtil.getCurrentUsername());
+            String mbrId = SecurityUtil.getCurrentUsername();
+            MemberResponse member = authService.getMemberInfo(mbrId);
 
             // 요청된 글의 작성자 확인
-            boolean isAuthor = commentService.isCommentAuthor(commentNo, mbrNo);
+            boolean isAuthor = commentService.isCommentAuthor(commentNo, member.getMbrNo());
 
             // 작성자인 경우에만 수정 권한 부여
             if (isAuthor) {
@@ -150,11 +152,12 @@ public class CommentController {
 
         } else {
 
-            int mbrNo = Integer.parseInt(SecurityUtil.getCurrentUsername());
+            String mbrId = SecurityUtil.getCurrentUsername();
+            MemberResponse member = authService.getMemberInfo(mbrId);
             // 요청된 댓글의 작성자 확인
-            boolean isAuthor = commentService.isCommentAuthor(commentNo, mbrNo);
+            boolean isAuthor = commentService.isCommentAuthor(commentNo, member.getMbrNo());
             boolean isAdmin = false;
-            MemberResponse user = authService.getMemberSeq(mbrNo);
+            MemberResponse user = authService.getMemberSeq(member.getMbrNo());
             // 관리자일 경우
             if(user.getRole().equals("ADMIN")) {
                 isAdmin = true;
