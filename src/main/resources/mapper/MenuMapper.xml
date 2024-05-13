@@ -269,12 +269,12 @@
         <!-- 낮은 함량의 카페인 -->
         <collection property="lowCaffeineMenus" column="base = CAFFEINE, menuNo = MENU_NO" ofType="MenuSimpleResponse" select="getLowCaffeineMenu"/>
         <!-- 메뉴의 다른 사이즈 정보 -->
-        <collection property="otherSizes" column="no = MENU_NO" ofType="java.lang.String" select="findOtherMenus"/>
+        <collection property="otherSizes" column="brand = BRAND, menuName = MENU_NAME" ofType="java.lang.String" select="findOtherMenus"/>
     </resultMap>
 
 
     <select id="getMenuDetail" resultMap="menuDetailResultMap">
-        SELECT MENU_NO, M1.BRAND, M1.MENU_NAME, CAFFEINE, PRICE, KCAL, SUGAR, SALT, PROTEIN, SAT_FAT, IMAGE_URL,
+        SELECT MENU_NO, BRAND, MENU_NAME, CAFFEINE, PRICE, KCAL, SUGAR, SALT, PROTEIN, SAT_FAT, IMAGE_URL,
                 CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') AS MENU_SIZE,
         <!-- 칼로리 높낮이 -->
         CASE
@@ -309,20 +309,17 @@
         <if test="maxCaffeine != null">
             ,CONCAT(ROUND(CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) / #{maxCaffeine} * 100), '%') AS PERCENT
         </if>
-        FROM MENU AS M1
-        INNER JOIN (
-            SELECT BRAND, MENU_NAME
-            FROM MENU
-            WHERE MENU_NO = #{no}
-        ) AS M2
-            ON M1.BRAND = M2.BRAND
-                AND M1.MENU_NAME = M2.MENU_NAME
+        FROM MENU
         <where>
-            <if test="menuSize != null and menuSize != ''">
-                and CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') = #{menuSize}
-            </if>
+            <!-- 첫 상세 조회 -->
             <if test="menuSize == null or menuSize == ''">
-                and M1.MENU_NO = #{no}
+                and MENU_NO = #{no}
+            </if>
+            <!-- 상세 조회 후 사이즈 변경 조회 -->
+            <if test="menuSize != null and menuSize != ''">
+                and BRAND = #{brand}
+                and MENU_NAME = #{menuName}
+                and CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') = #{menuSize}
             </if>
         </where>
     </select>
@@ -348,15 +345,10 @@
 
     <!-- 메뉴의 다른 사이즈 정보 -->
     <select id="findOtherMenus" resultType="java.lang.String">
-        SELECT CONCAT(M1.MENU_SIZE, '(', SUBSTRING_INDEX(M1.VOLUME, '(', 1), ')') AS OTHER_MENU_SIZE
-        FROM MENU AS M1
-        INNER JOIN (
-            SELECT BRAND, MENU_NAME
-            FROM MENU
-            WHERE MENU_NO = #{no}
-        ) AS M2
-            ON M1.BRAND = M2.BRAND
-                AND M1.MENU_NAME = M2.MENU_NAME
+        SELECT CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') AS OTHER_MENU_SIZE
+        FROM MENU
+        WHERE BRAND = #{brand}
+            AND MENU_NAME = #{menuName}
     </select>
 
 
