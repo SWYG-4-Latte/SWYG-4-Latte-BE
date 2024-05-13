@@ -268,8 +268,6 @@
         </association>
         <!-- 낮은 함량의 카페인 -->
         <collection property="lowCaffeineMenus" column="base = CAFFEINE, menuNo = MENU_NO" ofType="MenuSimpleResponse" select="getLowCaffeineMenu"/>
-        <!-- 메뉴의 다른 사이즈 정보 -->
-        <collection property="otherSizes" column="brand = BRAND, menuName = MENU_NAME" ofType="java.lang.String" select="findOtherMenus"/>
     </resultMap>
 
 
@@ -344,11 +342,16 @@
 
 
     <!-- 메뉴의 다른 사이즈 정보 -->
-    <select id="findOtherMenus" resultType="java.lang.String">
-        SELECT CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') AS OTHER_MENU_SIZE
-        FROM MENU
-        WHERE BRAND = #{brand}
-            AND MENU_NAME = #{menuName}
+    <select id="findOtherSize" resultType="java.lang.String">
+        SELECT CONCAT(M1.MENU_SIZE, '(', SUBSTRING_INDEX(M1.VOLUME, '(', 1), ')') AS OTHER_MENU_SIZE
+        FROM MENU AS M1
+        INNER JOIN (
+            SELECT BRAND, MENU_NAME
+            FROM MENU
+            WHERE MENU_NO = #{menuNo}
+        ) AS M2
+        ON M1.BRAND = M2.BRAND
+            AND M1.MENU_NAME = M2.MENU_NAME
     </select>
 
 
