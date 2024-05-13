@@ -4,6 +4,18 @@
 
 <mapper namespace="com.latte.drink.repository.DrinkMapper">
 
+    <!-- 홈화면 - 오늘 마신 카페인량 -->
+    <select id="findSumCaffeineByToday" resultType="int">
+        SELECT  IFNULL(SUM(CAST(SUBSTRING(MENU.CAFFEINE, 1, LENGTH(MENU.CAFFEINE) - 2) AS UNSIGNED)), 0)
+        FROM DRINK
+                 JOIN MENU
+                      ON DRINK.MENU_NO = MENU.MENU_NO
+        WHERE MBR_NO = #{mbrNo}
+          AND REQ_DATE = #{today}
+    </select>
+
+
+    <!-- 홈화면 - 최근마신 음료 -->
     <select id="findHomeResponse" resultType="DrinkMenuResponse">
         SELECT DISTINCT
             MENU.MENU_NO,
