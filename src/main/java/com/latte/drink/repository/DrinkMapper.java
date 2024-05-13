@@ -12,6 +12,9 @@ import java.util.List;
 @Mapper
 public interface DrinkMapper {
 
+    int findSumCaffeineByToday(@Param("mbrNo") int mbrNo,
+                               @Param("today") LocalDateTime today);
+
     List<DrinkMenuResponse> findHomeResponse(@Param("mbrNo") int mbrNo,
                                              @Param("today") LocalDateTime today);
 

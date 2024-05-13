@@ -8,8 +8,8 @@ import com.latte.drink.response.CalendarResponse;
 import com.latte.drink.response.DateStatusResponse;
 import com.latte.drink.response.DrinkMenuResponse;
 import com.latte.drink.service.DrinkService;
-import com.latte.member.mapper.AuthMapper;
 import com.latte.member.response.MemberResponse;
+import com.latte.member.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -30,7 +30,7 @@ import java.util.List;
 public class DrinkController {
 
     private final DrinkService drinkService;
-    private final AuthMapper authMapper;    // 테스트를 위한 임시
+    private final AuthService authService;
 
     /**
      * 홈화면
@@ -146,8 +146,8 @@ public class DrinkController {
             username = tokenUser.getUsername();
             log.info("username = {}", username);
         }
-        return authMapper.findById(username);
+        return authService.getMemberInfo(username);
         */
-        return authMapper.findById("testUser");
+        return authService.getMemberInfo("testUser");
     }
 }

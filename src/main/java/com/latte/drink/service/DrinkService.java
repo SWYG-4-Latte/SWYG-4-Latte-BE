@@ -30,15 +30,12 @@ public class DrinkService {
      * 닉네임, 오늘 카페인 섭취 상태, 오늘 카페인 섭취량, 기준값과의 차이, 최근 마신 음료
      */
     public HomeCaffeineResponse findHomeResponse(MemberResponse member) {
-        int todayCaffeine = 0;
         String interval, status;
         LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-        List<DrinkMenuResponse> recent = drinkMapper.findHomeResponse(member.getMbrNo(), today);
-        int maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
-
-        for (DrinkMenuResponse drinkMenuResponse : recent) {
-            todayCaffeine += Integer.parseInt(drinkMenuResponse.getCaffeine().replace("mg", ""));
-        }
+        
+        List<DrinkMenuResponse> recent = drinkMapper.findHomeResponse(member.getMbrNo(), today); // 최근 마신 음료
+        int todayCaffeine = drinkMapper.findSumCaffeineByToday(member.getMbrNo(), today);        // 오늘 마신 카페인 합계
+        int maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();   // 카페인 섭취량 기준값
 
         if (maxCaffeine < todayCaffeine) {
             status = "초과";
