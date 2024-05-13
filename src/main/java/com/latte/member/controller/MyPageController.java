@@ -89,11 +89,11 @@ public class MyPageController {
         // Authorization 헤더에서 토큰 추출 (Bearer 토큰)
         //String jwtToken = token.substring(7); // "Bearer " 이후의 토큰 부분만 추출
 
-        int mbrNo = Integer.parseInt(SecurityUtil.getCurrentUsername());
+        String mbrId = SecurityUtil.getCurrentUsername();
         String message = "";
         Map<String, Object> dataMap = new HashMap<>();
 
-        MemberResponse member = authService.getMemberSeq(mbrNo);
+        MemberResponse member = authService.getMemberInfo(mbrId);
         // 토큰을 사용하여 회원 정보 확인
         //MemberResponse member = authService.getMemberInfoFromToken(jwtToken);
 
