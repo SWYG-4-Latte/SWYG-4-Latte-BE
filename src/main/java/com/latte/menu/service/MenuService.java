@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -28,16 +29,19 @@ public class MenuService {
     private final MenuMapper menuMapper;
 
     private final StandardValueCalculate standardValueCalculate;
+
     private final String rankingKey = "menuSearchRanking";
 
     private final RedisTemplate<String, String> redisTemplate;
-    private ZSetOperations<String, String> zSetOperations;
-    private HashOperations<String, Object, Object> hashOperations;
+    private ZSetOperations<String, String> zSetOperations;  // 인기 검색어
+    private HashOperations<String, Object, Object> hashOperations;  // 브랜드명과 메뉴명
+    private ListOperations<String, String> listOperations;  // 다른 사이즈 정보
 
     @PostConstruct
     private void init() {
         zSetOperations = redisTemplate.opsForZSet();
         hashOperations = redisTemplate.opsForHash();
+        listOperations = redisTemplate.opsForList();
     }
 
 
@@ -152,31 +156,70 @@ public class MenuService {
         } catch (NotEnoughInfoException exception) {
             maxCaffeine = null;
         }
+
         /**
-         * 사이즈 변경 조회 시, 메뉴번호를 통해 브랜드명과 메뉴명을 조회
-         * 첫 상세 조회 이후 가능하기 때문에 메뉴번호 존재를 보장
+         * 다른 사이즈 정보 조회
+         * 첫 상세조회라면 DB 에서 조회, 사이즈 변경 조회라면 Redis 에서 조회
+         */
+        List<String> otherSize = findOtherSize(menuNo, menuSize);
+
+        /**
+         * 사이즈 변경 조회 시, Redis 에서 메뉴번호를 통해 브랜드명과 메뉴명을 조회
+         * 첫 상세 조회 이후 가능하기 때문에 메뉴번호의 존재와 다른 사이즈 정보의 존재를 보장
          */
         if (StringUtils.hasText(menuSize)) {
             Map<Object, Object> entries = hashOperations.entries(String.valueOf(menuNo));
             brand = (String) entries.get("brand");
             menuName = (String) entries.get("menuName");
         }
+
+        /**
+         * 메뉴 상세 조회 후, 다른 사이즈 정보를 응답에 추가
+         */
         MenuDetailResponse menuDetail = menuMapper.getMenuDetail(menuNo, menuSize, maxCaffeine, brand, menuName);
-        saveCache(menuDetail);  // 현재 메뉴의 브랜드명과 메뉴명을 redis 에 저장
+        menuDetail.setOtherSizes(otherSize);
+
+        /**
+         * 현재 메뉴의 브랜드명, 메뉴명, 다른 사이즈 정보를 redis 에 저장
+         */
+        saveCache(menuDetail);
         return menuDetail;
     }
 
+
     /**
-     * 첫 상세 조회 시 브랜드명과 메뉴명을 저장
-     * key 값은 현재 메뉴 번호
+     * 조회된 메뉴 번호를 기준으로 브랜드명, 메뉴명, 다른 사이즈 정보를 저장
+     * 사이즈 변경 조회 시, 최적화를 위해 이전 메뉴 번호를 기준으로 필요한 정보를 조회
      */
     private void saveCache(MenuDetailResponse menuDetail) {
+        String stringMenuNo = String.valueOf(menuDetail.getMenuNo());
+        
+        // 브랜드명, 메뉴명 저장
         Map<String, String> map = new HashMap<>();
         map.put("brand", menuDetail.getBrand());
         map.put("menuName", menuDetail.getMenuName());
-        hashOperations.putAll(String.valueOf(menuDetail.getMenuNo()), map);
+        hashOperations.putAll(stringMenuNo, map);
+
+        // 다른 사이즈 정보 저장
+        List<String> otherSizes = menuDetail.getOtherSizes();
+        for (String otherSize : otherSizes) {
+            listOperations.rightPush(stringMenuNo + "_size", otherSize);
+        }
     }
 
 
+    /**
+     * 첫 상세 조회 시에는 메뉴번호로 어떤 사이즈 정보가 있는지 탐색 필요
+     * 그 이후에는 이전 메뉴 번호를 통해 사이즈를 조회
+     */
+    private List<String> findOtherSize(Long menuNo, String menuSize) {
+        List<String> others = new ArrayList<>();
 
+        if (!StringUtils.hasText(menuSize)) {
+            others = menuMapper.findOtherSize(menuNo);
+        } else {
+            others = listOperations.range(menuNo + "_size", 0, -1);
+        }
+        return others;
+    }
 }
