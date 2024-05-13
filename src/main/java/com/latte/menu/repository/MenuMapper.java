@@ -42,6 +42,4 @@ public interface MenuMapper {
                                      @Param("maxCaffeine") Integer maxCaffeine,
                                      @Param("brand") String brand,
                                      @Param("menuName") String menuName);
-
-    List<String> findOtherSize(@Param("menuNo") Long menuNo);
 }
