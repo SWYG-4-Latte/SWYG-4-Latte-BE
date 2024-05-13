@@ -201,9 +201,11 @@ public class MenuService {
         hashOperations.putAll(stringMenuNo, map);
 
         // 다른 사이즈 정보 저장
-        List<String> otherSizes = menuDetail.getOtherSizes();
-        for (String otherSize : otherSizes) {
-            listOperations.rightPush(stringMenuNo + "_size", otherSize);
+        if (listOperations.size(stringMenuNo + "_size") == 0) {
+            List<String> otherSizes = menuDetail.getOtherSizes();
+            for (String otherSize : otherSizes) {
+                listOperations.rightPush(stringMenuNo + "_size", otherSize);
+            }
         }
     }
 
