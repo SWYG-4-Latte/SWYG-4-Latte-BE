@@ -6,7 +6,7 @@
 
     <!-- 홈화면 - 오늘 마신 카페인량 -->
     <select id="findSumCaffeineByToday" resultType="int">
-        SELECT  IFNULL(SUM(CAST(REPLACE(MENU.CAFFEINE, 'mg', '') AS UNSIGNED)), 0)
+        SELECT  IFNULL(SUM(CAST(SUBSTRING(MENU.CAFFEINE, 1, LENGTH(MENU.CAFFEINE) - 2) AS UNSIGNED)), 0)
         FROM DRINK
                  JOIN MENU
                       ON DRINK.MENU_NO = MENU.MENU_NO
@@ -35,7 +35,7 @@
 
 
     <select id="findCalendar" resultType="DateResponse">
-        SELECT DAY(REQ_DATE) AS DATE, SUM(CAST(REPLACE(MENU.CAFFEINE, 'mg', '') AS UNSIGNED)) AS CAFFEINE
+        SELECT DAY(REQ_DATE) AS DATE, SUM(CAST(SUBSTRING(MENU.CAFFEINE, 1, LENGTH(MENU.CAFFEINE) - 2) AS UNSIGNED)) AS CAFFEINE
         FROM DRINK
             JOIN MENU
         ON DRINK.MENU_NO = MENU.MENU_NO
@@ -47,7 +47,7 @@
     </select>
 
     <select id="findSumCaffeineByMonth" resultType="int">
-        SELECT IFNULL(SUM(CAST(REPLACE(MENU.CAFFEINE, 'mg', '') AS UNSIGNED)), -1)
+        SELECT IFNULL(SUM(CAST(SUBSTRING(MENU.CAFFEINE, 1, LENGTH(MENU.CAFFEINE) - 2) AS UNSIGNED)), -1)
         FROM DRINK
                  JOIN MENU
                       ON DRINK.MENU_NO = MENU.MENU_NO
@@ -67,7 +67,7 @@
                 ELSE '보통'
                 END AS STATUS
         FROM (
-                 SELECT IFNULL(SUM(CAST(REPLACE(MENU.CAFFEINE, 'mg', '') AS UNSIGNED)), NULL) AS SUM_CAFFEINE
+                 SELECT IFNULL(SUM(CAST(SUBSTRING(MENU.CAFFEINE, 1, LENGTH(MENU.CAFFEINE) - 2) AS UNSIGNED)), NULL) AS SUM_CAFFEINE
                  FROM DRINK
                           JOIN MENU
                                ON DRINK.MENU_NO = MENU.MENU_NO

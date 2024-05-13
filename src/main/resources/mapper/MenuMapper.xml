@@ -14,7 +14,7 @@
                 ELSE '보통'
                 END
         FROM (
-                 SELECT IFNULL(SUM(CAST(REPLACE(MENU.CAFFEINE, 'mg', '') AS UNSIGNED)), NULL) AS SUM_CAFFEINE
+                 SELECT IFNULL(SUM(CAST(SUBSTRING(MENU.CAFFEINE, 1, LENGTH(MENU.CAFFEINE) - 2) AS UNSIGNED)), NULL) AS SUM_CAFFEINE
                  FROM DRINK
                     JOIN MENU
                         ON DRINK.MENU_NO = MENU.MENU_NO
@@ -78,10 +78,10 @@
         ORDER BY
         <choose>
             <when test="sortBy == 'caffeine-desc'">
-                CAST(REPLACE(CAFFEINE, 'mg', '') AS UNSIGNED) DESC
+                CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) DESC
             </when>
             <when test="sortBy == 'caffeine-asc'">
-                CAST(REPLACE(CAFFEINE, 'mg', '') AS UNSIGNED) ASC
+                CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) ASC
             </when>
             <otherwise>
                 MENU_NO ASC
@@ -278,36 +278,36 @@
                 CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') AS MENU_SIZE,
         <!-- 칼로리 높낮이 -->
         CASE
-            WHEN CAST(REPLACE(KCAL, 'kcal', '') AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '낮음'
-            WHEN CAST(REPLACE(KCAL, 'kcal', '') AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '높음'
+            WHEN CAST(SUBSTRING(KCAL, 1, LOCATE('kcal', KCAL) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '낮음'
+            WHEN CAST(SUBSTRING(KCAL, 1, LOCATE('kcal', KCAL) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '높음'
             ELSE '보통'
         END AS KCAL_LEVEL,
         <!-- 당류 높낮이 -->
         CASE
-            WHEN CAST(REPLACE(SUGAR, 'g', '') AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSugar} THEN '낮음'
-            WHEN CAST(REPLACE(SUGAR, 'g', '') AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSugar} THEN '높음'
+            WHEN CAST(SUBSTRING(SUGAR, 1, LOCATE('g', SUGAR) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSugar} THEN '낮음'
+            WHEN CAST(SUBSTRING(SUGAR, 1, LOCATE('g', SUGAR) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSugar} THEN '높음'
             ELSE '보통'
         END AS SUGAR_LEVEL,
         <!-- 나트륨 높낮이 -->
         CASE
-            WHEN CAST(REPLACE(SALT, 'mg', '') AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSalt} THEN '낮음'
-            WHEN CAST(REPLACE(SALT, 'mg', '') AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSalt} THEN '높음'
+            WHEN CAST(SUBSTRING(SALT, 1, LOCATE('mg', SALT) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSalt} THEN '낮음'
+            WHEN CAST(SUBSTRING(SALT, 1, LOCATE('mg', SALT) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSalt} THEN '높음'
             ELSE '보통'
         END AS SALT_LEVEL,
         <!-- 단백질 높낮이 -->
         CASE
-            WHEN CAST(REPLACE(PROTEIN, 'g', '') AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minProtein} THEN '낮음'
-            WHEN CAST(REPLACE(PROTEIN, 'g', '') AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minProtein} THEN '높음'
+            WHEN CAST(SUBSTRING(PROTEIN, 1, LOCATE('g', PROTEIN) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minProtein} THEN '낮음'
+            WHEN CAST(SUBSTRING(PROTEIN, 1, LOCATE('g', PROTEIN) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minProtein} THEN '높음'
             ELSE '보통'
         END AS PROTEIN_LEVEL,
         <!-- 포화지방 높낮이 -->
         CASE
-            WHEN CAST(REPLACE(SAT_FAT, 'g', '') AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSatFat} THEN '낮음'
-            WHEN CAST(REPLACE(SAT_FAT, 'g', '') AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSatFat} THEN '높음'
+            WHEN CAST(SUBSTRING(SAT_FAT, 1, LOCATE('g', SAT_FAT) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSatFat} THEN '낮음'
+            WHEN CAST(SUBSTRING(SAT_FAT, 1, LOCATE('g', SAT_FAT) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSatFat} THEN '높음'
             ELSE '보통'
         END AS SAT_FAT_LEVEL
         <if test="maxCaffeine != null">
-            ,CONCAT(ROUND(CAST(REPLACE(CAFFEINE, 'mg', '') AS UNSIGNED) / #{maxCaffeine} * 100), '%') AS PERCENT
+            ,CONCAT(ROUND(CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) / #{maxCaffeine} * 100), '%') AS PERCENT
         </if>
         FROM MENU
         <where>
@@ -331,7 +331,7 @@
         FROM MENU
         <where>
             <if test="base != '0mg'">
-                and CAST(REPLACE(CAFFEINE, 'mg', '') AS UNSIGNED) &lt; CAST(REPLACE(#{base}, 'mg', '') AS UNSIGNED)
+                and CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) &lt; CAST(SUBSTRING(#{base}, 1, LOCATE('mg', #{base}) - 1) AS UNSIGNED)
             </if>
             <if test="base == '0mg'">
                 and CAFFEINE = '0mg'
