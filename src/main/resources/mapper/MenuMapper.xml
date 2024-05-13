@@ -317,8 +317,8 @@
             </if>
             <!-- 상세 조회 후 사이즈 변경 조회 -->
             <if test="menuSize != null and menuSize != ''">
-                and MENU_NAME = #{menuName}
                 and BRAND = #{brand}
+                and MENU_NAME = #{menuName}
                 and CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') = #{menuSize}
             </if>
         </where>
