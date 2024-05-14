@@ -140,15 +140,17 @@ public class MenuController {
      */
     @GetMapping("/detail/{menuNo}")
     public ResponseEntity<?> menuDetail(@PathVariable Long menuNo,
-                                         @RequestParam(value = "menu_size", defaultValue = "") String menuSize) throws JsonProcessingException {
-        MemberResponse member;
+                                         @RequestParam(value = "menu_size", defaultValue = "") String menuSize) {
         ResponseData<?> responseData;
+
         try {
-            member = isLogin();
-        } catch (NotLoginException exception) {
-            member = null;
+            MemberResponse member = isLogin();
+            responseData = new ResponseData<>(null, menuService.menuDetail(menuNo, menuSize, member));
+        } catch (JsonProcessingException exception) {
+            responseData = new ResponseData<>("상세 조회에 실패하였습니다.", null);
+            return new ResponseEntity<>(responseData, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        responseData = new ResponseData<>(null, menuService.menuDetail(menuNo, menuSize, member));
+
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
@@ -157,7 +159,7 @@ public class MenuController {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = "";
         if ("anonymousUser".equals(principal)) {
-            throw new NotLoginException("로그인하지 않은 사용자입니다");
+            return null;
         } else {
             User tokenUser = (User) principal;
             username = tokenUser.getUsername();

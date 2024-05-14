@@ -36,11 +36,13 @@ public class MenuService {
     private final RedisTemplate<String, String> redisTemplate;
     private ZSetOperations<String, String> zSetOperations;  // 인기 검색어
     private HashOperations<String, Object, Object> hashOperations;  // 브랜드명과 메뉴명
+    private ObjectMapper objectMapper;
 
     @PostConstruct
     private void init() {
         zSetOperations = redisTemplate.opsForZSet();
         hashOperations = redisTemplate.opsForHash();
+        objectMapper = new ObjectMapper();
     }
 
 
@@ -149,8 +151,6 @@ public class MenuService {
          * 로그인 한 사용자는 아이디가 key 값, 로그인 하지 않은 사용자는 브랜드명+메뉴명이 key 값
          */
         String key;
-        ObjectMapper objectMapper = new ObjectMapper();
-
         if (StringUtils.hasText(menuSize)) {
             if (member == null) {
                 log.info("##################### 비로그인 사용자 Redis 에서 상세 조회 #####################");
@@ -197,7 +197,6 @@ public class MenuService {
      * 저장하면서 요청에 맞는 메뉴 상세 정보 기록 및 반환
      */
     private MenuDetailResponse saveCache(Long menuNo, String key, List<MenuDetailResponse> menuDetailList) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
         Map<String, String> map = new HashMap<>();
         MenuDetailResponse detailResponse = null;  // 반환할 정보
         List<String> others = new ArrayList<>();    // 다른 사이즈 저장
