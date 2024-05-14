@@ -3,7 +3,6 @@ package com.latte.menu.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.latte.common.response.ResponseData;
 import com.latte.drink.exception.NotEnoughInfoException;
-import com.latte.drink.exception.NotLoginException;
 import com.latte.member.response.MemberResponse;
 import com.latte.member.service.AuthService;
 import com.latte.menu.response.*;
@@ -43,12 +42,11 @@ public class MenuController {
             MemberResponse member = isLogin();
             if (member == null) {
                 responseData = new ResponseData<>("로그인 하지 않은 사용자입니다", null);
-                return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
             }
             responseData = new ResponseData<>(null, menuService.popup(member));
         } catch (NotEnoughInfoException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
-            return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
