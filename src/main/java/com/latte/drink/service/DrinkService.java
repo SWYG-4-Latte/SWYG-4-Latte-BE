@@ -28,27 +28,19 @@ public class DrinkService {
     /**
      * 홈화면 데이터
      * 닉네임, 오늘 카페인 섭취 상태, 오늘 카페인 섭취량, 기준값과의 차이, 최근 마신 음료
-     * 부가정보 미입력 사용자는 닉네임만 반환
      */
     public HomeCaffeineResponse findHomeResponse(MemberResponse member) {
+        int maxCaffeine;
         String interval, status;
-        int todayCaffeine, maxCaffeine;
-        List<DrinkMenuResponse> recent;
         LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
 
-        recent = drinkMapper.findHomeResponse(member.getMbrNo(), today); // 최근 마신 음료
-        todayCaffeine = drinkMapper.findSumCaffeineByToday(member.getMbrNo(), today);        // 오늘 마신 카페인 합계
+        List<DrinkMenuResponse> recent = drinkMapper.findHomeResponse(member.getMbrNo(), today); // 최근 마신 음료
+        int todayCaffeine = drinkMapper.findSumCaffeineByToday(member.getMbrNo(), today);        // 오늘 마신 카페인 합계
 
         try {
             maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();   // 카페인 섭취량 기준값
-
-            if (maxCaffeine < todayCaffeine) {
-                status = "초과";
-                interval = Math.abs(maxCaffeine - todayCaffeine) + "mg";
-            } else {
-                status = "적정";
-                interval = (maxCaffeine - todayCaffeine) + "mg";
-            }
+            status = maxCaffeine < todayCaffeine ? "초과" : "적정";
+            interval = Math.abs(maxCaffeine - todayCaffeine) + "mg";
         } catch (NotEnoughInfoException exception) {
             return new HomeCaffeineResponse(member.getNickname(), null, todayCaffeine + "mg", null, recent);
         }
