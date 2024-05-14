@@ -1,5 +1,6 @@
 package com.latte.drink.service;
 
+import com.latte.drink.exception.NotEnoughInfoException;
 import com.latte.drink.repository.DrinkMapper;
 import com.latte.drink.response.*;
 import com.latte.drink.standard.DateSentence;
@@ -18,7 +19,6 @@ import java.util.Map;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class DrinkService {
 
@@ -28,21 +28,29 @@ public class DrinkService {
     /**
      * 홈화면 데이터
      * 닉네임, 오늘 카페인 섭취 상태, 오늘 카페인 섭취량, 기준값과의 차이, 최근 마신 음료
+     * 부가정보 미입력 사용자는 닉네임만 반환
      */
     public HomeCaffeineResponse findHomeResponse(MemberResponse member) {
         String interval, status;
+        int todayCaffeine, maxCaffeine;
+        List<DrinkMenuResponse> recent;
         LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-        
-        List<DrinkMenuResponse> recent = drinkMapper.findHomeResponse(member.getMbrNo(), today); // 최근 마신 음료
-        int todayCaffeine = drinkMapper.findSumCaffeineByToday(member.getMbrNo(), today);        // 오늘 마신 카페인 합계
-        int maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();   // 카페인 섭취량 기준값
 
-        if (maxCaffeine < todayCaffeine) {
-            status = "초과";
-            interval = Math.abs(maxCaffeine - todayCaffeine) + "mg";
-        } else {
-            status = "적정";
-            interval = (maxCaffeine - todayCaffeine) + "mg";
+        recent = drinkMapper.findHomeResponse(member.getMbrNo(), today); // 최근 마신 음료
+        todayCaffeine = drinkMapper.findSumCaffeineByToday(member.getMbrNo(), today);        // 오늘 마신 카페인 합계
+
+        try {
+            maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();   // 카페인 섭취량 기준값
+
+            if (maxCaffeine < todayCaffeine) {
+                status = "초과";
+                interval = Math.abs(maxCaffeine - todayCaffeine) + "mg";
+            } else {
+                status = "적정";
+                interval = (maxCaffeine - todayCaffeine) + "mg";
+            }
+        } catch (NotEnoughInfoException exception) {
+            return new HomeCaffeineResponse(member.getNickname(), null, todayCaffeine + "mg", null, recent);
         }
 
         return new HomeCaffeineResponse(member.getNickname(), status, todayCaffeine + "mg", interval, recent);
@@ -164,6 +172,7 @@ public class DrinkService {
      * 마신 메뉴 등록
      * 날짜는 현재 날짜를 기준으로함
      */
+    @Transactional
     public void saveDrinkMenu(MemberResponse member, Long menuNo) {
         LocalDateTime dateTime = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
         drinkMapper.saveDrinkMenu(member.getMbrNo(), menuNo, dateTime);
