@@ -268,63 +268,53 @@
         </association>
         <!-- 낮은 함량의 카페인 -->
         <collection property="lowCaffeineMenus" column="base = CAFFEINE, menuNo = MENU_NO" ofType="MenuSimpleResponse" select="getLowCaffeineMenu"/>
-        <!-- 메뉴의 다른 사이즈 정보 -->
-        <collection property="otherSizes" column="no = MENU_NO" ofType="java.lang.String" select="findOtherMenus"/>
     </resultMap>
 
 
     <select id="getMenuDetail" resultMap="menuDetailResultMap">
         SELECT MENU_NO, M1.BRAND, M1.MENU_NAME, CAFFEINE, PRICE, KCAL, SUGAR, SALT, PROTEIN, SAT_FAT, IMAGE_URL,
-        CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') AS MENU_SIZE,
+                CONCAT(MENU_SIZE, '(', SUBSTRING_INDEX(VOLUME, '(', 1), ')') AS MENU_SIZE,
         <!-- 칼로리 높낮이 -->
         CASE
-        WHEN CAST(SUBSTRING(KCAL, 1, LOCATE('kcal', KCAL) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '낮음'
-        WHEN CAST(SUBSTRING(KCAL, 1, LOCATE('kcal', KCAL) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '높음'
-        ELSE '보통'
+            WHEN CAST(SUBSTRING(KCAL, 1, LOCATE('kcal', KCAL) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '낮음'
+            WHEN CAST(SUBSTRING(KCAL, 1, LOCATE('kcal', KCAL) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minKcal} THEN '높음'
+            ELSE '보통'
         END AS KCAL_LEVEL,
         <!-- 당류 높낮이 -->
         CASE
-        WHEN CAST(SUBSTRING(SUGAR, 1, LOCATE('g', SUGAR) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSugar} THEN '낮음'
-        WHEN CAST(SUBSTRING(SUGAR, 1, LOCATE('g', SUGAR) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSugar} THEN '높음'
-        ELSE '보통'
+            WHEN CAST(SUBSTRING(SUGAR, 1, LOCATE('g', SUGAR) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSugar} THEN '낮음'
+            WHEN CAST(SUBSTRING(SUGAR, 1, LOCATE('g', SUGAR) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSugar} THEN '높음'
+            ELSE '보통'
         END AS SUGAR_LEVEL,
         <!-- 나트륨 높낮이 -->
         CASE
-        WHEN CAST(SUBSTRING(SALT, 1, LOCATE('mg', SALT) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSalt} THEN '낮음'
-        WHEN CAST(SUBSTRING(SALT, 1, LOCATE('mg', SALT) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSalt} THEN '높음'
-        ELSE '보통'
+            WHEN CAST(SUBSTRING(SALT, 1, LOCATE('mg', SALT) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSalt} THEN '낮음'
+            WHEN CAST(SUBSTRING(SALT, 1, LOCATE('mg', SALT) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSalt} THEN '높음'
+            ELSE '보통'
         END AS SALT_LEVEL,
         <!-- 단백질 높낮이 -->
         CASE
-        WHEN CAST(SUBSTRING(PROTEIN, 1, LOCATE('g', PROTEIN) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minProtein} THEN '낮음'
-        WHEN CAST(SUBSTRING(PROTEIN, 1, LOCATE('g', PROTEIN) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minProtein} THEN '높음'
-        ELSE '보통'
+            WHEN CAST(SUBSTRING(PROTEIN, 1, LOCATE('g', PROTEIN) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minProtein} THEN '낮음'
+            WHEN CAST(SUBSTRING(PROTEIN, 1, LOCATE('g', PROTEIN) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minProtein} THEN '높음'
+            ELSE '보통'
         END AS PROTEIN_LEVEL,
         <!-- 포화지방 높낮이 -->
         CASE
-        WHEN CAST(SUBSTRING(SAT_FAT, 1, LOCATE('g', SAT_FAT) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSatFat} THEN '낮음'
-        WHEN CAST(SUBSTRING(SAT_FAT, 1, LOCATE('g', SAT_FAT) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSatFat} THEN '높음'
-        ELSE '보통'
+            WHEN CAST(SUBSTRING(SAT_FAT, 1, LOCATE('g', SAT_FAT) - 1) AS DECIMAL(6, 2)) &lt; ${@com.latte.menu.level.LevelStandard@minSatFat} THEN '낮음'
+            WHEN CAST(SUBSTRING(SAT_FAT, 1, LOCATE('g', SAT_FAT) - 1) AS DECIMAL(6, 2)) &gt; ${@com.latte.menu.level.LevelStandard@minSatFat} THEN '높음'
+            ELSE '보통'
         END AS SAT_FAT_LEVEL
         <if test="maxCaffeine != null">
             ,CONCAT(ROUND(CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) / #{maxCaffeine} * 100), '%') AS PERCENT
         </if>
         FROM MENU AS M1
         INNER JOIN (
-        SELECT BRAND, MENU_NAME
-        FROM MENU
-        WHERE MENU_NO = #{no}
+            SELECT BRAND, MENU_NAME
+            FROM MENU
+            WHERE MENU_NO = #{no}
         ) AS M2
-        ON M1.BRAND = M2.BRAND
-        AND M1.MENU_NAME = M2.MENU_NAME
-        <where>
-            <if test="menuSize == null or menuSize == ''">
-                and M1.MENU_NO = #{no}
-            </if>
-            <if test="menuSize != null and menuSize != ''">
-                and CONCAT(M1.MENU_SIZE, '(', SUBSTRING_INDEX(M1.VOLUME, '(', 1), ')') = #{menuSize}
-            </if>
-        </where>
+            ON M1.BRAND = M2.BRAND
+                AND M1.MENU_NAME = M2.MENU_NAME
     </select>
 
 
@@ -343,20 +333,6 @@
         </where>
         ORDER BY RAND()
         LIMIT 4
-    </select>
-
-
-    <!-- 메뉴의 다른 사이즈 정보 -->
-    <select id="findOtherMenus" resultType="java.lang.String">
-        SELECT CONCAT(M1.MENU_SIZE, '(', SUBSTRING_INDEX(M1.VOLUME, '(', 1), ')') AS OTHER_MENU_SIZE
-        FROM MENU AS M1
-                 INNER JOIN (
-            SELECT BRAND, MENU_NAME
-            FROM MENU
-            WHERE MENU_NO = #{no}
-        ) AS M2
-                            ON M1.BRAND = M2.BRAND
-                                AND M1.MENU_NAME = M2.MENU_NAME
     </select>
 
 

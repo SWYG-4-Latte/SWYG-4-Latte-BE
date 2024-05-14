@@ -139,7 +139,33 @@ public class MenuService {
         return menuSimpleResponses;
     }
 
-    public MenuDetailResponse menuDetail(Long menuNo, String menuSize, MemberResponse member) {
+
+    /**
+     * 메뉴 상세 조회
+     */
+    public MenuDetailResponse menuDetail(Long menuNo, String menuSize, MemberResponse member) throws JsonProcessingException {
+        /**
+         * 사이즈 정보가 포함된 경우는 반드시 첫 상세 조회 이후임을 보장
+         * 로그인 한 사용자는 아이디가 key 값, 로그인 하지 않은 사용자는 브랜드명+메뉴명이 key 값
+         */
+        String key;
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        if (StringUtils.hasText(menuSize)) {
+            if (member == null) {
+                log.info("##################### 비로그인 사용자 Redis 에서 상세 조회 #####################");
+                key = menuMapper.findMenuById(menuNo);
+            } else {
+                log.info("##################### 로그인 사용자 Redis 에서 상세 조회 #####################");
+                key = member.getMbrId();
+            }
+            Map<Object, Object> entries = hashOperations.entries(key);
+            return objectMapper.readValue((String) entries.get(menuSize), MenuDetailResponse.class);
+        }
+
+        /**
+         * 로그인 한 사용자의 경우, 현재 메뉴가 최대 카페인 섭취량의 몇 % 를 차지하는지 정보가 필요
+         */
         Integer maxCaffeine = null;
         try {
             if (member != null) {
@@ -148,88 +174,50 @@ public class MenuService {
         } catch (NotEnoughInfoException exception) {
             maxCaffeine = null;
         }
-        return menuMapper.getMenuDetail(menuNo, menuSize, maxCaffeine);
+
+        /**
+         * 해당 메뉴의 모든 사이즈를 조회하고, Redis 에 저장
+         */
+        List<MenuDetailResponse> menuDetailList = menuMapper.getMenuDetail(menuNo, menuSize, maxCaffeine);
+        if (member == null) {
+            log.info("##################### 비로그인 사용자 최초 상세 조회 #####################");
+            key = menuDetailList.get(0).getBrand() + "_" + menuDetailList.get(0).getMenuName();
+        } else {
+            log.info("##################### 로그인 사용자 최초 상세 조회 #####################");
+            key = member.getMbrId();
+        }
+        return saveCache(menuNo, key, menuDetailList);
     }
 
-//
-//    /**
-//     * 메뉴 상세 조회
-//     */
-//    public MenuDetailResponse menuDetail(Long menuNo, String menuSize, MemberResponse member) throws JsonProcessingException {
-//        /**
-//         * 사이즈 정보가 포함된 경우는 반드시 첫 상세 조회 이후임을 보장
-//         * 로그인 한 사용자는 아이디가 key 값, 로그인 하지 않은 사용자는 브랜드명+메뉴명이 key 값
-//         */
-//        String key;
-//        ObjectMapper objectMapper = new ObjectMapper();
-//
-//        if (StringUtils.hasText(menuSize)) {
-//            if (member == null) {
-//                log.info("##################### 비로그인 사용자 Redis 에서 상세 조회 #####################");
-//                key = menuMapper.findMenuById(menuNo);
-//            } else {
-//                log.info("##################### 로그인 사용자 Redis 에서 상세 조회 #####################");
-//                key = member.getMbrId();
-//            }
-//            Map<Object, Object> entries = hashOperations.entries(key);
-//            return objectMapper.readValue((String) entries.get(menuSize), MenuDetailResponse.class);
-//        }
-//
-//        /**
-//         * 로그인 한 사용자의 경우, 현재 메뉴가 최대 카페인 섭취량의 몇 % 를 차지하는지 정보가 필요
-//         */
-//        Integer maxCaffeine = null;
-//        try {
-//            if (member != null) {
-//                maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
-//            }
-//        } catch (NotEnoughInfoException exception) {
-//            maxCaffeine = null;
-//        }
-//
-//        /**
-//         * 해당 메뉴의 모든 사이즈를 조회하고, Redis 에 저장
-//         */
-//        List<MenuDetailResponse> menuDetailList = menuMapper.getMenuDetail(menuNo, menuSize, maxCaffeine);
-//        if (member == null) {
-//            log.info("##################### 비로그인 사용자 최초 상세 조회 #####################");
-//            key = menuDetailList.get(0).getBrand() + "_" + menuDetailList.get(0).getMenuName();
-//        } else {
-//            log.info("##################### 로그인 사용자 최초 상세 조회 #####################");
-//            key = member.getMbrId();
-//        }
-//        return saveCache(menuNo, key, menuDetailList);
-//    }
-//
-//
-//    /**
-//     * 최초 상세 조회 시, 모든 사이즈에 대한 상세 정보를 모두 가져와 Redis 에 저장
-//     * 외부 key 값은 memberId, 내부 Map 의 key 값은 각 사이즈
-//     * 로그인 하지 않은 사용자라면 브랜드명+메뉴명을 외부 key 값으로 사용
-//     * 저장하면서 요청에 맞는 메뉴 상세 정보 기록 및 반환
-//     */
-//    private MenuDetailResponse saveCache(Long menuNo, String key, List<MenuDetailResponse> menuDetailList) throws JsonProcessingException {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        Map<String, String> map = new HashMap<>();
-//        MenuDetailResponse detailResponse = null;  // 반환할 정보
-//        List<String> others = new ArrayList<>();    // 다른 사이즈 저장
-//
-//        // 다른 사이즈 정보 추출
-//        for (MenuDetailResponse menuDetailResponse : menuDetailList) {
-//            others.add(menuDetailResponse.getMenuSize());
-//        }
-//
-//        for (MenuDetailResponse menuDetailResponse : menuDetailList) {
-//            menuDetailResponse.setOtherSizes(others);
-//            map.put(menuDetailResponse.getMenuSize(), objectMapper.writeValueAsString(menuDetailResponse));
-//            if (Objects.equals(menuNo, menuDetailResponse.getMenuNo())) {
-//                detailResponse = menuDetailResponse;
-//            }
-//        }
-//        hashOperations.putAll(key, map);
-//        return detailResponse;
-//    }
-//
+
+    /**
+     * 최초 상세 조회 시, 모든 사이즈에 대한 상세 정보를 모두 가져와 Redis 에 저장
+     * 외부 key 값은 memberId, 내부 Map 의 key 값은 각 사이즈
+     * 로그인 하지 않은 사용자라면 브랜드명+메뉴명을 외부 key 값으로 사용
+     * 저장하면서 요청에 맞는 메뉴 상세 정보 기록 및 반환
+     */
+    private MenuDetailResponse saveCache(Long menuNo, String key, List<MenuDetailResponse> menuDetailList) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, String> map = new HashMap<>();
+        MenuDetailResponse detailResponse = null;  // 반환할 정보
+        List<String> others = new ArrayList<>();    // 다른 사이즈 저장
+
+        // 다른 사이즈 정보 추출
+        for (MenuDetailResponse menuDetailResponse : menuDetailList) {
+            others.add(menuDetailResponse.getMenuSize());
+        }
+
+        for (MenuDetailResponse menuDetailResponse : menuDetailList) {
+            menuDetailResponse.setOtherSizes(others);
+            map.put(menuDetailResponse.getMenuSize(), objectMapper.writeValueAsString(menuDetailResponse));
+            if (Objects.equals(menuNo, menuDetailResponse.getMenuNo())) {
+                detailResponse = menuDetailResponse;
+            }
+        }
+        hashOperations.putAll(key, map);
+        return detailResponse;
+    }
+
 
 
 }
