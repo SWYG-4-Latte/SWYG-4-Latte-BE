@@ -45,7 +45,7 @@ public class DrinkController {
             responseData = new ResponseData<>(null, drinkService.findHomeResponse(member));
         } catch (NotLoginException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
-            return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -64,10 +64,9 @@ public class DrinkController {
             responseData = new ResponseData<>(null, calendar);
         } catch (NotLoginException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
-            return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
         } catch (NotEnoughInfoException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
-            return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -84,10 +83,9 @@ public class DrinkController {
             responseData = new ResponseData<>(null, caffeineByToday);
         } catch (NotLoginException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
-            return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
         } catch (NotEnoughInfoException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
-            return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -105,7 +103,7 @@ public class DrinkController {
             responseData = new ResponseData<>(null, menuByToday);
         } catch (NotLoginException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
-            return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -123,7 +121,7 @@ public class DrinkController {
             responseData = new ResponseData<>("기록이 완료되었습니다", null);
         } catch (NotLoginException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
-            return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
         } catch (DataIntegrityViolationException exception) {
             responseData = new ResponseData<>("존재하지 않는 사용자 혹은 메뉴입니다", null);
             return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
