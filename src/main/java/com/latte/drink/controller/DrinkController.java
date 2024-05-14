@@ -136,7 +136,6 @@ public class DrinkController {
 
 
     private MemberResponse isLogin() {
-        /*
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = "";
         if ("anonymousUser".equals(principal)) {
@@ -147,7 +146,5 @@ public class DrinkController {
             log.info("username = {}", username);
         }
         return authService.getMemberInfo(username);
-        */
-        return authService.getMemberInfo("testUser");
     }
 }
