@@ -46,9 +46,6 @@ public class DrinkController {
         } catch (NotLoginException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
             return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
-        } catch (NotEnoughInfoException exception) {
-            responseData = new ResponseData<>(exception.getMessage(), null);
-            return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
