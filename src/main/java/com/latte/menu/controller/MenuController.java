@@ -155,7 +155,6 @@ public class MenuController {
     }
 
     private MemberResponse isLogin() {
-        /*
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = "";
         if ("anonymousUser".equals(principal)) {
@@ -166,7 +165,5 @@ public class MenuController {
             log.info("username = {}", username);
         }
         return authService.getMemberInfo(username);
-        */
-        return authService.getMemberInfo("testUser");
     }
 }
