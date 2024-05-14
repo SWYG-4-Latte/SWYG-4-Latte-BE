@@ -41,10 +41,11 @@ public class MenuController {
         ResponseData<?> responseData;
         try {
             MemberResponse member = isLogin();
+            if (member == null) {
+                responseData = new ResponseData<>("로그인 하지 않은 사용자입니다", null);
+                return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
+            }
             responseData = new ResponseData<>(null, menuService.popup(member));
-        } catch (NotLoginException exception) {
-            responseData = new ResponseData<>(exception.getMessage(), null);
-            return new ResponseEntity<>(responseData, HttpStatus.FORBIDDEN);
         } catch (NotEnoughInfoException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
             return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
