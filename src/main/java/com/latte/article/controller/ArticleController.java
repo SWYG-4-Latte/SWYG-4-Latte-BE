@@ -2,7 +2,6 @@ package com.latte.article.controller;
 
 
 import com.latte.article.request.ArticleRequest;
-import com.latte.article.request.SearchRequest;
 import com.latte.article.response.ArticleResponse;
 import com.latte.article.service.ArticleService;
 import com.latte.member.config.SecurityUtil;
@@ -13,9 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -201,7 +197,7 @@ public class ArticleController {
      * @return
      */
     @GetMapping("/list")
-    public ResponseEntity<?> list(@RequestParam("sort") String sort, @RequestParam("keyword") String keyword, @PageableDefault(size = 4) Pageable pageable) {
+    public ResponseEntity<?> list(@RequestParam(value="sort", required = false) String sort, @RequestParam(value="keyword", required = false) String keyword, @PageableDefault(size = 4, page = 0) Pageable pageable) {
 
         String message = null;
         Page<ArticleResponse> list = articleService.articleList(sort, keyword, pageable);

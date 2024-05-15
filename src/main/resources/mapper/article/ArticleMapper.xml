@@ -9,7 +9,7 @@
     <sql id="sort">
         <choose>
             <!-- 최신순 -->
-            <when test="sort == null or sort == 'recent'">
+            <when test="sort == null or sort  == '' or sort == 'recent'">
                 ORDER BY A.article_no, A.reg_date ASC
             </when>
             <!-- 조회순 -->
