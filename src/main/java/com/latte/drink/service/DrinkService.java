@@ -1,17 +1,31 @@
 package com.latte.drink.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latte.drink.exception.NotEnoughInfoException;
+import com.latte.drink.exception.NotLoginException;
 import com.latte.drink.repository.DrinkMapper;
 import com.latte.drink.response.*;
 import com.latte.drink.standard.DateSentence;
 import com.latte.drink.standard.StandardValue;
 import com.latte.drink.standard.StandardValueCalculate;
+import com.latte.member.mapper.AuthMapper;
 import com.latte.member.response.MemberResponse;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +37,71 @@ import java.util.Map;
 public class DrinkService {
 
     private final DrinkMapper drinkMapper;
+    private final AuthMapper authMapper;
     private final StandardValueCalculate standardValueCalculate;
+
+    private final RedisTemplate<String, String> redisTemplate;
+    private ValueOperations<String, String> valueOperations;
+    private ObjectMapper objectMapper;
+
+    @PostConstruct
+    private void init() {
+        valueOperations = redisTemplate.opsForValue();
+        objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
+
+
+    /**
+     * 사용자 검증 및 Redis 에 저장
+     */
+    public MemberResponse isLoginMember() throws JsonProcessingException {
+        log.info("##################### 사용자 검증 실행 #####################");
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if ("anonymousUser".equals(principal)) {
+            log.info("##################### 비로그인 사용자 #####################");
+            throw new NotLoginException("로그인하지 않은 사용자입니다");
+        }
+
+        User tokenUser = (User) principal;
+        String username = tokenUser.getUsername();
+        log.info("username = {}", username);
+
+        String stringMember = valueOperations.get(username);
+        if (StringUtils.hasText(stringMember)) {
+            log.info("##################### Redis 에서 멤버 조회 #####################");
+            return objectMapper.readValue(stringMember, MemberResponse.class);
+        }
+
+        log.info("##################### DB 에서 멤버 조회 #####################");
+        MemberResponse memberResponse = authMapper.findById(username);
+        String jsonMember = objectMapper.writeValueAsString(memberResponse);
+        jsonMember = removeFieldFromJson(jsonMember, "enabled");
+        jsonMember = removeFieldFromJson(jsonMember, "accountNonLocked");
+        jsonMember = removeFieldFromJson(jsonMember, "accountNonExpired");
+        jsonMember = removeFieldFromJson(jsonMember, "credentialsNonExpired");
+        jsonMember = removeFieldFromJson(jsonMember, "authorities");
+        valueOperations.set(username, jsonMember, Duration.ofMinutes(30));  // 30분동안 유효
+        return memberResponse;
+    }
+
+    /**
+     * Redis 저장 시, 불필요한 필드 제거
+     */
+    private String removeFieldFromJson(String json, String fieldName) {
+        try {
+            JsonNode rootNode = objectMapper.readTree(json);
+            ((ObjectNode) rootNode).remove(fieldName);
+            return objectMapper.writeValueAsString(rootNode);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return json;
+        }
+    }
+
+
+
 
     /**
      * 홈화면 데이터
