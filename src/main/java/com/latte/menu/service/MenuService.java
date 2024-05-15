@@ -144,56 +144,57 @@ public class MenuService {
 
     /**
      * 메뉴 상세 조회
+     * 전달 받은 프론트엔드 API 호출 과정
+     * 1. 최초 상세 조회는 무조건 비로그인
+     * 2. 최초 상세 이후 토큰과 사이즈 정보를 담아서 다시 한 번 요청 ( percent 정보 요청 )
+     * 3. 사이즈 변환 시, 2번과 동일하게 토큰과 사이즈 정보를 담아서 요청
      */
     public MenuDetailResponse menuDetail(Long menuNo, String menuSize, MemberResponse member) throws JsonProcessingException {
         /**
+         * 최초 상세 조회 시 ( 사이즈 전달이 없는 경우 ), 해당 메뉴의 모든 사이즈를 조회하고, Redis 에 저장
+         * 최초 상세 조회는 무조건 비로그인 상태임을 ( 토큰일 전달되지 않음을 ) 보장
+         */
+        if (!StringUtils.hasText(menuSize)) {
+            log.info("##################### 최초 상세 조회 #####################");
+            List<MenuDetailResponse> menuDetailList = menuMapper.getMenuDetail(menuNo, menuSize);
+            String redisKey = menuDetailList.get(0).getBrand() + "_" + menuDetailList.get(0).getMenuName();
+            return saveCache(menuNo, redisKey, menuDetailList);
+        }
+
+        /**
          * 사이즈 정보가 포함된 경우는 반드시 첫 상세 조회 이후임을 보장
-         * 로그인 한 사용자는 아이디가 key 값, 로그인 하지 않은 사용자는 브랜드명+메뉴명이 key 값
+         * 브랜드명_메뉴명을 key 값으로 사용, Map 은 사이즈명을 key 값으로 사용
          */
-        String key;
-        if (StringUtils.hasText(menuSize)) {
-            if (member == null) {
-                log.info("##################### 비로그인 사용자 Redis 에서 상세 조회 #####################");
-                key = menuMapper.findMenuById(menuNo);
-            } else {
-                log.info("##################### 로그인 사용자 Redis 에서 상세 조회 #####################");
-                key = member.getMbrId();
-            }
-            Map<Object, Object> entries = hashOperations.entries(key);
-            return objectMapper.readValue((String) entries.get(menuSize), MenuDetailResponse.class);
-        }
+        String key = menuMapper.findMenuById(menuNo);
+        Map<Object, Object> entries = hashOperations.entries(key);
+        MenuDetailResponse menuDetailResponse = objectMapper.readValue((String) entries.get(menuSize), MenuDetailResponse.class);
 
-        /**
-         * 로그인 한 사용자의 경우, 현재 메뉴가 최대 카페인 섭취량의 몇 % 를 차지하는지 정보가 필요
-         */
-        Integer maxCaffeine = null;
-        try {
-            if (member != null) {
-                maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
-            }
-        } catch (NotEnoughInfoException exception) {
-            maxCaffeine = null;
-        }
-
-        /**
-         * 해당 메뉴의 모든 사이즈를 조회하고, Redis 에 저장
-         */
-        List<MenuDetailResponse> menuDetailList = menuMapper.getMenuDetail(menuNo, menuSize, maxCaffeine);
         if (member == null) {
-            log.info("##################### 비로그인 사용자 최초 상세 조회 #####################");
-            key = menuDetailList.get(0).getBrand() + "_" + menuDetailList.get(0).getMenuName();
-        } else {
-            log.info("##################### 로그인 사용자 최초 상세 조회 #####################");
-            key = member.getMbrId();
+            log.info("##################### 비로그인 사용자 Redis 에서 상세 조회 #####################");
+            return menuDetailResponse;
         }
-        return saveCache(menuNo, key, menuDetailList);
+
+        /**
+         * 부가정보를 입력한 사용자는 현재 메뉴가 최대 카페인 섭취량의 몇 % 를 차지하는지 정보가 필요
+         */
+        log.info("##################### 로그인 사용자 Redis 에서 상세 조회 #####################");
+        try {
+            int maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
+            log.info("##################### 부가 정보를 입력한 사용자 #####################");
+            double caffeine = Integer.parseInt(menuDetailResponse.getCaffeine().replace("mg", ""));
+            String percent = Math.round((caffeine / maxCaffeine) * 100) + "%";
+            menuDetailResponse.setPercent(percent);
+            return menuDetailResponse;
+        } catch (NotEnoughInfoException exception) {
+            log.info("##################### 부가 정보를 미입력한 사용자 #####################");
+            return menuDetailResponse;
+        }
     }
 
 
     /**
      * 최초 상세 조회 시, 모든 사이즈에 대한 상세 정보를 모두 가져와 Redis 에 저장
-     * 외부 key 값은 memberId, 내부 Map 의 key 값은 각 사이즈
-     * 로그인 하지 않은 사용자라면 브랜드명+메뉴명을 외부 key 값으로 사용
+     * 브랜드명_메뉴명을 key 값으로 사용, Map 은 사이즈명을 key 값으로 사용
      * 저장하면서 요청에 맞는 메뉴 상세 정보 기록 및 반환
      */
     private MenuDetailResponse saveCache(Long menuNo, String key, List<MenuDetailResponse> menuDetailList) throws JsonProcessingException {
