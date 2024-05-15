@@ -1,10 +1,7 @@
 package com.latte.menu.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latte.drink.exception.NotEnoughInfoException;
 import com.latte.drink.standard.StandardValueCalculate;
 import com.latte.member.mapper.AuthMapper;
@@ -19,14 +16,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.ZSetOperations;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -36,75 +29,21 @@ import java.util.*;
 public class MenuService {
 
     private final MenuMapper menuMapper;
-    private final AuthMapper authMapper;
-
     private final StandardValueCalculate standardValueCalculate;
 
     private final String rankingKey = "menuSearchRanking";
 
     private final RedisTemplate<String, String> redisTemplate;
-    private ValueOperations<String, String> valueOperations;
     private ZSetOperations<String, String> zSetOperations;  // 인기 검색어
     private HashOperations<String, Object, Object> hashOperations;  // 브랜드명과 메뉴명
     private ObjectMapper objectMapper;
 
     @PostConstruct
     private void init() {
-        valueOperations = redisTemplate.opsForValue();
         zSetOperations = redisTemplate.opsForZSet();
         hashOperations = redisTemplate.opsForHash();
         objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
-
-    /**
-     * 사용자 검증 및 Redis 에 저장
-     */
-    public MemberResponse isLoginMember() throws JsonProcessingException {
-        log.info("##################### 사용자 검증 실행 #####################");
-
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if ("anonymousUser".equals(principal)) {
-            log.info("##################### 비로그인 사용자 #####################");
-            return null;
-        }
-
-        User tokenUser = (User) principal;
-        String username = tokenUser.getUsername();
-        log.info("username = {}", username);
-
-        String stringMember = valueOperations.get(username);
-        if (StringUtils.hasText(stringMember)) {
-            log.info("##################### Redis 에서 멤버 조회 #####################");
-            return objectMapper.readValue(stringMember, MemberResponse.class);
-        }
-
-        log.info("##################### DB 에서 멤버 조회 #####################");
-        MemberResponse memberResponse = authMapper.findById(username);
-        String jsonMember = objectMapper.writeValueAsString(memberResponse);
-        jsonMember = removeFieldFromJson(jsonMember, "enabled");
-        jsonMember = removeFieldFromJson(jsonMember, "accountNonLocked");
-        jsonMember = removeFieldFromJson(jsonMember, "accountNonExpired");
-        jsonMember = removeFieldFromJson(jsonMember, "credentialsNonExpired");
-        jsonMember = removeFieldFromJson(jsonMember, "authorities");
-        valueOperations.set(username, jsonMember, Duration.ofMinutes(30));  // 30분동안 유효
-        return memberResponse;
-    }
-
-    /**
-     * Redis 저장 시, 불필요한 필드 제거
-     */
-    private String removeFieldFromJson(String json, String fieldName) {
-        try {
-            JsonNode rootNode = objectMapper.readTree(json);
-            ((ObjectNode) rootNode).remove(fieldName);
-            return objectMapper.writeValueAsString(rootNode);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return json;
-        }
-    }
-
 
     /**
      * 메뉴 추천 팝업

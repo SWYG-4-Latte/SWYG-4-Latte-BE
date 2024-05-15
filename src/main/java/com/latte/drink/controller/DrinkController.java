@@ -1,6 +1,5 @@
 package com.latte.drink.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.latte.common.response.ResponseData;
 import com.latte.drink.exception.NotEnoughInfoException;
 import com.latte.drink.exception.NotLoginException;
@@ -10,11 +9,14 @@ import com.latte.drink.response.DateStatusResponse;
 import com.latte.drink.response.DrinkMenuResponse;
 import com.latte.drink.service.DrinkService;
 import com.latte.member.response.MemberResponse;
+import com.latte.member.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -28,6 +30,7 @@ import java.util.List;
 public class DrinkController {
 
     private final DrinkService drinkService;
+    private final AuthService authService;
 
     /**
      * 홈화면
@@ -38,14 +41,11 @@ public class DrinkController {
     public ResponseEntity<?> homeResponse() {
         ResponseData<?> responseData;
         try {
-            MemberResponse member = drinkService.isLoginMember();
+            MemberResponse member = isLogin();
             responseData = new ResponseData<>(null, drinkService.findHomeResponse(member));
         } catch (NotLoginException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
             return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
-        } catch (JsonProcessingException exception) {
-            responseData = new ResponseData<>("사용자 검증에 실패하였습니다", null);
-            return new ResponseEntity<>(responseData, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -59,7 +59,7 @@ public class DrinkController {
     public ResponseEntity<?> findCaffeineByMonth(@RequestParam("datetime") String dateTime) {
         ResponseData<?> responseData;
         try {
-            MemberResponse member = drinkService.isLoginMember();
+            MemberResponse member = isLogin();
             CalendarResponse calendar = drinkService.findCaffeineByMonth(member, dateTime);
             responseData = new ResponseData<>(null, calendar);
         } catch (NotLoginException exception) {
@@ -67,9 +67,6 @@ public class DrinkController {
             return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
         } catch (NotEnoughInfoException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
-        } catch (JsonProcessingException exception) {
-            responseData = new ResponseData<>("사용자 검증에 실패하였습니다", null);
-            return new ResponseEntity<>(responseData, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -81,7 +78,7 @@ public class DrinkController {
     public ResponseEntity<?> findCaffeineByDate(@RequestParam("datetime") LocalDateTime dateTime) {
         ResponseData<?> responseData;
         try {
-            MemberResponse member = drinkService.isLoginMember();
+            MemberResponse member = isLogin();
             DateStatusResponse caffeineByToday = drinkService.findCaffeineByDate(member, dateTime);
             responseData = new ResponseData<>(null, caffeineByToday);
         } catch (NotLoginException exception) {
@@ -89,9 +86,6 @@ public class DrinkController {
             return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
         } catch (NotEnoughInfoException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
-        } catch (JsonProcessingException exception) {
-            responseData = new ResponseData<>("사용자 검증에 실패하였습니다", null);
-            return new ResponseEntity<>(responseData, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -104,15 +98,12 @@ public class DrinkController {
     public ResponseEntity<?> findMenuByDate(@RequestParam("datetime") LocalDateTime dateTime) {
         ResponseData<?> responseData;
         try {
-            MemberResponse member = drinkService.isLoginMember();;
+            MemberResponse member = isLogin();
             List<DrinkMenuResponse> menuByToday = drinkService.findMenuByDate(member, dateTime);
             responseData = new ResponseData<>(null, menuByToday);
         } catch (NotLoginException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
             return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
-        } catch (JsonProcessingException exception) {
-            responseData = new ResponseData<>("사용자 검증에 실패하였습니다", null);
-            return new ResponseEntity<>(responseData, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -125,7 +116,7 @@ public class DrinkController {
     public ResponseEntity<?> saveDrinkMenu(@RequestBody DrinkMenuRequest drinkMenuRequest) {
         ResponseData<?> responseData;
         try {
-            MemberResponse member = drinkService.isLoginMember();
+            MemberResponse member = isLogin();
             drinkService.saveDrinkMenu(member, drinkMenuRequest.getMenuNo());
             responseData = new ResponseData<>("기록이 완료되었습니다", null);
         } catch (NotLoginException exception) {
@@ -134,10 +125,21 @@ public class DrinkController {
         } catch (DataIntegrityViolationException exception) {
             responseData = new ResponseData<>("존재하지 않는 사용자 혹은 메뉴입니다", null);
             return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
-        } catch (JsonProcessingException exception) {
-            responseData = new ResponseData<>("사용자 검증에 실패하였습니다", null);
-            return new ResponseEntity<>(responseData, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
+
+    private MemberResponse isLogin() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = "";
+        if ("anonymousUser".equals(principal)) {
+            throw new NotLoginException("로그인하지 않은 사용자입니다");
+        } else {
+            User tokenUser = (User) principal;
+            username = tokenUser.getUsername();
+            log.info("username = {}", username);
+        }
+        return authService.getMemberInfo(username);
     }
 }
