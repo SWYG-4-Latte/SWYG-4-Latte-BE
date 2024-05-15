@@ -5,12 +5,32 @@
 
 <mapper namespace="com.latte.article.repository.ArticleMapper">
 
+    <!--아티클 정렬-->
+    <sql id="sort">
+        <choose>
+            <!-- 최신순 -->
+            <when test="sort == null or sort == 'recent'">
+                ORDER BY A.article_no, A.reg_date ASC
+            </when>
+            <!-- 조회순 -->
+            <when test="sort == 'viewCnt'">
+                ORDER BY A.view_cnt DESC
+            </when>
+            <!-- 좋아요순 -->
+            <when test="sort == 'likeCnt'">
+                ORDER BY A.like_cnt DESC
+            </when>
+        </choose>
+    </sql>
+
     <!--아티클 목록 조회-->
     <select id="getArticleList" resultType="com.latte.article.response.ArticleResponse">
+        /* ArticleMapper.getArticleList */
         SELECT
             A.article_no
              , A.image_url
              , A.title
+             , A.sub_title
              , A.content
              , A.writer_no
              , M.mbr_id
@@ -21,6 +41,23 @@
              , A.update_date
         FROM ARTICLE A LEFT JOIN tb_member M ON A.writer_no = M.mbr_no
         WHERE A.delete_yn = 'N'
+        <if test='keyword != null'>
+            AND ( title like CONCAT ('%', #{keyword}, '%')
+            OR sub_title like CONCAT ('%', #{keyword}, '%')
+            OR content like CONCAT ('%', #{keyword}, '%') )
+        </if>
+        <include refid="sort" />
+        LIMIT #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+
+    <!--전체 아티클 수-->
+    <select id="totalCount" resultType="int" parameterType="String">
+        SELECT COUNT(*)
+        FROM ARTICLE
+        <if test='keyword != null'>
+            WHERE  title like CONCAT ('%', #{keyword}, '%')
+        </if>
     </select>
 
 
@@ -30,6 +67,7 @@
                A.article_no
              , A.image_url
              , A.title
+             , A.sub_title
              , A.content
              , A.writer_no
              , M.mbr_id

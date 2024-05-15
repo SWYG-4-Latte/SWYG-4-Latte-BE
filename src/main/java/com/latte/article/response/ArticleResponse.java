@@ -4,8 +4,12 @@ package com.latte.article.response;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.w3c.dom.Text;
 
+import java.sql.Blob;
 import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -18,9 +22,15 @@ public class ArticleResponse {
 
     private String imageUrl;        // 이미지
 
+    private Map<String, String> images;       // 이미지 분리
+
     private String title;           // 아티클 제목
 
+    private String subTitle;        // 아티클 서브 제목
+
     private String content;         // 아티클 내용
+
+    private Map<String, String> contents;       // 아티클 내용 정리
 
     private int writerNo;           // 작성자 번호
 
