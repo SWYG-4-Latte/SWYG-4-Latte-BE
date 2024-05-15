@@ -57,10 +57,11 @@ public class AuthConroller {
 
         String message = "";
 
-        MemberResponse member = authService.getMemberInfo(request.getMbrId());
-        int mbrNo = member.getMbrNo();
+
 
         try {
+            MemberResponse member = authService.getMemberInfo(request.getMbrId());
+            int mbrNo = member.getMbrNo();
 
             // 회원 탈퇴 여부 확인
             if ("Y".equals(member.getDeleteYn())) {

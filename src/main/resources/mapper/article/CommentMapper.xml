@@ -39,8 +39,8 @@
 
 
     <!-- 댓글 상세정보 조회 -->
-    <select id="findByComment" parameterType="int" resultType="com.latte.article.response.CommentResponse">
-        /* CommentMapper.findByComment */
+    <select id="detailComment" parameterType="int" resultType="com.latte.article.response.CommentResponse">
+        /* CommentMapper.detailComment */
         SELECT
         <include refid="commentColumns" />
         FROM
@@ -102,6 +102,47 @@
         SET report_count = report_count + 1
         WHERE `comment_no`=#{commentNo}
     </update>
+
+    <!--좋아요 추가-->
+    <insert id="likeCount">
+        INSERT INTO COMMENT_LIKE (
+                                   comment_no
+                                 , article_no
+                                 , reg_no
+                                 , reg_date
+        ) VALUES (
+                   #{commentNo}
+                 , #{articleNo}
+                 , #{regNo}
+                 , NOW()
+                 )
+    </insert>
+
+    <!--좋아요 삭제-->
+    <delete id="unlikeCount" parameterType="int">
+        DELETE FROM COMMENT_LIKE
+        WHERE co_like_no = #{coLikeNo}
+    </delete>
+
+    <!--댓글 테이블 좋아요 수정-->
+    <update id="updateCommentLike"  parameterType="int">
+        UPDATE COMMENT
+        SET
+            like_cnt = (SELECT COUNT(*)
+                        FROM COMMENT_LIKE
+                        WHERE comment_no = #{commentNo})
+        WHERE comment_no = #{commentNo}
+    </update>
+
+
+    <!--등록자 좋아요-->
+    <select id="findLikeByCommentRegNo" parameterType="int" resultType="Integer">
+        SELECT co_like_no
+        FROM COMMENT_LIKE
+        WHERE comment_no = #{commentNo}
+          AND reg_no = #{regNo}
+    </select>
+
 
 
 </mapper>

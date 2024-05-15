@@ -182,6 +182,11 @@ public class CommentController {
     }
 
 
+    /**
+     * 댓글 리스트 가져오기
+     * @param articleNo
+     * @return
+     */
     @GetMapping("/list/{articleNo}")
     public ResponseEntity<?> list(@PathVariable("articleNo") int articleNo) {
 
@@ -195,7 +200,11 @@ public class CommentController {
     }
 
 
-
+    /**
+     * 댓글 신고
+     * @param commentNo
+     * @return
+     */
     @PostMapping("/report/{commentNo}")
     @ResponseBody
     public ResponseEntity<?> report(@PathVariable("commentNo") int commentNo) {
@@ -223,6 +232,44 @@ public class CommentController {
 
 
         ResponseData<?> responseData = new ResponseData<>(message, result);
+        return new ResponseEntity<>(responseData, OK);
+    }
+
+
+    /**
+     * 댓글 좋아요
+     * @param commentNo
+     * @return
+     */
+    @PostMapping("/like/{commentNo}")
+    public ResponseEntity<?> like(@PathVariable("commentNo") int commentNo) {
+
+        // 현재 사용자 인증 정보 가져오기
+        Object authentication = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Map<String, Object> dataMap = new HashMap<>();
+        boolean result = false;
+        String message = "";
+
+        // 로그인 상태 확인
+        if("anonymousUser".equals(authentication)) {
+            message = "로그인을 해주세요";
+
+        } else {
+            String mbrId = SecurityUtil.getCurrentUsername();
+            MemberResponse member = authService.getMemberInfo(mbrId);
+            result = commentService.likeCount(commentNo, member.getMbrNo());
+            CommentResponse commentResponse = commentService.detailComment(commentNo);
+            if (!result) {
+                message = "좋아요가 실패하였습니다.";
+
+            } else {
+                dataMap.put("likeCnt", commentResponse.getLikeCnt());
+                message = "값이 전달되었습니다.";
+            }
+        }
+
+        ResponseData<?> responseData = new ResponseData<>(message, dataMap);
         return new ResponseEntity<>(responseData, OK);
     }
 

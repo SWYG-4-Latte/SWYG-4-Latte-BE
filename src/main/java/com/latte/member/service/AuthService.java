@@ -1,5 +1,6 @@
 package com.latte.member.service;
 
+import com.latte.drink.exception.NotEnoughInfoException;
 import com.latte.member.config.jwt.JwtToken;
 import com.latte.member.config.jwt.JwtTokenProvider;
 import com.latte.member.mapper.AuthMapper;
@@ -342,8 +343,9 @@ public class AuthService {
      */
     public MemberResponse getMemberInfo(String mbrId) {
 
-        //System.out.println("==============service" +  authMapper.findById(id));
-
+        if(authMapper.countByLoginId(mbrId) == 0) {
+            throw new BadCredentialsException("아이디가 존재하지 않습니다.");
+        }
         return authMapper.findById(mbrId);
     }
 

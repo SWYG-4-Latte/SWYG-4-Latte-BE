@@ -78,20 +78,17 @@ public class ArticleService {
     @Transactional
     public Page<ArticleResponse> articleList(@Param("sort") String sort, @Param("keyword") String keyword, @Param("pageable") Pageable pageable) {
 
-
-
-
-        Map<String, String> imgMap = new HashMap<>();
-
         // 페이지 수
         int totalCount = mapper.totalCount(keyword);
 
         List<ArticleResponse> list =  mapper.getArticleList(sort, keyword, pageable);
         for (ArticleResponse article : list) {
+            Map<String, String> imgMap = new HashMap<>();
             MemberResponse member = authService.getMemberSeq(article.getWriterNo());
             article.setNickname(member.getNickname());
-            List<String> data = new ArrayList<>();
+
             if(article.getImageUrl() != null) {
+                List<String> data = new ArrayList<>();
                 data = List.of(article.getImageUrl().split(","));
 
                 for(int i = 0; i < data.size(); i++) {
@@ -128,26 +125,29 @@ public class ArticleService {
 
         Map<String, String> contents = new LinkedHashMap<>();
 
-        for (int i = 1; i < strongList.size(); i++){
+        for (int i = 0; i < strongList.size(); i++){
             String sub = strongList.get(i);
-            contents.put("strong"+i, sub);
+            contents.put("strong"+(i+1), sub);
         }
-        for (int i = 1; i < paragraphList.size(); i++) {
+        for (int i = 0; i < paragraphList.size(); i++) {
             String con = paragraphList.get(i);
-            contents.put("content"+i, con);
+            contents.put("content"+(i+1), con);
         }
 
         user.setContents(contents);
 
         if(user.getImageUrl() != null) {
-            String imgs[] = user.getImageUrl().split(",");
 
-            imgMap.put("imgUrl1", imgs[0]);
-            imgMap.put("imgUrl2", imgs[1]);
+            List<String> data = new ArrayList<>();
+            data = List.of(user.getImageUrl().split(","));
+
+            for(int i = 0; i < data.size(); i++) {
+                String img = data.get(i);
+                imgMap.put("imgUrl"+(i+1), img);
+            }
 
             user.setImages(imgMap);
         }
-
 
         MemberResponse member = authService.getMemberSeq(user.getWriterNo());
         user.setNickname(member.getNickname());

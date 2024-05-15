@@ -1,8 +1,12 @@
 package com.latte.article.service;
 
 
+import com.latte.article.repository.ArticleMapper;
 import com.latte.article.repository.CommentMapper;
+import com.latte.article.request.CommentLikeRequest;
 import com.latte.article.request.CommentRequest;
+import com.latte.article.request.LikeRequest;
+import com.latte.article.response.ArticleResponse;
 import com.latte.article.response.CommentResponse;
 import com.latte.member.response.MemberResponse;
 import com.latte.member.service.AuthService;
@@ -11,13 +15,15 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class CommentService {
 
     private final CommentMapper commentMapper;
+
+    private final ArticleMapper articleMapper;
 
     private final AuthService authService;
 
@@ -132,6 +138,65 @@ public class CommentService {
         } else {
             return false;
         }
+    }
+
+    /**
+     * 댓글 상세 조회
+     * @param commentNo
+     * @return
+     */
+    public CommentResponse detailComment(int commentNo) {
+
+        CommentResponse user = commentMapper.detailComment(commentNo);
+
+        MemberResponse member = authService.getMemberSeq(user.getWriterNo());
+        user.setNickname(member.getNickname());
+
+        return user;
+    }
+
+
+    /**
+     * 댓글 좋아요
+     * @param commentNo
+     * @param regNo
+     * @return
+     */
+    @Transactional
+    public boolean likeCount(int commentNo, int regNo) {
+
+        // 작성자 여부 확인
+        Integer likeNo = commentMapper.findLikeByCommentRegNo(commentNo, regNo);
+
+
+        //MemberResponse memberResponse = authService.getMemberSeq(mbrNo);
+
+        CommentLikeRequest likeRequest = new CommentLikeRequest();
+        likeRequest.setCommentNo(commentNo);
+        likeRequest.setRegNo(regNo);
+
+        CommentResponse commentResponse = commentMapper.detailComment(commentNo);
+        int articleNo = commentResponse.getArticleNo();
+
+
+        // 해당 댓글에 작성자가 like를 누른 적이 없을 때
+
+        if(likeNo == null) {
+            commentMapper.likeCount(commentNo, articleNo, regNo);
+        } else {
+
+            commentMapper.unlikeCount(likeNo);
+        }
+
+        int res = commentMapper.updateCommentLike(commentNo);
+
+        if(res > 0) {
+            return true;
+        } else {
+            return false;
+        }
+
+
     }
 
 }
