@@ -98,8 +98,14 @@ public class MyPageController {
         //MemberResponse member = authService.getMemberInfoFromToken(jwtToken);
 
         if (member != null) {
+            String maxCaffeine;
             if(member.getDeleteYn().equals("N")) {
-                String maxCaffeine = String.valueOf(standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine());
+                try {
+                    maxCaffeine = String.valueOf(standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine());
+                } catch (NotEnoughInfoException e) {
+                    maxCaffeine = null;
+                }
+
 
                 dataMap.put("member", member);
                 dataMap.put("caffeinIntake", maxCaffeine);

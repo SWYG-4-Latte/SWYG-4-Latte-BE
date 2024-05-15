@@ -1,10 +1,10 @@
 package com.latte.article.repository;
 
 import com.latte.article.request.ArticleRequest;
-import com.latte.article.request.LikeRequest;
 import com.latte.article.response.ArticleResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -22,10 +22,13 @@ public interface ArticleMapper {
     boolean deleteArticle(int seq);
 
     // 아티클 목록 조회
-    List<ArticleResponse> getArticleList();
+    List<ArticleResponse> getArticleList(@Param("sort") String sort, @Param("keyword") String keyword, @Param("pageable") Pageable pageable);
 
     // 아티클 상세보기
     ArticleResponse detailArticle(int articleNo);
+
+    // 아티클 게시물 수
+    int totalCount(@Param("keyword") String keyword);
 
     // 아티클 작성자 확인
     int isArticleAuthor(@Param("articleNo") int articleNo, @Param("writerNo") int writerNo);
@@ -44,6 +47,8 @@ public interface ArticleMapper {
 
     // 작성자가 좋아요를 눌렀는지 여부 확인
     Integer findLikeByArticleRegNo(@Param("articleNo") int articleNo, @Param("regNo") int regNo);
+
+
 
 }
 

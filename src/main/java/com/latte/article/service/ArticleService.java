@@ -6,16 +6,20 @@ import com.latte.article.repository.ArticleMapper;
 import com.latte.article.request.ArticleRequest;
 import com.latte.article.request.LikeRequest;
 import com.latte.article.response.ArticleResponse;
-import com.latte.article.response.CommentResponse;
 import com.latte.member.response.MemberResponse;
 import com.latte.member.service.AuthService;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class ArticleService {
@@ -27,17 +31,18 @@ public class ArticleService {
     @Autowired
     public AuthService authService;
 
-
     /**
      * 아티클 게시글 등록
      *
      * @param request
      */
-    public boolean insertArticle(ArticleRequest request) {
+    @Transactional
+    public boolean insertArticle(ArticleRequest request, MultipartHttpServletRequest file) throws Exception {
 
         request.setDeleteYn("N");
         request.setLikeCnt(0);
         request.setViewCnt(0);
+
 
         return mapper.insertArticle(request);
     }
@@ -70,16 +75,33 @@ public class ArticleService {
      * 아티클 목록 조회
      * @return
      */
-    public List<ArticleResponse> articleList() {
+    public Page<ArticleResponse> articleList(@Param("sort") String sort, @Param("keyword") String keyword, @Param("pageable") Pageable pageable) {
 
-        List<ArticleResponse> list =  mapper.getArticleList();
+
+
+
+        Map<String, String> imgMap = new HashMap<>();
+
+        // 페이지 수
+        int totalCount = mapper.totalCount(keyword);
+
+        List<ArticleResponse> list =  mapper.getArticleList(sort, keyword, pageable);
         for (ArticleResponse article : list) {
             MemberResponse member = authService.getMemberSeq(article.getWriterNo());
             article.setNickname(member.getNickname());
+
+            if(article.getImageUrl() != null) {
+                String imgs[] = article.getImageUrl().split(",");
+
+                imgMap.put("imgUrl1", imgs[0]);
+                imgMap.put("imgUrl2", imgs[1]);
+
+                article.setImages(imgMap);
+            }
+
         }
 
-        return list;
-
+        return new PageImpl<>(list, pageable, totalCount);
     }
 
 
@@ -90,7 +112,38 @@ public class ArticleService {
      */
     public ArticleResponse detailArticle(int articleNo) {
 
+        Map<String, String> imgMap = new HashMap<>();
         ArticleResponse user = mapper.detailArticle(articleNo);
+
+        // 내용
+        String content = user.getContent();
+
+        List<String> strongList = extractTextBetweenTags(content, "strong");
+        List<String> paragraphList = extractTextBetweenTags(content, "p");
+
+
+        Map<String, String> contents = new LinkedHashMap<>();
+
+        for (int i = 1; i < strongList.size(); i++){
+            String sub = strongList.get(i);
+            contents.put("strong"+i, sub);
+        }
+        for (int i = 1; i < paragraphList.size(); i++) {
+            String con = paragraphList.get(i);
+            contents.put("content"+i, con);
+        }
+
+        user.setContents(contents);
+
+        if(user.getImageUrl() != null) {
+            String imgs[] = user.getImageUrl().split(",");
+
+            imgMap.put("imgUrl1", imgs[0]);
+            imgMap.put("imgUrl2", imgs[1]);
+
+            user.setImages(imgMap);
+        }
+
 
         MemberResponse member = authService.getMemberSeq(user.getWriterNo());
         user.setNickname(member.getNickname());
@@ -98,6 +151,18 @@ public class ArticleService {
         return user;
     }
 
+    public static List<String> extractTextBetweenTags(String input, String tag) {
+        String patternString = "<" + tag + ">(.+?)</" + tag + ">";
+        Pattern pattern = Pattern.compile(patternString);
+        Matcher matcher = pattern.matcher(input);
+
+        List<String> result = new ArrayList<>();
+        while (matcher.find()) {
+            result.add(matcher.group(1));
+        }
+        return result;
+
+    }
 
     /**
      * 아티클 작성자 확인
@@ -164,7 +229,6 @@ public class ArticleService {
 
 
     }
-
 
 
 

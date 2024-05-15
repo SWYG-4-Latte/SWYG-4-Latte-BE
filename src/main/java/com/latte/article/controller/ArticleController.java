@@ -1,32 +1,28 @@
 package com.latte.article.controller;
 
 
-import com.fasterxml.jackson.core.JsonToken;
 import com.latte.article.request.ArticleRequest;
-import com.latte.article.request.LikeRequest;
+import com.latte.article.request.SearchRequest;
 import com.latte.article.response.ArticleResponse;
 import com.latte.article.service.ArticleService;
 import com.latte.member.config.SecurityUtil;
-import com.latte.member.config.jwt.JwtAuthenticationFilter;
-import com.latte.member.config.jwt.JwtToken;
-import com.latte.member.request.MemberRequest;
 import com.latte.member.response.MemberResponse;
 import com.latte.member.service.AuthService;
 import com.latte.response.ResponseData;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.util.HashMap;
 import java.util.List;
@@ -56,12 +52,15 @@ public class ArticleController {
      */
     @PostMapping("/write")
     @ResponseBody
-    public ResponseEntity<?> write(@RequestBody ArticleRequest request) {
+    public ResponseEntity<?> write(@RequestBody ArticleRequest request, @RequestBody MultipartHttpServletRequest file) throws Exception {
 
         // 현재 사용자 인증 정보 가져오기
         Object authentication = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Map<String, Object> dataMap = new HashMap<>();
+
+
+
         String message ="";
         boolean result = false;
 
@@ -71,7 +70,7 @@ public class ArticleController {
             String mbrId = SecurityUtil.getCurrentUsername();
             MemberResponse member = authService.getMemberInfo(mbrId);
             request.setWriterNo(member.getMbrNo());
-            result = articleService.insertArticle(request);
+            result = articleService.insertArticle(request, file);
 
             ArticleResponse article = articleService.detailArticle(request.getArticleNo());
             dataMap.put("articleInfo", article);
@@ -202,11 +201,10 @@ public class ArticleController {
      * @return
      */
     @GetMapping("/list")
-    public ResponseEntity<?> list() {
+    public ResponseEntity<?> list(@RequestParam("sort") String sort, @RequestParam("keyword") String keyword, @PageableDefault(size = 4) Pageable pageable) {
 
-        String message = "";
-
-        List<ArticleResponse> list = articleService.articleList();
+        String message = null;
+        Page<ArticleResponse> list = articleService.articleList(sort, keyword, pageable);
 
         ResponseData<?> responseData = new ResponseData<>(message, list);
         return new ResponseEntity<>(responseData, OK);
@@ -218,8 +216,8 @@ public class ArticleController {
      * @param articleNo
      * @return
      */
-    @GetMapping("/detail/{mbrNo}")
-    public ResponseEntity<?> detail(@PathVariable("mbrNo") int articleNo) {
+    @GetMapping("/detail/{articleNo}")
+    public ResponseEntity<?> detail(@PathVariable("articleNo") int articleNo) {
 
         String message = "";
 
@@ -266,8 +264,8 @@ public class ArticleController {
                 message = "좋아요가 실패하였습니다.";
 
             } else {
-                dataMap.put("articleInfo", articleResponse);
-                message = "좋아요가 성공하였습니다.";
+                dataMap.put("likeCnt", articleResponse.getLikeCnt());
+                message = "값이 전달되었습니다.";
             }
         }
 
