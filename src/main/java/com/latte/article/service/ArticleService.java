@@ -75,6 +75,7 @@ public class ArticleService {
      * 아티클 목록 조회
      * @return
      */
+    @Transactional
     public Page<ArticleResponse> articleList(@Param("sort") String sort, @Param("keyword") String keyword, @Param("pageable") Pageable pageable) {
 
 
@@ -89,12 +90,15 @@ public class ArticleService {
         for (ArticleResponse article : list) {
             MemberResponse member = authService.getMemberSeq(article.getWriterNo());
             article.setNickname(member.getNickname());
-
+            List<String> data = new ArrayList<>();
             if(article.getImageUrl() != null) {
-                String imgs[] = article.getImageUrl().split(",");
+                data = List.of(article.getImageUrl().split(","));
 
-                imgMap.put("imgUrl1", imgs[0]);
-                imgMap.put("imgUrl2", imgs[1]);
+                for(int i = 0; i < data.size(); i++) {
+                    String img = data.get(i);
+                    imgMap.put("imgUrl"+(i+1), img);
+                }
+
 
                 article.setImages(imgMap);
             }
