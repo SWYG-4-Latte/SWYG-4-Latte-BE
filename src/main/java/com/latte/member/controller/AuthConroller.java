@@ -61,6 +61,16 @@ public class AuthConroller {
         int mbrNo = member.getMbrNo();
 
         try {
+
+            // 회원 탈퇴 여부 확인
+            if ("Y".equals(member.getDeleteYn())) {
+                message = "회원 탈퇴한 아이디로는 로그인이 불가능합니다.";
+                dataMap.put("jwtToken", "delete");
+                ResponseData<?> responseData = new ResponseData<>(message, dataMap);
+                return new ResponseEntity<>(responseData, OK);
+            }
+
+            
             JwtToken jwtToken = authService.signIn(request.getMbrId(), request.getPassword(), response);
             dataMap.put("jwtToken", jwtToken);
             dataMap.put("mbrNo", mbrNo);
