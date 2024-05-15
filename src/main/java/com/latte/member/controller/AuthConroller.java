@@ -39,15 +39,6 @@ public class AuthConroller {
     @Autowired
     private AuthService authService;
 
-    @Autowired
-    private EmailService emailService;
-
-    @Value("${spring.mail.username")
-    private String from;
-
-    @Autowired
-    private final JavaMailSender javaMailSender;
-
 
 
     /**
@@ -196,6 +187,103 @@ public class AuthConroller {
         ResponseData<?> responseData = new ResponseData<>(message, dataMap);
         return new ResponseEntity<>(responseData, OK);
     }
+
+
+    /**
+     * 아이디 중복검사
+     * @param mbrId
+     * @return
+     */
+    @PostMapping("/existsId/{mbrId}")
+    @ResponseBody
+    public ResponseEntity<?> existsId(@PathVariable("mbrId") String mbrId) {
+
+        String confirmIdYn = null;
+        String message = "";
+        Map<String, Object> dataMap = new HashMap<>();
+
+        int countMemberById = authService.countMemberByLoginId(mbrId);
+
+        if (countMemberById > 0) {
+            confirmIdYn = "false";
+            message = "아이디가 이미 존재합니다.";
+        } else {
+            confirmIdYn = "true";
+            message = "사용 가능한 아이디입니다.";
+        }
+
+        dataMap.put("mbrId", mbrId);
+        dataMap.put("confirmIdYn", confirmIdYn);
+
+        ResponseData<?> responseData = new ResponseData<>(message, dataMap);
+        return new ResponseEntity<>(responseData, OK);
+
+    }
+
+    /**
+     * 닉네임 중복검사
+     * @param nickname
+     * @return
+     */
+    @PostMapping("/existsNickname/{nickname}")
+    @ResponseBody
+    public ResponseEntity<?> existsNickname(@PathVariable("nickname") String nickname) {
+
+        String confirmNicknameYn = null;
+        String message = "";
+        Map<String, Object> dataMap = new HashMap<>();
+
+        int countMemberByName = authService.countMemberByNickname(nickname);
+
+        if (countMemberByName > 0) {
+            confirmNicknameYn = "false";
+            message = "닉네임이 이미 존재합니다.";
+        } else {
+            confirmNicknameYn = "true";
+            message = "사용 가능한 닉네임입니다.";
+        }
+
+        dataMap.put("nickname", nickname);
+        dataMap.put("confirmNicknameYn", confirmNicknameYn);
+
+        ResponseData<?> responseData = new ResponseData<>(message, dataMap);
+        return new ResponseEntity<>(responseData, OK);
+
+    }
+
+
+    /**
+     * 이메일 중복검사
+     * @param email
+     * @return
+     */
+    @PostMapping("/existsEmail/{email}")
+    @ResponseBody
+    public ResponseEntity<?> existsEmail(@PathVariable("email") String email) {
+
+        String confirmEmailYn = null;
+        String message = "";
+        Map<String, Object> dataMap = new HashMap<>();
+
+        int countMemberByEmail = authService.countMemberByEmail(email);
+
+        if (countMemberByEmail > 0) {
+            confirmEmailYn = "false";
+            message = "이메일이 이미 존재합니다.";
+        } else {
+            confirmEmailYn = "true";
+            message = "사용 가능한 이메일입니다.";
+        }
+
+        dataMap.put("email", email);
+        dataMap.put("confirmEmailYn", confirmEmailYn);
+
+        ResponseData<?> responseData = new ResponseData<>(message, dataMap);
+        return new ResponseEntity<>(responseData, OK);
+
+    }
+
+
 
     /**
      * [API] 회원수정
