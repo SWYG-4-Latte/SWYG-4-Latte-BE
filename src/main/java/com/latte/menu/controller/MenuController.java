@@ -15,8 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -39,7 +37,7 @@ public class MenuController {
     public ResponseEntity<?> menuPopup() {
         ResponseData<?> responseData;
         try {
-            MemberResponse member = isLogin();
+            MemberResponse member = menuService.isLoginMember();
             if (member == null) {
                 responseData = new ResponseData<>("로그인 하지 않은 사용자입니다", null);
                 return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
@@ -47,6 +45,9 @@ public class MenuController {
             responseData = new ResponseData<>(null, menuService.popup(member));
         } catch (NotEnoughInfoException exception) {
             responseData = new ResponseData<>(exception.getMessage(), null);
+        } catch (JsonProcessingException exception) {
+            responseData = new ResponseData<>("사용자 검증에 실패하였습니다", null);
+            return new ResponseEntity<>(responseData, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -143,7 +144,7 @@ public class MenuController {
         ResponseData<?> responseData;
 
         try {
-            MemberResponse member = isLogin();
+            MemberResponse member = menuService.isLoginMember();
             responseData = new ResponseData<>(null, menuService.menuDetail(menuNo, menuSize, member));
         } catch (JsonProcessingException exception) {
             responseData = new ResponseData<>("상세 조회에 실패하였습니다.", null);
@@ -151,18 +152,5 @@ public class MenuController {
         }
 
         return new ResponseEntity<>(responseData, HttpStatus.OK);
-    }
-
-    private MemberResponse isLogin() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username = "";
-        if ("anonymousUser".equals(principal)) {
-            return null;
-        } else {
-            User tokenUser = (User) principal;
-            username = tokenUser.getUsername();
-            log.info("username = {}", username);
-        }
-        return authService.getMemberInfo(username);
     }
 }
