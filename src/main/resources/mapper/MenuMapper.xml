@@ -177,7 +177,7 @@
             WHEN '빽다방' THEN 5
             ELSE 6
         END,
-        M1.MENU_NAME ASC
+        M1.MENU_NO ASC
         LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
     </select>
 
