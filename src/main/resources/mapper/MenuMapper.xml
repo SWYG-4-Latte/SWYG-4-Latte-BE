@@ -69,6 +69,9 @@
                 <if test="cond == 'caffeine-none'">
                     and CAFFEINE = "0mg"
                 </if>
+                <if test="sortBy == 'caffeine-desc' or sortBy == 'caffeine-asc'">
+                    and CAFFEINE != "0mg"
+                </if>
             </where>
             GROUP BY MENU_NAME, BRAND
         ) AS M2
@@ -107,6 +110,9 @@
             <if test="cond == 'caffeine-none'">
                 and CAFFEINE = "0mg"
             </if>
+            <if test="sortBy == 'caffeine-desc' or sortBy == 'caffeine-asc'">
+                and CAFFEINE != "0mg"
+            </if>
         </where>
         GROUP BY MENU_NAME, brand
         ) AS M2
@@ -140,6 +146,9 @@
         <where>
             <if test="cond == 'caffeine-none'">
                 and M1.CAFFEINE = "0mg"
+            </if>
+            <if test="sortBy == 'caffeine-desc' or sortBy == 'caffeine-asc'">
+                and CAFFEINE != "0mg"
             </if>
             <!-- 검색어 -->
             <if test="word != null and word != ''">
@@ -199,6 +208,9 @@
         <where>
             <if test="cond == 'caffeine-none'">
                 and M1.CAFFEINE = "0mg"
+            </if>
+            <if test="sortBy == 'caffeine-desc' or sortBy == 'caffeine-asc'">
+                and CAFFEINE != "0mg"
             </if>
             <!-- 검색어 -->
             <if test="word != null and word != ''">

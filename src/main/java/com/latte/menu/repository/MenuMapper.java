@@ -17,14 +17,18 @@ public interface MenuMapper {
                                                       @Param("cond") String cond,
                                                       @Param("pageable") Pageable pageable);
 
-    int getBrandCategoryCnt(@Param("brand") String brand, @Param("cond") String cond);
+    int getBrandCategoryCnt(@Param("brand") String brand,
+                            @Param("sortBy") String sortBy,
+                            @Param("cond") String cond);
 
     List<MenuSearchResponse> findMenuList(@Param("sortBy") String sortBy,
                                           @Param("cond") String cond,
                                           @Param("word") String word,
                                           @Param("pageable") Pageable pageable);
 
-    int getFindMenuListCnt(@Param("cond") String cond, @Param("word") String word);
+    int getFindMenuListCnt(@Param("sortBy") String sortBy,
+                           @Param("cond") String cond,
+                           @Param("word") String word);
 
     String findTodaySumCaffeine(@Param("mbrNo") int mbrNo,
                                 @Param("localDateTime") LocalDateTime localDateTime,

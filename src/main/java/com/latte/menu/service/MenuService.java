@@ -70,7 +70,7 @@ public class MenuService {
      */
     public Page<BrandCategoryResponse> findBrandCategoryList(String brandName, String sortBy, String cond, Pageable pageable) {
         List<BrandCategoryResponse> content = menuMapper.findBrandCategoryList(BrandType.valueOf(brandName.toUpperCase()).getValue(), sortBy, cond, pageable);
-        int total = menuMapper.getBrandCategoryCnt(BrandType.valueOf(brandName.toUpperCase()).getValue(), cond);
+        int total = menuMapper.getBrandCategoryCnt(BrandType.valueOf(brandName.toUpperCase()).getValue(), sortBy, cond);
         return new PageImpl<>(content, pageable, total);
     }
 
@@ -83,7 +83,7 @@ public class MenuService {
         }
 
         List<MenuSearchResponse> content = menuMapper.findMenuList(sortBy, cond, word, pageable);
-        int total = menuMapper.getFindMenuListCnt(cond, word);
+        int total = menuMapper.getFindMenuListCnt(sortBy, cond, word);
 
         // 검색 성공 시에만 증가
         if (content.size() != 0) {
