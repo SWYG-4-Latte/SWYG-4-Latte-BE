@@ -16,7 +16,7 @@ public interface StandardValueConstants {
      */
 
     int MN_MIN_NORMAL = 134;
-   int MN_MAX_NORMAL = 267;
+    int MN_MAX_NORMAL = 267;
     int MN_MAX_CAFFEINE = 400;
 
 
@@ -34,7 +34,7 @@ public interface StandardValueConstants {
 
     int FYE_MIN_NORMAL = 0;
     int FYE_MAX_NORMAL = 0;
-   int FYE_MAX_CAFFEINE = 0;
+    int FYE_MAX_CAFFEINE = 0;
 
     int FYM_MIN_NORMAL = 51;
     int FYM_MAX_NORMAL = 200;

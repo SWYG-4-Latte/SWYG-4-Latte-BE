@@ -181,7 +181,7 @@ public class MenuService {
             int maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
             log.info("##################### 부가 정보를 입력한 사용자 #####################");
             double caffeine = Integer.parseInt(menuDetailResponse.getCaffeine().replace("mg", ""));
-            String percent = Math.round((caffeine / maxCaffeine) * 100) + "%";
+            String percent = maxCaffeine == 0 ? "100%" : Math.round((caffeine / maxCaffeine) * 100) + "%";
             menuDetailResponse.setPercent(percent);
             return menuDetailResponse;
         } catch (NotEnoughInfoException exception) {
