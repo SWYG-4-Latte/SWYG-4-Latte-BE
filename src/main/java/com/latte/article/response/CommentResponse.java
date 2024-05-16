@@ -17,6 +17,8 @@ public class CommentResponse {
 
     private String content;			// 내용
 
+    private String title;
+
     private int likeCnt;			// 좋아요(추천수)
 
     private int writerNo;			// 작성자 번호

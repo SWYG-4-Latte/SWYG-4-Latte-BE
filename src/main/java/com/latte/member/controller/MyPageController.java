@@ -1,6 +1,9 @@
 package com.latte.member.controller;
 
 
+import com.latte.article.response.CommentResponse;
+import com.latte.article.service.ArticleService;
+import com.latte.article.service.CommentService;
 import com.latte.drink.exception.NotEnoughInfoException;
 import com.latte.drink.standard.StandardValueCalculate;
 import com.latte.member.config.SecurityUtil;
@@ -12,12 +15,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static org.springframework.http.HttpStatus.OK;
 
@@ -32,6 +34,12 @@ public class MyPageController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private CommentService commentService;
+
+    @Autowired
+    private ArticleService articleService;
 
 
 /*
@@ -123,6 +131,54 @@ public class MyPageController {
         ResponseData<?> responseData = new ResponseData<>(message, dataMap);
         return new ResponseEntity<>(responseData, OK);
     }
+
+
+    /**
+     * 댓글 리스트 조회(유저)
+     * @return sort 정렬
+     */
+    @GetMapping("/myCommentList")
+    public ResponseEntity<?> myCommentList(@RequestParam(value="sort", required = false) String sort) {
+
+        // 현재 사용자 인증 정보 가져오기
+        Object authentication = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        String mbrId = SecurityUtil.getCurrentUsername();
+        String message = "";
+        List<Map<String, String>> commentDataList = new ArrayList<>();
+
+        // 댓글 개수
+        Map<String, String> userCount = new HashMap<>();
+        String count = String.valueOf(commentService.userCommentCount(mbrId));
+        userCount.put("userCount", count);
+
+
+        // 로그인 상태 확인
+        if("anonymousUser".equals(authentication)) {
+            message = "로그인을 해주세요";
+
+        } else {
+            message = mbrId + "의 댓글 리스트입니다.";
+            List<CommentResponse> commentList = commentService.commentListByMember(sort, mbrId);
+
+            for (CommentResponse comment : commentList) {
+                // 댓글 내용
+                Map<String, String> dataMap = new HashMap<>();
+                dataMap.put("content", comment.getContent());
+                dataMap.put("title", comment.getTitle());
+                dataMap.put("likeCnt", String.valueOf(comment.getLikeCnt()));
+                dataMap.put("regDate", String.valueOf(comment.getRegDate()));
+                dataMap.put("updateDate", String.valueOf(comment.getUpdateDate()));
+                commentDataList.add(dataMap);
+            }
+            commentDataList.add(userCount);
+
+        }
+
+        ResponseData<?> responseData = new ResponseData<>(message, commentDataList);
+        return new ResponseEntity<>(responseData, OK);
+    }
+
 
 
 

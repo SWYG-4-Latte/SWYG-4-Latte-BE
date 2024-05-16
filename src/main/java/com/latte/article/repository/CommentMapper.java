@@ -56,4 +56,9 @@ public interface CommentMapper {
     Integer findLikeByCommentRegNo(@Param("commentNo") int commentNo, @Param("regNo") int regNo);
 
     CommentResponse detailComment(int commentNo);
+
+    Integer userCommentCount(@Param("writerNo") int writerNo);
+
+    // 댓글 리스트(유저)
+    List<CommentResponse> commentListByMember(@Param("sort") String sort, @Param("writerNo") int writerNo);
 }

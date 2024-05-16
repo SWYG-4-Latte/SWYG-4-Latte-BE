@@ -5,6 +5,19 @@
 
 <mapper namespace="com.latte.article.repository.CommentMapper">
 
+    <!--댓글 정렬-->
+    <sql id="sort">
+        <choose>
+            <!-- 최신순 -->
+            <when test="sort == null or sort  == '' or sort == 'recent'">
+                ORDER BY C.comment_no, C.reg_date ASC
+            </when>
+            <!-- 좋아요순 -->
+            <when test="sort == 'likeCnt'">
+                ORDER BY C.like_cnt DESC
+            </when>
+        </choose>
+    </sql>
 
     <!-- comment 테이블 전체 컬럼 -->
     <sql id="commentColumns">
@@ -72,7 +85,7 @@
     </delete>
 
 
-    <!-- 댓글 리스트 조회 -->
+    <!-- 댓글 리스트 조회(아티클) -->
     <select id="findAll" parameterType="int" resultType="com.latte.article.response.CommentResponse">
         /* CommentMapper.findAll */
         SELECT
@@ -84,6 +97,21 @@
     </select>
 
 
+    <!-- 댓글 리스트 조회(유저별) -->
+    <select id="commentListByMember" resultType="com.latte.article.response.CommentResponse">
+        /* CommentMapper.commentListByMember */
+        SELECT
+                C.content
+             , A.title
+             , C.like_cnt
+             , C.reg_date
+             , C.update_date
+        FROM COMMENT C LEFT JOIN ARTICLE A ON C.article_no = A.article_no
+        WHERE C.delete_yn = 'N'
+        AND C.writer_no = #{writerNo}
+        <include refid="sort" />
+    </select>
+
     <!-- 작성자 확인 여부 -->
     <select id="isCommentAuthor" parameterType="int" resultType="int">
         /* CommentMapper.isCommentAuthor */
@@ -94,6 +122,13 @@
         WHERE
             `comment_no` = #{commentNo}
           AND `writer_no` = #{writerNo}
+    </select>
+
+    <!--전체 댓글 수(유저)-->
+    <select id="userCommentCount" resultType="Integer" parameterType="int">
+        SELECT COUNT(*)
+        FROM COMMENT
+        WHERE writer_no = #{writerNo}
     </select>
 
     <!--댓글 신고 증가-->
