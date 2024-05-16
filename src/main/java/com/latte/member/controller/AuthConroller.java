@@ -78,17 +78,11 @@ public class AuthConroller {
             message =  "로그인에 성공했습니다";
 
         } catch (BadCredentialsException e) {
-            int existIdYn = authService.countMemberByLoginId(request.getMbrId());
-            dataMap.put("jwtToken", null);
-            // 아이디가 존재하지 않다면
-            if(existIdYn == 0) {
-                // 아이디가 틀렸을 때
-                message =  "아이디를 잘못 입력했습니다.";
-            } else {
-                // 비밀번호가 틀렸을 때
-                message =  "비밀번호를 잘못 입력했습니다.";
-            }
+            // 로그인 실패 시 에러 메시지와 로그 출력
+            message = "아이디 또는 비밀번호를 잘못 입력했습니다.";
+            log.error("로그인 실패 - 아이디: {}, 에러 메시지: {}", request.getMbrId(), e.getMessage());
         } catch (Exception e) {
+            // 그 외 예외 발생 시 런타임 에러로 처리
             throw new RuntimeException(e);
         }
 

@@ -88,7 +88,7 @@ public class CommentService {
     }
 
     /**
-     * 댓글 리스트 조회
+     * 댓글 리스트 조회(게시글)
      * @param articleNo - 게시글 번호 (FK)
      * @return 특정 게시글에 등록된 댓글 리스트
      */
@@ -102,6 +102,36 @@ public class CommentService {
 
         return list;
     }
+
+    /**
+     * 댓글 리스트 조회(유저)
+     * @param mbrId
+     * @return
+     */
+    public List<CommentResponse> commentListByMember(@Param("sort") String sort, String mbrId) {
+
+        MemberResponse member = authService.getMemberInfo(mbrId);
+
+        List<CommentResponse> list = commentMapper.commentListByMember(sort, member.getMbrNo());
+
+        return list;
+    }
+
+    /**
+     * 댓글 게시글 개수(유저)
+     * @param mbrId
+     * @return
+     */
+    public Integer userCommentCount(String mbrId) {
+
+        MemberResponse member = authService.getMemberInfo(mbrId);
+
+        Integer commentCount = commentMapper.userCommentCount(member.getMbrNo());
+
+        return commentCount;
+    }
+
+
 
 
     /**
