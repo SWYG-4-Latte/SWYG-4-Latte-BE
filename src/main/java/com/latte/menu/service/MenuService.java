@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latte.drink.exception.NotEnoughInfoException;
 import com.latte.drink.standard.StandardValueCalculate;
-import com.latte.member.mapper.AuthMapper;
 import com.latte.member.response.MemberResponse;
 import com.latte.menu.repository.MenuMapper;
 import com.latte.menu.response.*;
