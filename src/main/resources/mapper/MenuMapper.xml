@@ -167,16 +167,6 @@
                 CAST(SUBSTRING(M1.CAFFEINE, 1, LOCATE('mg', M1.CAFFEINE) - 1) AS UNSIGNED) ASC,
             </when>
         </choose>
-        <!-- 검색어에 따라 정렬 -->
-        <if test="word != null and word != ''">
-            CASE
-                WHEN M1.MENU_NAME LIKE CONCAT('%', TRIM(#{word}), '%') THEN 1
-                WHEN REPLACE(M1.MENU_NAME, ' ', '') LIKE CONCAT('%', TRIM(#{word}), '%') THEN 1
-                WHEN M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%') THEN 1
-                WHEN M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', '%'), '%') THEN 2
-                ELSE 3
-            END,
-        </if>
         M1.MENU_NO ASC
         LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
     </select>
