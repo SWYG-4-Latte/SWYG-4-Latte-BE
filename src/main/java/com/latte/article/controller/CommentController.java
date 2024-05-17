@@ -62,7 +62,7 @@ public class CommentController {
             request.setWriterNo(member.getMbrNo());
 
             result = commentService.saveComment(request);
-            CommentResponse comment = commentService.findCommentById(request.getCommentNo());
+            CommentResponse comment = commentService.detailComment(request.getCommentNo());
             dataMap.put("commentInfo", comment);
             if(result) {
                 message = "댓글 등록이 완료되었습니다";
@@ -110,7 +110,7 @@ public class CommentController {
                 request.setCommentNo(commentNo);
 
                 result = commentService.updateComment(request);
-                CommentResponse comment = commentService.findCommentById(commentNo);
+                CommentResponse comment = commentService.detailComment(commentNo);
                 dataMap.put("commentInfo", comment);
                 if(result) {
                     message = "댓글 수정이 완료되었습니다";

@@ -46,15 +46,6 @@ public class CommentService {
     }
 
     /**
-     * 댓글 상세정보 조회
-     * @param commentNo - PK
-     * @return 댓글 상세정보
-     */
-    public CommentResponse findCommentById(final int commentNo) {
-        return commentMapper.findByComment(commentNo);
-    }
-
-    /**
      * 댓글 수정
      * @param request - 댓글 정보
      * @return PK

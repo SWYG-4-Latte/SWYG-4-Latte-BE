@@ -16,10 +16,6 @@ public interface CommentMapper {
     int save(CommentRequest request);
 
 
-    // 댓글 상세정보 조회
-    CommentResponse findByComment(int commentNo);
-
-
     // 댓글 수정
     int update(CommentRequest commentRequest);
 
