@@ -62,6 +62,7 @@ public class AuthConroller {
         try {
             MemberResponse member = authService.getMemberInfo(request.getMbrId());
             int mbrNo = member.getMbrNo();
+            String nickname = member.getNickname();
 
             // 회원 탈퇴 여부 확인
             if ("Y".equals(member.getDeleteYn())) {
@@ -75,6 +76,7 @@ public class AuthConroller {
             JwtToken jwtToken = authService.signIn(request.getMbrId(), request.getPassword(), response);
             dataMap.put("jwtToken", jwtToken);
             dataMap.put("mbrNo", mbrNo);
+            dataMap.put("nickname", nickname);
             message =  "로그인에 성공했습니다";
 
         } catch (BadCredentialsException e) {
