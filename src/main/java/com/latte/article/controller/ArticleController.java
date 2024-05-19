@@ -219,13 +219,14 @@ public class ArticleController {
 
 
         articleService.viewCount(articleNo);
-        ArticleResponse articleResponse = articleService.detailArticle(articleNo);
-        if(articleResponse == null ) {
-            message = "삭제되거나 존재하지 않는 게시글입니다.";
-        } else {
-
+        ArticleResponse articleResponse = new ArticleResponse();
+        try {
+            articleResponse = articleService.detailArticle(articleNo);
             message = "게시글 정보입니다.";
+        } catch (Exception e) {
+            throw new RuntimeException("존재하지 않는 게시글입니다.");
         }
+
 
         ResponseData<?> responseData = new ResponseData<>(message, articleResponse);
         return new ResponseEntity<>(responseData, OK);

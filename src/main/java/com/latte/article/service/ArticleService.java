@@ -113,28 +113,12 @@ public class ArticleService {
      */
     public ArticleResponse detailArticle(int articleNo) {
 
+        ArticleResponse user = new ArticleResponse();
         Map<String, String> imgMap = new HashMap<>();
-        ArticleResponse user = mapper.detailArticle(articleNo);
 
-        // 내용
-        String content = user.getContent();
-
-        List<String> strongList = extractTextBetweenTags(content, "strong");
-        List<String> paragraphList = extractTextBetweenTags(content, "p");
+        user = mapper.detailArticle(articleNo);
 
 
-        Map<String, String> contents = new LinkedHashMap<>();
-
-        for (int i = 0; i < strongList.size(); i++){
-            String sub = strongList.get(i);
-            contents.put("strong"+(i+1), sub);
-        }
-        for (int i = 0; i < paragraphList.size(); i++) {
-            String con = paragraphList.get(i);
-            contents.put("content"+(i+1), con);
-        }
-
-        user.setContents(contents);
 
         if(user.getImageUrl() != null) {
 
@@ -153,19 +137,6 @@ public class ArticleService {
         user.setNickname(member.getNickname());
 
         return user;
-    }
-
-    public static List<String> extractTextBetweenTags(String input, String tag) {
-        String patternString = "<" + tag + ">(.+?)</" + tag + ">";
-        Pattern pattern = Pattern.compile(patternString);
-        Matcher matcher = pattern.matcher(input);
-
-        List<String> result = new ArrayList<>();
-        while (matcher.find()) {
-            result.add(matcher.group(1));
-        }
-        return result;
-
     }
 
     /**
