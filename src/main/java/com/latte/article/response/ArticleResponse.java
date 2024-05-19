@@ -30,8 +30,6 @@ public class ArticleResponse {
 
     private String content;         // 아티클 내용
 
-    private Map<String, String> contents;       // 아티클 내용 정리
-
     private int writerNo;           // 작성자 번호
 
     private String nickname;           // 작성자 닉네임
