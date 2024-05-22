@@ -218,9 +218,12 @@ public class ArticleController {
         String message = "";
 
 
-        articleService.viewCount(articleNo);
+
         ArticleResponse articleResponse = new ArticleResponse();
         try {
+            articleService.viewCount(articleNo);
+
+
             articleResponse = articleService.detailArticle(articleNo);
             message = "게시글 정보입니다.";
         } catch (Exception e) {
