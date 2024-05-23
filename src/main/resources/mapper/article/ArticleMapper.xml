@@ -42,9 +42,7 @@
         FROM ARTICLE A LEFT JOIN tb_member M ON A.writer_no = M.mbr_no
         WHERE A.delete_yn = 'N'
         <if test='keyword != null'>
-            AND ( title like CONCAT ('%', #{keyword}, '%')
-/*            OR sub_title like CONCAT ('%', #{keyword}, '%')
-            OR content like CONCAT ('%', #{keyword}, '%') )*/
+            AND title like CONCAT ('%', #{keyword}, '%')
         </if>
         <include refid="sort" />
         LIMIT #{pageable.offset}, #{pageable.pageSize}
