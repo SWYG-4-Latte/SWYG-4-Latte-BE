@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +39,9 @@ public class AuthConroller {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private final PasswordEncoder passwordEncoder;
 
 
 
@@ -96,6 +100,9 @@ public class AuthConroller {
 
 
     /**
+     *
+     *
+     *
      * 로그아웃 API
      * @param
      * @return
@@ -149,7 +156,7 @@ public class AuthConroller {
      */
     @PostMapping("/signup")
     @ResponseBody
-    public ResponseEntity<?> saveMember(@RequestBody MemberRequest request) {
+    public ResponseEntity<?> saveMember(@RequestBody MemberRequest request, HttpServletResponse response) {
 
         String existIdYn = null;
         String existNicknameYn = null;
@@ -161,6 +168,7 @@ public class AuthConroller {
         String message = "";
         Map<String, Object> dataMap = new HashMap<>();
 
+        String realPassword = request.getPassword();
         if (countMemberById > 0) {
             existIdYn = "false";
             message = "아이디가 이미 존재합니다.";
@@ -174,11 +182,21 @@ public class AuthConroller {
             existIdYn = "true";
             existNicknameYn = "true";
             existIdEmailYn = "true";
+
+            // 비밀번호 인코딩
+            //request.setPassword(passwordEncoder.encode(request.getPassword()));
+
             boolean res = authService.save(request);
             if (res) {
                 MemberResponse result = authService.getMemberInfo(request.getMbrId());
                 dataMap.put("result", result); // MemberResponse를 Map에 추가
                 message = "회원 가입에 성공했습니다.";
+
+                // 회원가입 성공 시 자동 로그인 수행
+                LoginRequest loginRequest = new LoginRequest();
+                loginRequest.setMbrId(request.getMbrId());
+                loginRequest.setPassword(realPassword);
+                return login(loginRequest, response);
             } else {
                 message = "회원 가입에 실패했습니다.";
             }

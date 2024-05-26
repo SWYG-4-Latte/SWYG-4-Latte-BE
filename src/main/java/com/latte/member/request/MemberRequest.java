@@ -77,7 +77,6 @@ public class MemberRequest {
         if (this.cellPhone == null) this.cellPhone = response.getCellPhone();
         if (this.email == null) this.email = response.getEmail();
         if (this.gender == null) this.gender = response.getGender();
-        if (!this.pregnancy) this.pregnancy = response.isPregnancy();
         if (this.pregMonth == 0) this.pregMonth = response.getPregMonth();
         if (this.allergy == null) this.allergy = response.getAllergy();
         if (this.symptom == null) this.symptom = response.getSymptom();

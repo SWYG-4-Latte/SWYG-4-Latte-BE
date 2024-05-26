@@ -18,6 +18,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,17 +34,17 @@ public class AuthService {
 
     private final EmailService emailService;
 
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final ApplicationEventPublisher eventPublisher;
     private final JwtTokenProvider jwtTokenProvider;
     private static final String NUMBER = "0123456789";
     private static SecureRandom random = new SecureRandom();
 
-    public AuthService(AuthMapper authMapper, EmailService emailService, PasswordEncoder passwordEncoder, AuthenticationManagerBuilder authenticationManagerBuilder, ApplicationEventPublisher eventPublisher, JwtTokenProvider jwtTokenProvider) {
+    public AuthService(AuthMapper authMapper, EmailService emailService, AuthenticationManagerBuilder authenticationManagerBuilder, ApplicationEventPublisher eventPublisher, JwtTokenProvider jwtTokenProvider) {
         this.authMapper = authMapper;
         this.emailService = emailService;
-        this.passwordEncoder = passwordEncoder;
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.eventPublisher = eventPublisher;
         this.jwtTokenProvider = jwtTokenProvider;
@@ -59,32 +60,46 @@ public class AuthService {
      */
     @Transactional
     public JwtToken signIn(String mbrId, String password, HttpServletResponse response) throws Exception {
-        // 1. mbrId + password 를 기반으로 Authentication 객체 생성
-        // 이때 authentication 은 인증 여부를 확인하는 authenticated 값이 false
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(mbrId, password);
 
-        try {
-            // 2. 실제 검증. authenticate() 메서드를 통해 요청된 Member 에 대한 검증 진행
-            // authenticate 메서드가 실행될 때 CustomUserDetailsService 에서 만든 loadUserByUsername 메서드 실행
-            Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        MemberResponse member = authMapper.findById(mbrId);
 
-            // 3. 인증 정보를 기반으로 JWT 토큰 생성
-            JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
-
-
-            // Refresh Token을 HttpOnly에 설정하고 Cookie에 추가
-            Cookie refreshTokenCookie = new Cookie("refreshToken", jwtToken.getRefreshToken());
-            refreshTokenCookie.setHttpOnly(true);
-            refreshTokenCookie.setMaxAge((int) (jwtTokenProvider.getRefreshTokenExpirationMs() / 1000));
-            refreshTokenCookie.setSecure(true); // HTTPS 프로토콜에서만 쿠키 전송 가능
-            refreshTokenCookie.setPath("/");
-            response.addCookie(refreshTokenCookie);
-
-            return jwtToken; // 로그인 성공
-        } catch (BadCredentialsException e) {
-
+        if(!passwordEncoder.matches(password, member.getPassword())) {
             throw new BadCredentialsException("아이디 또는 비밀번호를 잘못 입력했습니다.");
+        } else {
+
+            // 1. mbrId + password 를 기반으로 Authentication 객체 생성
+            // 이때 authentication 은 인증 여부를 확인하는 authenticated 값이 false
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(mbrId, password);
+
+            try {
+                // 2. 실제 검증. authenticate() 메서드를 통해 요청된 Member 에 대한 검증 진행
+                // authenticate 메서드가 실행될 때 CustomUserDetailsService 에서 만든 loadUserByUsername 메서드 실행
+
+                Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                // 3. 인증 정보를 기반으로 JWT 토큰 생성
+                JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
+
+
+                // Refresh Token을 HttpOnly에 설정하고 Cookie에 추가
+                Cookie refreshTokenCookie = new Cookie("refreshToken", jwtToken.getRefreshToken());
+                refreshTokenCookie.setHttpOnly(true);
+                refreshTokenCookie.setMaxAge((int) (jwtTokenProvider.getRefreshTokenExpirationMs() / 1000));
+                refreshTokenCookie.setSecure(true); // HTTPS 프로토콜에서만 쿠키 전송 가능
+                refreshTokenCookie.setPath("/");
+                response.addCookie(refreshTokenCookie);
+
+                return jwtToken; // 로그인 성공
+            } catch (BadCredentialsException e) {
+
+                throw new BadCredentialsException("로그인 중 오류가 발생했습니다. 관리자에게 문의 바랍니다.");
+            }
         }
+
+
+
     }
 
     /**

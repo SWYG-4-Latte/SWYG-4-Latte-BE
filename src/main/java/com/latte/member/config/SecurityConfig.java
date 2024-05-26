@@ -17,6 +17,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -50,19 +51,15 @@ public class SecurityConfig{
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-/*
-    @Bean
-    public CustomUserDetailsService customUserDetailsService() {  // Create and return CustomUserDetailsService bean
-        return new CustomUserDetailsService(authMapper, passwordEncoder());
-    }
-*/
-
-    @Bean
+/*    @Bean
     public BCryptPasswordEncoder passwordEncoder() {
 
         return new BCryptPasswordEncoder();
+    }*/
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
-
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -107,8 +104,11 @@ public class SecurityConfig{
                 )
                 .logout((logout) -> logout
                         //.logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout"))
-                        .logoutSuccessUrl("/")
+                        .logoutSuccessUrl("/auth/logout")
                         .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID") // 쿠키 삭제
+                        .invalidateHttpSession(true) // 세션 무효화
+                        .clearAuthentication(true) // 인증 정보 제거
                 )
                 .httpBasic(withDefaults()); // Basic Authentication 활성화
 
