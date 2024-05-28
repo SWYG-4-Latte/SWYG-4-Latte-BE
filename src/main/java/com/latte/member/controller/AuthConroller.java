@@ -55,7 +55,7 @@ public class AuthConroller {
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         //String id = request.getMbrId();
         //String password = request.getPassword();
-        log.info("request id = {}, password = {}", request.getMbrId(), request.getPassword());
+        //log.info("request id = {}, password = {}", request.getMbrId(), request.getPassword());
         // log.info("jwtToken accessToken = {}, refreshToken = {}", jwtToken.getAccessToken(), jwtToken.getRefreshToken());
         Map<String, Object> dataMap = new HashMap<>();
 
@@ -82,6 +82,7 @@ public class AuthConroller {
             dataMap.put("mbrNo", mbrNo);
             dataMap.put("nickname", nickname);
             message =  "로그인에 성공했습니다";
+            log.info("로그인 성공 request id = {}, token = {}", request.getMbrId(), jwtToken.getAccessToken());
 
         } catch (BadCredentialsException e) {
             // 로그인 실패 시 에러 메시지와 로그 출력
@@ -191,7 +192,7 @@ public class AuthConroller {
                 MemberResponse result = authService.getMemberInfo(request.getMbrId());
                 dataMap.put("result", result); // MemberResponse를 Map에 추가
                 message = "회원 가입에 성공했습니다.";
-
+                log.info("회원가입 성공 request id = {}", request.getMbrId());
                 // 회원가입 성공 시 자동 로그인 수행
                 LoginRequest loginRequest = new LoginRequest();
                 loginRequest.setMbrId(request.getMbrId());
@@ -199,6 +200,7 @@ public class AuthConroller {
                 return login(loginRequest, response);
             } else {
                 message = "회원 가입에 실패했습니다.";
+                log.error("회원가입 실패 request id = {}", request.getMbrId());
             }
         }
 
