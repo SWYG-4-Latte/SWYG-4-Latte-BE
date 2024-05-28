@@ -274,6 +274,47 @@ public class ArticleController {
     }
 
 
+    /**
+     * 회원/아티클 좋아요 유무
+     * @param articleNo
+     * @return
+     */
+    @PostMapping("/likeYn/{articleNo}")
+    public ResponseEntity<?> likeMember(@PathVariable("articleNo") int articleNo) {
+
+
+        Map<String, Object> dataMap = new HashMap<>();
+        boolean result = false;
+        String message = "";
+
+        // 현재 사용자 인증 정보 가져오기
+        Object authentication = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+
+        // 로그인 상태 확인
+        if("anonymousUser".equals(authentication)) {
+            message = "로그인을 해주세요";
+
+        } else {
+            String mbrId = SecurityUtil.getCurrentUsername();
+            MemberResponse member = authService.getMemberInfo(mbrId);
+            result = articleService.likeYn(articleNo, member.getMbrNo());
+
+            if (result) {
+                message = "좋아요를 한 작성자입니다.";
+            } else {
+                message = "좋아요를 한 작성자가 아닙니다";
+            }
+
+            dataMap.put("likeYn", result);
+        }
+
+
+        ResponseData<?> responseData = new ResponseData<>(message, dataMap);
+        return new ResponseEntity<>(responseData, OK);
+    }
+
+
 
     /*    *//* 파일 삭제 *//*
     @GetMapping("/deleteFile/{noticeId}/{fileId}")

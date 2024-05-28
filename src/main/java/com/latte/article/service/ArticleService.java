@@ -206,6 +206,29 @@ public class ArticleService {
     }
 
 
+    /**
+     * 회원/아티클 좋아요 유무
+     * @param articleNo
+     * @param regNo
+     * @return
+     */
+    @Transactional
+    public boolean likeYn(int articleNo, int regNo) {
+
+        // 작성자 여부 확인
+        int likeNo = mapper.findLikeYnByArticleRegNo(articleNo, regNo);
+
+
+        // 해당 아티클에 작성자가 like를 누른 적이 없을 때
+        if(likeNo == 0) {
+            return false;
+        } else {
+            return true;
+        }
+
+    }
+
+
 
 
 }

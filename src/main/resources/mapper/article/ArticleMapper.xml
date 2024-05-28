@@ -163,6 +163,14 @@
           AND reg_no = #{regNo}
     </select>
 
+    <!--등록자 좋아요 유무-->
+    <select id="findLikeYnByArticleRegNo" parameterType="int" resultType="Integer">
+        SELECT COUNT(*)
+        FROM ARTICLE_LIKE
+        WHERE article_no = #{articleNo}
+          AND reg_no = #{regNo}
+    </select>
+
 
 
     <!--아티클 등록-->

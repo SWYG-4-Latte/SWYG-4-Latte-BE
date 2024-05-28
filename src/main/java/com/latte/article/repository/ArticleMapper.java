@@ -48,7 +48,8 @@ public interface ArticleMapper {
     // 작성자가 좋아요를 눌렀는지 여부 확인
     Integer findLikeByArticleRegNo(@Param("articleNo") int articleNo, @Param("regNo") int regNo);
 
-
+    // 작성자/아티클 좋아요 여부
+    int findLikeYnByArticleRegNo(@Param("articleNo") int articleNo, @Param("regNo") int regNo);
 
 }
 
