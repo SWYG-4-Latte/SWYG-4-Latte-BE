@@ -114,7 +114,7 @@ public class DrinkService {
         StandardValue memberStandardValue = standardValueCalculate.getMemberStandardValue(member);
 
         /**
-         * 지난 달 카페인 달력 날짜별 상태 조회 ( 이번 달 1일을 기준으로 7일 전 지난 달부터 조회 )
+         * 지난 달 카페인 달력 날짜별 상태 조회 ( 기준 달 1일을 기준으로 7일 전 지난 달부터 조회 )
          */
         LocalDateTime lastMonthDate = firstDayOfMonth.minusDays(1);
         List<DateResponse> lastMonth = drinkMapper.findCalendar(member.getMbrNo(), firstDayOfMonth.minusDays(7), lastMonthDate);
@@ -123,12 +123,21 @@ public class DrinkService {
         getDateMap(mapResponse, memberStandardValue, lastMonth, year, month);
 
         /**
-         * 이번 달 카페인 달력 날짜별 상태 조회
+         * 기준 달 카페인 달력 날짜별 상태 조회
          */
         List<DateResponse> currentMonth = drinkMapper.findCalendar(member.getMbrNo(), firstDayOfMonth, lastDayOfMonth);
         year = firstDayOfMonth.getYear();
         month = firstDayOfMonth.getMonthValue();
         getDateMap(mapResponse, memberStandardValue, currentMonth, year, month);
+
+        /**
+         * 다음 달 카페인 달력 날짜별 상태 조회 ( 다음 달 1일부터 7일까지 )
+         */
+        LocalDateTime nextMonthDate = firstDayOfMonth.plusMonths(1);
+        List<DateResponse> nextMonth = drinkMapper.findCalendar(member.getMbrNo(), nextMonthDate, nextMonthDate.plusDays(7));
+        year = nextMonthDate.getYear();
+        month = nextMonthDate.getMonthValue();
+        getDateMap(mapResponse, memberStandardValue, nextMonth, year, month);
 
         return mapResponse;
     }
