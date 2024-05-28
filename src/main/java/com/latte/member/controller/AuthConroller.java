@@ -157,7 +157,7 @@ public class AuthConroller {
      */
     @PostMapping("/signup")
     @ResponseBody
-    public ResponseEntity<?> saveMember(@RequestBody MemberRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> saveMember(@RequestBody MemberRequest request, HttpServletResponse response) throws Exception {
 
         String existIdYn = null;
         String existNicknameYn = null;
@@ -193,14 +193,15 @@ public class AuthConroller {
                 dataMap.put("result", result); // MemberResponse를 Map에 추가
                 message = "회원 가입에 성공했습니다.";
                 log.info("회원가입 성공 request id = {}", request.getMbrId());
-                // 회원가입 성공 시 자동 로그인 수행
-                LoginRequest loginRequest = new LoginRequest();
-                loginRequest.setMbrId(request.getMbrId());
-                loginRequest.setPassword(realPassword);
-                return login(loginRequest, response);
+
+                // 회원가입 성공 시 로그인 수행
+                JwtToken jwtToken = authService.signIn(request.getMbrId(), realPassword, response);
+                dataMap.put("jwtToken", jwtToken);
+                log.info("자동 로그인 성공 request id = {}, token = {}", request.getMbrId(), jwtToken.getAccessToken());
             } else {
                 message = "회원 가입에 실패했습니다.";
                 log.error("회원가입 실패 request id = {}", request.getMbrId());
+
             }
         }
 
