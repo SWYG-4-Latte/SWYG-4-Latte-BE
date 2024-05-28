@@ -112,9 +112,29 @@ public class DrinkService {
     private Map<String, String> getStatusByDate(MemberResponse member, LocalDateTime firstDayOfMonth, LocalDateTime lastDayOfMonth) {
         Map<String, String> mapResponse = new HashMap<>();
         StandardValue memberStandardValue = standardValueCalculate.getMemberStandardValue(member);
-        List<DateResponse> calendar = drinkMapper.findCalendar(member.getMbrNo(), firstDayOfMonth, lastDayOfMonth);
 
-        for (DateResponse response : calendar) {
+        /**
+         * 지난 달 카페인 달력 날짜별 상태 조회 ( 이번 달 1일을 기준으로 7일 전 지난 달부터 조회 )
+         */
+        LocalDateTime lastMonthDate = firstDayOfMonth.minusDays(1);
+        List<DateResponse> lastMonth = drinkMapper.findCalendar(member.getMbrNo(), firstDayOfMonth.minusDays(7), lastMonthDate);
+        int year = lastMonthDate.getYear();
+        int month = lastMonthDate.getMonthValue();
+        getDateMap(mapResponse, memberStandardValue, lastMonth, year, month);
+
+        /**
+         * 이번 달 카페인 달력 날짜별 상태 조회
+         */
+        List<DateResponse> currentMonth = drinkMapper.findCalendar(member.getMbrNo(), firstDayOfMonth, lastDayOfMonth);
+        year = firstDayOfMonth.getYear();
+        month = firstDayOfMonth.getMonthValue();
+        getDateMap(mapResponse, memberStandardValue, currentMonth, year, month);
+
+        return mapResponse;
+    }
+
+    private void getDateMap(Map<String, String> mapResponse, StandardValue memberStandardValue, List<DateResponse> lastMonth, int year, int month) {
+        for (DateResponse response : lastMonth) {
             String value = "";
             int caffeine = Integer.parseInt(response.getCaffeine());
             if (caffeine > memberStandardValue.getMaxNormal()) {
@@ -124,10 +144,8 @@ public class DrinkService {
             } else {
                 value = "보통";
             }
-            mapResponse.put(response.getDate(), value);
+            mapResponse.put(year + "-" + String.format("%02d", month) + "-" + response.getDate(), value);
         }
-
-        return mapResponse;
     }
 
 
