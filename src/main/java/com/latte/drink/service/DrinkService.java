@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +77,7 @@ public class DrinkService {
         String monthStatus = getStatusByMonth(member, firstDayOfMonth, lastDayOfMonth, lastDayOfLastMonth, firstDayOfLastMonth);
 
         // 날짜별 카페인 섭취 상태
-        Map<String, String> dateMap = getStatusByDate(member, firstDayOfMonth, lastDayOfMonth);
+        Map<String, String> dateMap = getStatusByDate(member, firstDayOfMonth);
 
         return new CalendarResponse(monthStatus, dateMap);
     }
@@ -109,41 +110,16 @@ public class DrinkService {
     /**
      * 날짜별 카페인 섭취량 합계에 따른 섭취 상태 판단
      */
-    private Map<String, String> getStatusByDate(MemberResponse member, LocalDateTime firstDayOfMonth, LocalDateTime lastDayOfMonth) {
+    private Map<String, String> getStatusByDate(MemberResponse member, LocalDateTime firstDayOfMonth) {
         Map<String, String> mapResponse = new HashMap<>();
         StandardValue memberStandardValue = standardValueCalculate.getMemberStandardValue(member);
 
         /**
-         * 지난 달 카페인 달력 날짜별 상태 조회 ( 기준 달 1일을 기준으로 7일 전 지난 달부터 조회 )
+         * 기준 달 1일 기준으로 7일전 ~ 다음 달 7일까지
          */
-        LocalDateTime lastMonthDate = firstDayOfMonth.minusDays(1);
-        List<DateResponse> lastMonth = drinkMapper.findCalendar(member.getMbrNo(), firstDayOfMonth.minusDays(7), lastMonthDate);
-        int year = lastMonthDate.getYear();
-        int month = lastMonthDate.getMonthValue();
-        getDateMap(mapResponse, memberStandardValue, lastMonth, year, month);
+        List<DateResponse> calendar = drinkMapper.findCalendar(member.getMbrNo(), firstDayOfMonth.minusDays(7), firstDayOfMonth.plusMonths(1).plusDays(7));
 
-        /**
-         * 기준 달 카페인 달력 날짜별 상태 조회
-         */
-        List<DateResponse> currentMonth = drinkMapper.findCalendar(member.getMbrNo(), firstDayOfMonth, lastDayOfMonth);
-        year = firstDayOfMonth.getYear();
-        month = firstDayOfMonth.getMonthValue();
-        getDateMap(mapResponse, memberStandardValue, currentMonth, year, month);
-
-        /**
-         * 다음 달 카페인 달력 날짜별 상태 조회 ( 다음 달 1일부터 7일까지 )
-         */
-        LocalDateTime nextMonthDate = firstDayOfMonth.plusMonths(1);
-        List<DateResponse> nextMonth = drinkMapper.findCalendar(member.getMbrNo(), nextMonthDate, nextMonthDate.plusDays(7));
-        year = nextMonthDate.getYear();
-        month = nextMonthDate.getMonthValue();
-        getDateMap(mapResponse, memberStandardValue, nextMonth, year, month);
-
-        return mapResponse;
-    }
-
-    private void getDateMap(Map<String, String> mapResponse, StandardValue memberStandardValue, List<DateResponse> lastMonth, int year, int month) {
-        for (DateResponse response : lastMonth) {
+        for (DateResponse response : calendar) {
             String value = "";
             int caffeine = Integer.parseInt(response.getCaffeine());
             if (caffeine > memberStandardValue.getMaxNormal()) {
@@ -153,8 +129,10 @@ public class DrinkService {
             } else {
                 value = "보통";
             }
-            mapResponse.put(year + "-" + String.format("%02d", month) + "-" + response.getDate(), value);
+            mapResponse.put(response.getDate(), value);
         }
+
+        return mapResponse;
     }
 
 
