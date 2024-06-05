@@ -138,6 +138,9 @@ public class RedisService {
     public MenuDetailResponse findMenuDetails(Long menuNo, String key, String menuSize, MemberResponse member) throws JsonProcessingException {
         Map<Object, Object> entries = hashOperations.entries(key);
         MenuDetailResponse menuDetailResponse = objectMapper.readValue((String) entries.get(menuSize), MenuDetailResponse.class);
+        /**
+         * 최근 확인한 음료 추가
+         */
         saveRecentMenu(menuNo, menuDetailResponse, member);
         return menuDetailResponse;
     }
@@ -150,7 +153,12 @@ public class RedisService {
         if (member != null && Objects.equals(menuNo, menuDetailResponse.getMenuNo())) {
             log.info("##################### 로그인 사용자 최근 확인 음료 저장 #####################");
             MenuSimpleResponse menuSimpleResponse = MenuSimpleResponse.convertDetailToSimple(menuDetailResponse);
-            recentList.leftPush(member.getMbrId() + recentKey, objectMapper.writeValueAsString(menuSimpleResponse));
+            String memberRecentKey = member.getMbrId() + recentKey;
+            recentList.leftPush(memberRecentKey, objectMapper.writeValueAsString(menuSimpleResponse));
+            Long size = recentList.size(memberRecentKey);
+            if (size > 4) {
+                recentList.rightPop(memberRecentKey);
+            }
         }
     }
 
