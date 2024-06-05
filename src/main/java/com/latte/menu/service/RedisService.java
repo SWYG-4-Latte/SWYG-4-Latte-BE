@@ -3,6 +3,7 @@ package com.latte.menu.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latte.member.response.MemberResponse;
+import com.latte.menu.exception.NotCorrectIndexException;
 import com.latte.menu.response.MenuDetailResponse;
 import com.latte.menu.response.MenuSearchRankingResponse;
 import com.latte.menu.response.MenuSimpleResponse;
@@ -80,10 +81,15 @@ public class RedisService {
 
 
     /**
-     * 사용자 별 최근 검색어 저장
+     * 사용자 별 최근 검색어 저장 ( 최대 3개 )
      */
     public void saveRecentSearchWord(String memberId , String word) {
-        searchWordList.leftPush(memberId + searchKey, word);
+        String memberSearchKey = memberId + searchKey;
+        searchWordList.leftPush(memberSearchKey, word);
+        Long size = searchWordList.size(memberSearchKey);
+        if (size > 3) {
+            searchWordList.rightPop(memberSearchKey);
+        }
     }
 
     /**
@@ -100,6 +106,31 @@ public class RedisService {
         }
 
         return response;
+    }
+
+    public void deleteRecentSearchWord(MemberResponse member, int wordIdx) {
+        String memberSearchKey = member.getMbrId() + searchKey;
+        List<String> range = searchWordList.range(memberSearchKey, 0, -1);
+
+        if (range == null) {
+            return;
+        }
+
+        if (wordIdx >= range.size()) {
+            throw new NotCorrectIndexException("올바르지 않은 인덱스입니다");
+        }
+
+        // 전체 삭제
+        if (wordIdx == -1) {
+            redisTemplate.delete(memberSearchKey);
+        } else {
+            range.remove(wordIdx);
+            if (range.size() != 0) {
+                searchWordList.rightPushAll(memberSearchKey, range);
+            } else {
+                redisTemplate.delete(memberSearchKey);
+            }
+        }
     }
 
 
@@ -130,7 +161,6 @@ public class RedisService {
         return detailResponse;
     }
 
-
     /**
      * 메뉴 상세 조회
      * 로그인 한 사용자의 경우, 최근 확인한 음료로 추가
@@ -145,8 +175,9 @@ public class RedisService {
         return menuDetailResponse;
     }
 
+
     /**
-     * 최근 확인한 음료 저장
+     * 최근 확인한 음료 저장 ( 최대 4개 )
      * 사이즈별로 담기지 않게 하기 위해 토큰 전달 최초 조회( 메뉴번호의 사이즈명 = 전달 받은 사이즈명 )일 때만 최근 확인한 음료로 저장
      */
     public void saveRecentMenu(Long menuNo, MenuDetailResponse menuDetailResponse, MemberResponse member) throws JsonProcessingException {
@@ -161,7 +192,6 @@ public class RedisService {
             }
         }
     }
-
 
     /**
      * 최근 확인한 음료 조회

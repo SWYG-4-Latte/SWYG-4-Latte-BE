@@ -91,6 +91,14 @@ public class MenuService {
 
 
     /**
+     * 최근 검색어 삭제
+     */
+    public void deleteRecentSearchWord(MemberResponse member, int wordIdx) {
+        redisService.deleteRecentSearchWord(member, wordIdx);
+    }
+
+
+    /**
      * 메뉴 비교하기
      */
     public List<MenuCompareResponse> menuCompare(Long menuNo1, Long menuNo2) {
