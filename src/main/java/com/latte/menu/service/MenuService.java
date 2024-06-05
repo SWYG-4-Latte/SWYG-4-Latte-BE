@@ -58,7 +58,7 @@ public class MenuService {
     /**
      * 메뉴 검색
      */
-    public Page<MenuSearchResponse> findMenuList(String sortBy, String cond, String word, Pageable pageable) {
+    public Page<MenuSearchResponse> findMenuList(MemberResponse member, String sortBy, String cond, String word, Pageable pageable) {
         if ("".equals(word)) {
             return new PageImpl<>(new ArrayList<>(), pageable, 0L);
         }
@@ -68,7 +68,7 @@ public class MenuService {
 
         // 검색 성공 시에만 증가
         if (content.size() != 0) {
-            redisService.increasePopularSearchWord(word);
+            redisService.increasePopularSearchWord(member, word);
         }
 
         return new PageImpl<>(content, pageable, total);
@@ -80,6 +80,21 @@ public class MenuService {
      */
     public List<MenuSearchRankingResponse> getSearchWordRanking() {
         return redisService.findPopularSearchWord();
+    }
+
+    /**
+     * 최근 검색어 조회
+     */
+    public List<String> getRecentSearchWord(MemberResponse member) {
+        return redisService.findRecentSearchWord(member);
+    }
+
+
+    /**
+     * 최근 검색어 삭제
+     */
+    public void deleteRecentSearchWord(MemberResponse member, int wordIdx) {
+        redisService.deleteRecentSearchWord(member, wordIdx);
     }
 
 
@@ -98,13 +113,8 @@ public class MenuService {
     /**
      * 최근 확인한 메뉴
      */
-    public List<MenuSimpleResponse> recentMenu(String recent) {
-        List<MenuSimpleResponse> menuSimpleResponses = new ArrayList<>();
-        if (!"".equals(recent)) {
-            String[] split = recent.split(",");
-            menuSimpleResponses = menuMapper.getRecentMenu(split);
-        }
-        return menuSimpleResponses;
+    public List<MenuSimpleResponse> recentMenu(MemberResponse member) throws JsonProcessingException {
+        return redisService.findRecentMenu(member);
     }
 
 
@@ -132,7 +142,7 @@ public class MenuService {
          * 브랜드명_메뉴명을 key 값으로 사용, Map 은 사이즈명을 key 값으로 사용
          */
         String key = menuMapper.findMenuById(menuNo);
-        MenuDetailResponse menuDetailResponse = redisService.findMenuDetails(key, menuSize);
+        MenuDetailResponse menuDetailResponse = redisService.findMenuDetails(menuNo, key, menuSize, member);
 
         if (member == null) {
             log.info("##################### 비로그인 사용자 Redis 에서 상세 조회 #####################");

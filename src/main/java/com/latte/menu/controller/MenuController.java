@@ -5,6 +5,7 @@ import com.latte.common.response.ResponseData;
 import com.latte.drink.exception.NotEnoughInfoException;
 import com.latte.member.response.MemberResponse;
 import com.latte.member.service.AuthService;
+import com.latte.menu.exception.NotCorrectIndexException;
 import com.latte.menu.response.*;
 import com.latte.menu.service.BrandType;
 import com.latte.menu.service.MenuService;
@@ -96,7 +97,8 @@ public class MenuController {
                                         @RequestParam(value = "cond", defaultValue = "") String cond,
                                         @RequestParam(value = "word", defaultValue = "") String word,
                                         @PageableDefault(size = 6) Pageable pageable) {
-        Page<MenuSearchResponse> menuList = menuService.findMenuList(sortBy, cond, word, pageable);
+        MemberResponse member = isLogin();
+        Page<MenuSearchResponse> menuList = menuService.findMenuList(member, sortBy, cond, word, pageable);
         ResponseData<?> responseData = new ResponseData<>(null, menuList);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -110,6 +112,34 @@ public class MenuController {
         ResponseData<?> responseData = new ResponseData<>(null, searchWordRanking);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
+
+    /**
+     * 최근 검색어 조회
+     */
+    @GetMapping("/recent/word")
+    public ResponseEntity<?> recentSearchWord() {
+        MemberResponse member = isLogin();
+        ResponseData<?> responseData = new ResponseData<>(null, menuService.getRecentSearchWord(member));
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
+    /**
+     * 최근 검색어 제거
+     */
+    @DeleteMapping("/recent/word/{wordIdx}")
+    public ResponseEntity<?> deleteRecentSearchWord(@PathVariable int wordIdx) {
+        ResponseData<?> responseData;
+        try {
+            MemberResponse member = isLogin();
+            menuService.deleteRecentSearchWord(member, wordIdx);
+            responseData = new ResponseData<>("최근 검색어가 삭제되었습니다", null);
+            return new ResponseEntity<>(responseData, HttpStatus.OK);
+        } catch (NotCorrectIndexException exception) {
+            responseData = new ResponseData<>(exception.getMessage(), null);
+            return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
+        }
+    }
+
 
     /**
      * 비교하기
@@ -126,8 +156,15 @@ public class MenuController {
      * 최근 확인한 메뉴
      */
     @GetMapping("/recent")
-    public ResponseEntity<?> vieRecentMenu(@RequestParam(value = "menus", defaultValue = "") String recent) {
-        ResponseData<?> responseData = new ResponseData<>(null, menuService.recentMenu(recent));
+    public ResponseEntity<?> vieRecentMenu() {
+        ResponseData<?> responseData;
+        try {
+            MemberResponse member = isLogin();
+            responseData = new ResponseData<>(null, menuService.recentMenu(member));
+        } catch (JsonProcessingException exception) {
+            responseData = new ResponseData<>("최근 마신 음료 조회에 실패하였습니다.", null);
+            return new ResponseEntity<>(responseData, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
     
@@ -141,7 +178,6 @@ public class MenuController {
     public ResponseEntity<?> menuDetail(@PathVariable Long menuNo,
                                          @RequestParam(value = "menu_size", defaultValue = "") String menuSize) {
         ResponseData<?> responseData;
-
         try {
             MemberResponse member = isLogin();
             responseData = new ResponseData<>(null, menuService.menuDetail(menuNo, menuSize, member));
@@ -149,7 +185,6 @@ public class MenuController {
             responseData = new ResponseData<>("상세 조회에 실패하였습니다.", null);
             return new ResponseEntity<>(responseData, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
