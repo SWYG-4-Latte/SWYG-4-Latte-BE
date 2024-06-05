@@ -14,11 +14,13 @@ import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class RedisService {
 
