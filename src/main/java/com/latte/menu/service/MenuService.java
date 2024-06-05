@@ -1,21 +1,16 @@
 package com.latte.menu.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latte.drink.exception.NotEnoughInfoException;
 import com.latte.drink.standard.StandardValueCalculate;
 import com.latte.member.response.MemberResponse;
 import com.latte.menu.repository.MenuMapper;
 import com.latte.menu.response.*;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -27,22 +22,9 @@ import java.util.*;
 @RequiredArgsConstructor
 public class MenuService {
 
+    private final RedisService redisService;
     private final MenuMapper menuMapper;
     private final StandardValueCalculate standardValueCalculate;
-
-    private final String rankingKey = "menuSearchRanking";
-
-    private final RedisTemplate<String, String> redisTemplate;
-    private ZSetOperations<String, String> zSetOperations;  // 인기 검색어
-    private HashOperations<String, Object, Object> hashOperations;  // 브랜드명과 메뉴명
-    private ObjectMapper objectMapper;
-
-    @PostConstruct
-    private void init() {
-        zSetOperations = redisTemplate.opsForZSet();
-        hashOperations = redisTemplate.opsForHash();
-        objectMapper = new ObjectMapper();
-    }
 
     /**
      * 메뉴 추천 팝업
@@ -86,7 +68,7 @@ public class MenuService {
 
         // 검색 성공 시에만 증가
         if (content.size() != 0) {
-            zSetOperations.incrementScore(rankingKey, word, 1);
+            redisService.increasePopularSearchWord(word);
         }
 
         return new PageImpl<>(content, pageable, total);
@@ -97,21 +79,7 @@ public class MenuService {
      * 인기 검색어 조회
      */
     public List<MenuSearchRankingResponse> getSearchWordRanking() {
-        List<MenuSearchRankingResponse> rankingResponses = new ArrayList<>();
-        Set<ZSetOperations.TypedTuple<String>> typedTuples = zSetOperations.reverseRangeWithScores(rankingKey, 0, 4);
-
-        if (typedTuples.size() == 0) {
-            return rankingResponses;
-        }
-
-        int rank = 1;
-        for (ZSetOperations.TypedTuple<String> typedTuple : typedTuples) {
-            String word = typedTuple.getValue();
-            MenuSearchRankingResponse response = new MenuSearchRankingResponse(rank, word);
-            rankingResponses.add(response);
-            rank++;
-        }
-        return rankingResponses;
+        return redisService.findPopularSearchWord();
     }
 
 
@@ -156,7 +124,7 @@ public class MenuService {
             log.info("##################### 최초 상세 조회 #####################");
             List<MenuDetailResponse> menuDetailList = menuMapper.getMenuDetail(menuNo, menuSize);
             String redisKey = menuDetailList.get(0).getBrand() + "_" + menuDetailList.get(0).getMenuName();
-            return saveCache(menuNo, redisKey, menuDetailList);
+            return redisService.saveMenuDetails(menuNo, redisKey, menuDetailList);
         }
 
         /**
@@ -164,8 +132,7 @@ public class MenuService {
          * 브랜드명_메뉴명을 key 값으로 사용, Map 은 사이즈명을 key 값으로 사용
          */
         String key = menuMapper.findMenuById(menuNo);
-        Map<Object, Object> entries = hashOperations.entries(key);
-        MenuDetailResponse menuDetailResponse = objectMapper.readValue((String) entries.get(menuSize), MenuDetailResponse.class);
+        MenuDetailResponse menuDetailResponse = redisService.findMenuDetails(key, menuSize);
 
         if (member == null) {
             log.info("##################### 비로그인 사용자 Redis 에서 상세 조회 #####################");
@@ -188,34 +155,4 @@ public class MenuService {
             return menuDetailResponse;
         }
     }
-
-
-    /**
-     * 최초 상세 조회 시, 모든 사이즈에 대한 상세 정보를 모두 가져와 Redis 에 저장
-     * 브랜드명_메뉴명을 key 값으로 사용, Map 은 사이즈명을 key 값으로 사용
-     * 저장하면서 요청에 맞는 메뉴 상세 정보 기록 및 반환
-     */
-    private MenuDetailResponse saveCache(Long menuNo, String key, List<MenuDetailResponse> menuDetailList) throws JsonProcessingException {
-        Map<String, String> map = new HashMap<>();
-        MenuDetailResponse detailResponse = null;  // 반환할 정보
-        List<String> others = new ArrayList<>();    // 다른 사이즈 저장
-
-        // 다른 사이즈 정보 추출
-        for (MenuDetailResponse menuDetailResponse : menuDetailList) {
-            others.add(menuDetailResponse.getMenuSize());
-        }
-
-        for (MenuDetailResponse menuDetailResponse : menuDetailList) {
-            menuDetailResponse.setOtherSizes(others);
-            map.put(menuDetailResponse.getMenuSize(), objectMapper.writeValueAsString(menuDetailResponse));
-            if (Objects.equals(menuNo, menuDetailResponse.getMenuNo())) {
-                detailResponse = menuDetailResponse;
-            }
-        }
-        hashOperations.putAll(key, map);
-        return detailResponse;
-    }
-
-
-
 }
