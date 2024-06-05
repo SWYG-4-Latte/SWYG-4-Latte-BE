@@ -126,8 +126,17 @@ public class MenuController {
      * 최근 확인한 메뉴
      */
     @GetMapping("/recent")
-    public ResponseEntity<?> vieRecentMenu(@RequestParam(value = "menus", defaultValue = "") String recent) {
-        ResponseData<?> responseData = new ResponseData<>(null, menuService.recentMenu(recent));
+    public ResponseEntity<?> vieRecentMenu() {
+        ResponseData<?> responseData;
+        
+        try {
+            MemberResponse member = isLogin();
+            responseData = new ResponseData<>(null, menuService.recentMenu(member));
+        } catch (JsonProcessingException exception) {
+            responseData = new ResponseData<>("최근 마신 음료 조회에 실패하였습니다.", null);
+            return new ResponseEntity<>(responseData, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
     

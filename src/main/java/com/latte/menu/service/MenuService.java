@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ import java.util.*;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class MenuService {
 
@@ -98,13 +100,8 @@ public class MenuService {
     /**
      * 최근 확인한 메뉴
      */
-    public List<MenuSimpleResponse> recentMenu(String recent) {
-        List<MenuSimpleResponse> menuSimpleResponses = new ArrayList<>();
-        if (!"".equals(recent)) {
-            String[] split = recent.split(",");
-            menuSimpleResponses = menuMapper.getRecentMenu(split);
-        }
-        return menuSimpleResponses;
+    public List<MenuSimpleResponse> recentMenu(MemberResponse member) throws JsonProcessingException {
+        return redisService.findRecentMenu(member);
     }
 
 
@@ -132,7 +129,7 @@ public class MenuService {
          * 브랜드명_메뉴명을 key 값으로 사용, Map 은 사이즈명을 key 값으로 사용
          */
         String key = menuMapper.findMenuById(menuNo);
-        MenuDetailResponse menuDetailResponse = redisService.findMenuDetails(key, menuSize);
+        MenuDetailResponse menuDetailResponse = redisService.findMenuDetails(menuNo, key, menuSize, member);
 
         if (member == null) {
             log.info("##################### 비로그인 사용자 Redis 에서 상세 조회 #####################");
