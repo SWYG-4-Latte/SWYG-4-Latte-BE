@@ -96,7 +96,8 @@ public class MenuController {
                                         @RequestParam(value = "cond", defaultValue = "") String cond,
                                         @RequestParam(value = "word", defaultValue = "") String word,
                                         @PageableDefault(size = 6) Pageable pageable) {
-        Page<MenuSearchResponse> menuList = menuService.findMenuList(sortBy, cond, word, pageable);
+        MemberResponse member = isLogin();
+        Page<MenuSearchResponse> menuList = menuService.findMenuList(member, sortBy, cond, word, pageable);
         ResponseData<?> responseData = new ResponseData<>(null, menuList);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
@@ -110,6 +111,15 @@ public class MenuController {
         ResponseData<?> responseData = new ResponseData<>(null, searchWordRanking);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
+
+
+    @GetMapping("/recent/word")
+    public ResponseEntity<?> recentSearchWord() {
+        MemberResponse member = isLogin();
+        ResponseData<?> responseData = new ResponseData<>(null, menuService.getRecentSearchWord(member));
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
 
     /**
      * 비교하기

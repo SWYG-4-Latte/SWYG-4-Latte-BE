@@ -26,11 +26,14 @@ public class RedisService {
 
     private final String rankingKey = "menuSearchRanking";  // 인기 검색어 key
     private final String recentKey = "_RecentMenu";         // 최근 확인한 메뉴 key
+    private final String searchKey = "_Search";             // 검색어 key
+
 
     private final RedisTemplate<String, String> redisTemplate;
     private ZSetOperations<String, String> zSetOperations;  // 인기 검색어
     private HashOperations<String, Object, Object> hashOperations;  // 브랜드명과 메뉴명
-    private ListOperations<String, String> recentList;
+    private ListOperations<String, String> recentList;          // 최근 확인한 음료
+    private ListOperations<String, String> searchWordList;      // 최근 검색어
     private ObjectMapper objectMapper;
 
     @PostConstruct
@@ -38,6 +41,7 @@ public class RedisService {
         zSetOperations = redisTemplate.opsForZSet();
         hashOperations = redisTemplate.opsForHash();
         recentList = redisTemplate.opsForList();
+        searchWordList = redisTemplate.opsForList();
         objectMapper = new ObjectMapper();
     }
 
@@ -45,8 +49,11 @@ public class RedisService {
     /**
      * 검색어 score 증가
      */
-    public void increasePopularSearchWord(String word) {
+    public void increasePopularSearchWord(MemberResponse member, String word) {
         zSetOperations.incrementScore(rankingKey, word, 1);
+        if (member != null) {
+            saveRecentSearchWord(member.getMbrId(), word);
+        }
     }
 
 
@@ -70,7 +77,31 @@ public class RedisService {
         }
         return rankingResponses;
     }
-    
+
+
+    /**
+     * 사용자 별 최근 검색어 저장
+     */
+    public void saveRecentSearchWord(String memberId , String word) {
+        searchWordList.leftPush(memberId + searchKey, word);
+    }
+
+    /**
+     * 최근 검색어 조회
+     */
+    public List<String> findRecentSearchWord(MemberResponse member) {
+        List<String> response = new ArrayList<>();
+
+        if (member != null) {
+            List<String> range = searchWordList.range(member.getMbrId() + searchKey, 0, 2);
+            if (range != null) {
+                response = range;
+            }
+        }
+
+        return response;
+    }
+
 
     /**
      * 메뉴 상세 정보 저장

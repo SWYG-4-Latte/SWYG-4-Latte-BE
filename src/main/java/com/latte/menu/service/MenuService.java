@@ -58,7 +58,7 @@ public class MenuService {
     /**
      * 메뉴 검색
      */
-    public Page<MenuSearchResponse> findMenuList(String sortBy, String cond, String word, Pageable pageable) {
+    public Page<MenuSearchResponse> findMenuList(MemberResponse member, String sortBy, String cond, String word, Pageable pageable) {
         if ("".equals(word)) {
             return new PageImpl<>(new ArrayList<>(), pageable, 0L);
         }
@@ -68,7 +68,7 @@ public class MenuService {
 
         // 검색 성공 시에만 증가
         if (content.size() != 0) {
-            redisService.increasePopularSearchWord(word);
+            redisService.increasePopularSearchWord(member, word);
         }
 
         return new PageImpl<>(content, pageable, total);
@@ -80,6 +80,13 @@ public class MenuService {
      */
     public List<MenuSearchRankingResponse> getSearchWordRanking() {
         return redisService.findPopularSearchWord();
+    }
+
+    /**
+     * 최근 검색어 조회
+     */
+    public List<String> getRecentSearchWord(MemberResponse member) {
+        return redisService.findRecentSearchWord(member);
     }
 
 
