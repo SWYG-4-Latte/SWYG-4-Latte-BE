@@ -75,7 +75,7 @@
 
 
 
-    <!--회원 이름과 이메일로 아이디 조회-->
+    <!--회원 이메일로 아이디 조회-->
     <select id="findIdByNameEmail" parameterType="String" resultType="com.latte.member.response.FindIdResponse">
         <!--AuthMapper.findIdByNameEmail-->
         <![CDATA[
@@ -83,7 +83,7 @@
                   mbr_id
                 , delete_yn
             FROM tb_member
-            where email = #{email} and nickname = #{nickname}
+            where email = #{email}
         ]]>
     </select>
 
@@ -182,6 +182,39 @@
             mbr_id = #{id}
          AND   email = #{email}
     </select>
+
+
+    <!--인증번호 코드 일치 여부-->
+    <select id="verifyCode" parameterType="string" resultType="int">
+        /* AuthMapper.verifyCode */
+        SELECT
+            COUNT(*)
+        FROM
+            tb_member
+        WHERE
+            email = #{email}
+          AND   code = #{code}
+    </select>
+
+    <!--인증번호 넣기-->
+    <update id="insertCode" parameterType="com.latte.member.request.MemberRequest" >
+        /* AuthMapper.insertMember */
+        UPDATE `tb_member`
+        set code =#{code}
+        WHERE
+            `email`=#{email}
+    </update>
+
+
+    <!--인증번호 삭제-->
+    <update id="deleteCode" parameterType="String">
+        <!--AuthMapper.deleteCode-->
+        UPDATE `tb_member`
+        set
+        code = NULL
+        WHERE
+        `email`=#{email}
+    </update>
 
     <!--회원 정보 등록-->
     <insert id="insertMember" parameterType="com.latte.member.request.MemberRequest" useGeneratedKeys="true" keyProperty="mbrNo">

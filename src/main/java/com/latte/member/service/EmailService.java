@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import com.latte.member.mapper.AuthMapper;
 import com.latte.member.response.*;
@@ -17,6 +18,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -40,6 +42,8 @@ public class EmailService {
     @Autowired
     private AuthMapper authMapper;
 
+    //private final RedisTemplate<String, String> redisTemplate;
+
 
     //@Async("threadPoolTaskExecutor")
     public String sendEmail(TempAuthResponse tempAuthResponse) throws Exception {
@@ -48,8 +52,17 @@ public class EmailService {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom("duswlskfk42@naver.com");
             message.setTo(tempAuthResponse.getEmail());
-            message.setSubject("인증번호 발송 안내");
-            message.setText("인증번호 : " + tempAuthResponse.getAuthNumber());
+
+            // 아이디 찾기
+            if(tempAuthResponse.getKind().equals("id")) {
+                message.setSubject("아이디 발송 안내");
+                message.setText("이이디 : " + tempAuthResponse.getAuthNumber());
+            } else {
+                // 비밀번호 찾기
+                message.setSubject("인증번호 발송 안내");
+                message.setText("인증번호 : " + tempAuthResponse.getAuthNumber());
+                authMapper.insertCode(tempAuthResponse.getEmail(), tempAuthResponse.getAuthNumber());
+            }
 
             mailSender.send(message);
             return tempAuthResponse.getAuthNumber();
@@ -57,6 +70,23 @@ public class EmailService {
             mailException.printStackTrace();
             throw new IllegalAccessException();
         }
+    }
+
+
+    public boolean verifyCode(String email, String code) {
+
+        int count = authMapper.verifyCode(email, code);
+
+        if(count > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean deleteVerificationCode(String email) {
+
+        return authMapper.deleteCode(email);
     }
 
 
