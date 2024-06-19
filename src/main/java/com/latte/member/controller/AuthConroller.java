@@ -5,6 +5,7 @@ import com.latte.member.request.LoginRequest;
 import com.latte.member.request.MemberRequest;
 import com.latte.member.response.FindIdResponse;
 import com.latte.member.response.MemberResponse;
+import com.latte.member.response.TempAuthResponse;
 import com.latte.member.service.AuthService;
 import com.latte.member.service.EmailService;
 import com.latte.response.ResponseData;
@@ -14,7 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 import static org.springframework.http.HttpStatus.OK;
@@ -42,6 +43,10 @@ public class AuthConroller {
 
     @Autowired
     private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailService emailService;
+
 
 
 
@@ -396,24 +401,24 @@ public class AuthConroller {
 
     // [API] 아이디 찾기
     @PostMapping("/findId")
-    public ResponseEntity<?> findId(@RequestParam("nickname") String nickname, @RequestParam("email") String email) throws Exception {
+    public ResponseEntity<?> findId(@RequestParam("email") String email) throws Exception {
 
-        FindIdResponse member = authService.findIdByNameEmail(nickname, email);
+        FindIdResponse member = authService.findIdByNameEmail(email);
 
         MemberResponse user = authService.getMemberInfo(member.getMbrId());
 
         String message = "";
-        String authInfo = null;
+
         if(member.getMbrId() == null || member.getMbrId() == "") {
             message = "해당 정보로 가입한 아이디가 없습니다.";
         } else if (member.getDeleteYn().equals("Y")) {
             message = "해당 아이디는 탈퇴한 회원입니다.";
         } else {
-            authInfo = authService.saveTempAuthInfo(user.getMbrNo());
-            message = "회원님의 아이디는 " + member.getMbrId() + "입니다.";
+            authService.saveTempAuthEmail(user.getMbrNo());
+            message = "아이디를 전송하였습니다. 이메일을 확인해주세요";
         }
 
-        ResponseData<?> responseData = new ResponseData<>(message, authInfo);
+        ResponseData<?> responseData = new ResponseData<>(message, null);
         return new ResponseEntity<>(responseData, OK);
     }
 
@@ -439,14 +444,34 @@ public class AuthConroller {
 /*        } else if(existUserEmail == 0) {
             message = "해당 정보로 가입한 이메일이 없습니다.";*/
         } else {
-            authInfo = authService.saveTempAuthInfo(member.getMbrNo());
+            authService.saveTempAuthInfo(member.getMbrNo());
             message = "인증번호를 전송하였습니다. 이메일을 확인해주세요";
         }
+
 
         ResponseData<?> responseData = new ResponseData<>(message, authInfo);
         return new ResponseEntity<>(responseData, OK);
 
     }
+
+
+    // 인증번호 확인 API
+    @PostMapping("/verifyCode")
+    @ResponseBody
+    public ResponseEntity<?> verifyCode(@RequestParam("email") String email, @RequestParam("code") String code) {
+        boolean isValid = emailService.verifyCode(email, code);
+        String message;
+        if (isValid) {
+            message = "인증이 성공하였습니다.";
+            emailService.deleteVerificationCode(email); // 인증번호 사용 후 삭제
+        } else {
+            message = "인증번호가 일치하지 않습니다.";
+        }
+        ResponseData<?> responseData = new ResponseData<>(message, null);
+        return new ResponseEntity<>(responseData, OK);
+    }
+
+
 
 
     @PostMapping("/update_pw")

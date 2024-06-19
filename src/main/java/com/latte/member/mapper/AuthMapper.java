@@ -30,7 +30,7 @@ public interface AuthMapper {
     MemberResponse findById(String id);
 
     // 회원아이디 찾기
-    FindIdResponse findIdByNameEmail(@Param("nickname") String nickname, @Param("email") String email);
+    FindIdResponse findIdByNameEmail(@Param("email") String email);
 
 
     // 전체 회원 목록
@@ -52,6 +52,14 @@ public interface AuthMapper {
 
     // 회원 탈퇴
     boolean deleteMember(int id);
+
+
+    // 코드 일치 확인
+    int verifyCode(@Param("email") String email, @Param("code") String code);
+
+    boolean insertCode(@Param("email") String email, @Param("code") String code);
+
+    boolean deleteCode(@Param("email") String email);
 
 
 

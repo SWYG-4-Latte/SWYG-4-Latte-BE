@@ -1,6 +1,5 @@
 package com.latte.member.service;
 
-import com.latte.drink.exception.NotEnoughInfoException;
 import com.latte.member.config.jwt.JwtToken;
 import com.latte.member.config.jwt.JwtTokenProvider;
 import com.latte.member.mapper.AuthMapper;
@@ -14,6 +13,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class AuthService {
@@ -41,6 +42,8 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private static final String NUMBER = "0123456789";
     private static SecureRandom random = new SecureRandom();
+
+
 
     public AuthService(AuthMapper authMapper, EmailService emailService, AuthenticationManagerBuilder authenticationManagerBuilder, ApplicationEventPublisher eventPublisher, JwtTokenProvider jwtTokenProvider) {
         this.authMapper = authMapper;
@@ -242,9 +245,17 @@ public class AuthService {
      * @param email
      * @return
      */
-    public FindIdResponse findIdByNameEmail(String nickname, String email) {
+    public FindIdResponse findIdByNameEmail(String email) {
 
-        FindIdResponse member = authMapper.findIdByNameEmail(nickname, email);
+        FindIdResponse member = new FindIdResponse();
+
+        try {
+            member = authMapper.findIdByNameEmail(email);
+        } catch (Exception ignored) {
+
+            System.out.println("=============이메일이 존재하지 않거나 중복되어있습니다.===========");
+        }
+
 
         if(member == null) {
             return new FindIdResponse(false, null, null);
@@ -380,19 +391,21 @@ public class AuthService {
         return true;
     }
 
+
     @Transactional
-    public String saveTempAuthInfo(int seq) throws Exception {
-        // 인증번호 생성
-        String authNumber = instancePasswordGenerator();
+    public String saveTempAuthEmail(int seq) throws Exception {
 
         MemberResponse member = authMapper.findBySeq(seq);
 
-        // 인증번호 정보 넣기
+        String id = member.getMbrId();
+
+        // 아이디 정보 넣기
         TempAuthResponse tempAuthInfo = new TempAuthResponse();
         tempAuthInfo.setMbrNo(seq);
         tempAuthInfo.setEmail(member.getEmail());
-        tempAuthInfo.setAuthNumber(authNumber);
+        tempAuthInfo.setAuthNumber(id);
 
+        tempAuthInfo.setKind("id");
 
         String number = emailService.sendEmail(tempAuthInfo);
 
@@ -406,6 +419,34 @@ public class AuthService {
 
         // 이메일 발송
         return number;
+    }
+    @Transactional
+    public TempAuthResponse saveTempAuthInfo(int seq) throws Exception {
+        // 인증번호 생성
+        String authNumber = instancePasswordGenerator();
+
+        MemberResponse member = authMapper.findBySeq(seq);
+
+        // 인증번호 정보 넣기
+        TempAuthResponse tempAuthInfo = new TempAuthResponse();
+        tempAuthInfo.setMbrNo(seq);
+        tempAuthInfo.setEmail(member.getEmail());
+        tempAuthInfo.setAuthNumber(authNumber);
+        tempAuthInfo.setKind("pw");
+
+
+        String number = emailService.sendEmail(tempAuthInfo);
+
+/*        if(success) {
+
+            // 임시 유저비밀번호로 setting
+            PwChangeRequest pwChange = PwChangeRequest.builder().mbrNo(seq).mbrId(member.getMbrId()).password(passwordEncoder.encode(tempPassword)).build();
+            //member.setPassword(passwordEncoder.encode(tempPassword));
+            authMapper.updatePassword(pwChange);
+        }*/
+
+        // 이메일 발송
+        return tempAuthInfo;
     }
 
     @Transactional

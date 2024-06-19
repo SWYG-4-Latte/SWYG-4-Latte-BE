@@ -14,4 +14,6 @@ public class TempAuthResponse {
     private String email;
 
     private String authNumber;
+
+    private String kind;
 }

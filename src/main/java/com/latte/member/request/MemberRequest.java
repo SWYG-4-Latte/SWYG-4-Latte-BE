@@ -62,6 +62,8 @@ public class MemberRequest {
 
     private String deleteYn;          // 회원탈퇴 여부
 
+    private String code;
+
     public void encodingPassword(PasswordEncoder passwordEncoder) {
         if (StringUtils.isEmpty(password)) {
             return;
