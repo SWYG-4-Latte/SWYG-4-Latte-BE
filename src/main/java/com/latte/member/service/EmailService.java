@@ -2,13 +2,16 @@ package com.latte.member.service;
 
 import java.io.IOException;
 import java.lang.reflect.Member;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import com.latte.member.exception.NotCodeException;
 import com.latte.member.mapper.AuthMapper;
+import com.latte.member.request.MemberRequest;
 import com.latte.member.response.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +64,9 @@ public class EmailService {
                 // 비밀번호 찾기
                 message.setSubject("인증번호 발송 안내");
                 message.setText("인증번호 : " + tempAuthResponse.getAuthNumber());
-                authMapper.insertCode(tempAuthResponse.getEmail(), tempAuthResponse.getAuthNumber());
+
+                LocalDateTime codeDate = LocalDateTime.now();
+                authMapper.insertCode(tempAuthResponse.getEmail(), tempAuthResponse.getAuthNumber(), codeDate);
             }
 
             mailSender.send(message);
@@ -77,12 +82,26 @@ public class EmailService {
 
         int count = authMapper.verifyCode(email, code);
 
-        if(count > 0) {
-            return true;
+
+        FindIdResponse find = authMapper.findIdByNameEmail(email);
+
+
+        // 10분 유효기간 체크
+        if (count > 0) {
+            System.out.println("=--------vLocalDateTime.now()" + find.getCodeDate());
+            System.out.println("=--------vLocalDateTime.now()" + LocalDateTime.now().minusMinutes(10));
+            if (find.getCodeDate().isAfter(LocalDateTime.now().minusMinutes(10))) {
+                return true;
+            } else {
+                throw new NotCodeException("인증코드 유효시간이 지났습니다.");
+            }
         } else {
             return false;
         }
+
+
     }
+
 
     public boolean deleteVerificationCode(String email) {
 

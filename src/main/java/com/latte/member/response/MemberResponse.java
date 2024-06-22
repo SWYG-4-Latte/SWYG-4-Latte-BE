@@ -54,6 +54,9 @@ public class MemberResponse implements UserDetails {
 
     private Timestamp updateDate;   // 변경일
 
+    private String code;
+
+    private String codeDate;
 
     public void clearPassword() {
         this.password = "";

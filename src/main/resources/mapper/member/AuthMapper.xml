@@ -81,6 +81,7 @@
         <![CDATA[
             SELECT
                   mbr_id
+                 , code_date
                 , delete_yn
             FROM tb_member
             where email = #{email}
@@ -200,7 +201,7 @@
     <update id="insertCode" parameterType="com.latte.member.request.MemberRequest" >
         /* AuthMapper.insertMember */
         UPDATE `tb_member`
-        set code =#{code}
+        set code =#{code}, code_date=#{codeDate}
         WHERE
             `email`=#{email}
     </update>
@@ -211,7 +212,8 @@
         <!--AuthMapper.deleteCode-->
         UPDATE `tb_member`
         set
-        code = NULL
+        code = NULL,
+        code_date=NULL
         WHERE
         `email`=#{email}
     </update>

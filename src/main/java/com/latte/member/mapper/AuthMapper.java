@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.security.core.parameters.P;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -57,7 +58,7 @@ public interface AuthMapper {
     // 코드 일치 확인
     int verifyCode(@Param("email") String email, @Param("code") String code);
 
-    boolean insertCode(@Param("email") String email, @Param("code") String code);
+    boolean insertCode(@Param("email") String email, @Param("code") String code, @Param("codeDate") LocalDateTime codeDate);
 
     boolean deleteCode(@Param("email") String email);
 

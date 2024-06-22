@@ -1,6 +1,10 @@
 package com.latte.member.controller;
 
+import com.latte.drink.exception.NotLoginException;
 import com.latte.member.config.jwt.JwtToken;
+import com.latte.member.exception.NotCodeException;
+import com.latte.member.exception.NotEmailException;
+import com.latte.member.exception.NotIdException;
 import com.latte.member.request.LoginRequest;
 import com.latte.member.request.MemberRequest;
 import com.latte.member.response.FindIdResponse;
@@ -423,24 +427,32 @@ public class AuthConroller {
     }
 
 
+    // 비밀번호 찾기
     @PostMapping("/findPw")
     public ResponseEntity<?> forgotPassword(@RequestParam("mbrId") String id, @RequestParam("email") String email) throws Exception {
 
         MemberResponse member = authService.getMemberInfo(id);
-
+        String message = "";
         // 유효회원 여부 검사
-        //int existUserId = authService.countMemberByLoginId(id);
+        int existUserId = authService.countMemberByLoginId(id);
 
-        //int existUserEmail = authService.countMemberByEmail(email);
+        int existUserEmail = authService.countMemberByEmail(email);
+
+        if(existUserId == 0) {
+            message = "존재하지 않은 아이디입니다.";
+            throw new NotIdException("존재하지 않은 아이디입니다.");
+        } else if(existUserEmail == 0) {
+            message = "존재하지 않은 이메일입니다.";
+            throw new NotEmailException("존재하지 않은 이메일입니다.");
+        }
 
         int countByIdEmail = authService.countByIdEmail(id, email);
 
         String authInfo = null;
 
-        String message = "";
-
         if(countByIdEmail == 0) {
             message = "아이디와 이메일을 다시 확인해주세요";
+            throw new NotEmailException("아이디와 이메일을 다시 확인해주세요");
 /*        } else if(existUserEmail == 0) {
             message = "해당 정보로 가입한 이메일이 없습니다.";*/
         } else {
@@ -466,6 +478,7 @@ public class AuthConroller {
             emailService.deleteVerificationCode(email); // 인증번호 사용 후 삭제
         } else {
             message = "인증번호가 일치하지 않습니다.";
+            throw new NotCodeException("인증번호가 일치하지 않습니다.");
         }
         ResponseData<?> responseData = new ResponseData<>(message, null);
         return new ResponseEntity<>(responseData, OK);

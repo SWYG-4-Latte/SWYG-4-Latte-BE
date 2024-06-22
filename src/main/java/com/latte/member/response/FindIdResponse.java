@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @ToString(callSuper = true)
@@ -14,6 +17,8 @@ public class FindIdResponse {
 
     // 사용자 ID
     private String mbrId;
+
+    private LocalDateTime codeDate;
 
     private String deleteYn;
 

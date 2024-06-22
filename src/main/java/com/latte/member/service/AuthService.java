@@ -392,6 +392,7 @@ public class AuthService {
     }
 
 
+    // 이메일로 아이디 찾기
     @Transactional
     public String saveTempAuthEmail(int seq) throws Exception {
 
@@ -420,6 +421,8 @@ public class AuthService {
         // 이메일 발송
         return number;
     }
+
+    // 비밀번호 찾기
     @Transactional
     public TempAuthResponse saveTempAuthInfo(int seq) throws Exception {
         // 인증번호 생성

@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -62,7 +64,9 @@ public class MemberRequest {
 
     private String deleteYn;          // 회원탈퇴 여부
 
-    private String code;
+    private String code;            // 인증 코드
+
+    private LocalDateTime codeDate;         // 인증코드 발생시간
 
     public void encodingPassword(PasswordEncoder passwordEncoder) {
         if (StringUtils.isEmpty(password)) {
