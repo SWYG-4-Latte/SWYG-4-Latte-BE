@@ -5,6 +5,7 @@ import com.latte.member.config.jwt.JwtToken;
 import com.latte.member.exception.NotCodeException;
 import com.latte.member.exception.NotEmailException;
 import com.latte.member.exception.NotIdException;
+import com.latte.member.exception.VerifyCodeResult;
 import com.latte.member.request.LoginRequest;
 import com.latte.member.request.MemberRequest;
 import com.latte.member.response.FindIdResponse;
@@ -19,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -171,57 +173,65 @@ public class AuthConroller {
         String existIdYn = null;
         String existNicknameYn = null;
         String existIdEmailYn = null;
-
-        int countMemberById = authService.countMemberByLoginId(request.getMbrId());
-        int countMemberByName = authService.countMemberByNickname(request.getNickname());
-        int countMemberByEmail = authService.countMemberByEmail(request.getEmail());
         String message = "";
         Map<String, Object> dataMap = new HashMap<>();
+        ResponseData<?> responseData;
 
-        String realPassword = request.getPassword();
-        if (countMemberById > 0) {
-            existIdYn = "false";
-            message = "아이디가 이미 존재합니다.";
-        } else if (countMemberByName > 0) {
-            existNicknameYn = "false";
-            message = "닉네임이 이미 존재합니다.";
-        } else if (countMemberByEmail > 0) {
-            existIdEmailYn = "false";
-            message = "이메일이 이미 존재합니다.";
-        } else {
-            existIdYn = "true";
-            existNicknameYn = "true";
-            existIdEmailYn = "true";
+        try {
+            int countMemberById = authService.countMemberByLoginId(request.getMbrId());
+            int countMemberByName = authService.countMemberByNickname(request.getNickname());
+            int countMemberByEmail = authService.countMemberByEmail(request.getEmail());
 
-            // 비밀번호 인코딩
-            //request.setPassword(passwordEncoder.encode(request.getPassword()));
 
-            boolean res = authService.save(request);
-            if (res) {
-                MemberResponse result = authService.getMemberInfo(request.getMbrId());
-                dataMap.put("result", result); // MemberResponse를 Map에 추가
-                message = "회원 가입에 성공했습니다.";
-                log.info("회원가입 성공 request id = {}", request.getMbrId());
 
-                // 회원가입 성공 시 로그인 수행
-                JwtToken jwtToken = authService.signIn(request.getMbrId(), realPassword, response);
-                dataMap.put("jwtToken", jwtToken);
-                log.info("자동 로그인 성공 request id = {}, token = {}", request.getMbrId(), jwtToken.getAccessToken());
+            String realPassword = request.getPassword();
+            if (countMemberById > 0) {
+                existIdYn = "false";
+                message = "아이디가 이미 존재합니다.";
+            } else if (countMemberByName > 0) {
+                existNicknameYn = "false";
+                message = "닉네임이 이미 존재합니다.";
+            } else if (countMemberByEmail > 0) {
+                existIdEmailYn = "false";
+                message = "이메일이 이미 존재합니다.";
             } else {
-                message = "회원 가입에 실패했습니다.";
-                log.error("회원가입 실패 request id = {}", request.getMbrId());
+                existIdYn = "true";
+                existNicknameYn = "true";
+                existIdEmailYn = "true";
 
+                // 비밀번호 인코딩
+                //request.setPassword(passwordEncoder.encode(request.getPassword()));
+
+                boolean res = authService.save(request);
+                if (res) {
+                    MemberResponse result = authService.getMemberInfo(request.getMbrId());
+                    dataMap.put("result", result); // MemberResponse를 Map에 추가
+                    message = "회원 가입에 성공했습니다.";
+                    log.info("회원가입 성공 request id = {}", request.getMbrId());
+
+                    // 회원가입 성공 시 로그인 수행
+                    JwtToken jwtToken = authService.signIn(request.getMbrId(), realPassword, response);
+                    dataMap.put("jwtToken", jwtToken);
+                    log.info("자동 로그인 성공 request id = {}, token = {}", request.getMbrId(), jwtToken.getAccessToken());
+                } else {
+                    message = "회원 가입에 실패했습니다.";
+                    log.error("회원가입 실패 request id = {}", request.getMbrId());
+
+                }
             }
+
+            dataMap.put("confirmId", existIdYn); // res 값을 Map에 추가
+            dataMap.put("confirmNickname", existNicknameYn);
+            dataMap.put("confirmEmail", existIdEmailYn);
+            responseData = new ResponseData<>(message, dataMap);
+        } catch (Exception e) {
+            message = "회원 가입 중 오류가 발생했습니다.";
+            log.error("회원가입 중 예외 발생: {}", e.getMessage(), e);
+            return new ResponseEntity<>(new ResponseData<>(message, dataMap), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        dataMap.put("confirmId", existIdYn); // res 값을 Map에 추가
-        dataMap.put("confirmNickname", existNicknameYn);
-        dataMap.put("confirmEmail", existIdEmailYn);
 
-
-
-
-        ResponseData<?> responseData = new ResponseData<>(message, dataMap);
+        responseData = new ResponseData<>(message, dataMap);
         return new ResponseEntity<>(responseData, OK);
     }
 
@@ -431,38 +441,44 @@ public class AuthConroller {
     @PostMapping("/findPw")
     public ResponseEntity<?> forgotPassword(@RequestParam("mbrId") String id, @RequestParam("email") String email) throws Exception {
 
-        MemberResponse member = authService.getMemberInfo(id);
+
         String message = "";
         // 유효회원 여부 검사
         int existUserId = authService.countMemberByLoginId(id);
 
         int existUserEmail = authService.countMemberByEmail(email);
+        ResponseData<?> responseData;
 
         if(existUserId == 0) {
-            message = "존재하지 않은 아이디입니다.";
-            throw new NotIdException("존재하지 않은 아이디입니다.");
+            responseData = new ResponseData<>("존재하지 않은 아이디입니다.", null);
+            //throw new NotIdException("존재하지 않은 아이디입니다.");
+            return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
         } else if(existUserEmail == 0) {
-            message = "존재하지 않은 이메일입니다.";
-            throw new NotEmailException("존재하지 않은 이메일입니다.");
+            responseData = new ResponseData<>("존재하지 않은 이메일입니다.", null);
+            //throw new NotEmailException("존재하지 않은 이메일입니다.");
+            return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
         }
+        MemberResponse member = authService.getMemberInfo(id);
 
         int countByIdEmail = authService.countByIdEmail(id, email);
 
-        String authInfo = null;
+
 
         if(countByIdEmail == 0) {
-            message = "아이디와 이메일을 다시 확인해주세요";
-            throw new NotEmailException("아이디와 이메일을 다시 확인해주세요");
+            //throw new NotEmailException("아이디와 이메일을 다시 확인해주세요");
 /*        } else if(existUserEmail == 0) {
             message = "해당 정보로 가입한 이메일이 없습니다.";*/
+
+            responseData = new ResponseData<>("아이디와 이메일을 다시 확인해주세요", null);
+            return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
         } else {
             authService.saveTempAuthInfo(member.getMbrNo());
             message = "인증번호를 전송하였습니다. 이메일을 확인해주세요";
         }
 
 
-        ResponseData<?> responseData = new ResponseData<>(message, authInfo);
-        return new ResponseEntity<>(responseData, OK);
+        responseData = new ResponseData<>(message, null);
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
 
     }
 
@@ -471,17 +487,19 @@ public class AuthConroller {
     @PostMapping("/verifyCode")
     @ResponseBody
     public ResponseEntity<?> verifyCode(@RequestParam("email") String email, @RequestParam("code") String code) {
-        boolean isValid = emailService.verifyCode(email, code);
+        VerifyCodeResult result = emailService.verifyCode(email, code);
+
+        ResponseData<?> responseData;
         String message;
-        if (isValid) {
-            message = "인증이 성공하였습니다.";
+        if (result.isValid()) {
             emailService.deleteVerificationCode(email); // 인증번호 사용 후 삭제
+            responseData = new ResponseData<>(result.getMessage(), null);
+            return new ResponseEntity<>(responseData, HttpStatus.OK);
         } else {
-            message = "인증번호가 일치하지 않습니다.";
-            throw new NotCodeException("인증번호가 일치하지 않습니다.");
+            responseData = new ResponseData<>(result.getMessage(), null);
+            return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
+            //throw new NotCodeException("인증번호가 일치하지 않습니다.");
         }
-        ResponseData<?> responseData = new ResponseData<>(message, null);
-        return new ResponseEntity<>(responseData, OK);
     }
 
 
