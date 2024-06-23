@@ -258,13 +258,13 @@ public class AuthService {
 
 
         if(member == null) {
-            return new FindIdResponse(false, null, null);
+            return new FindIdResponse(false, null, null, null);
         }
 
         String strUserId = member.getMbrId();
 
 
-        return new FindIdResponse(true, strUserId, member.getDeleteYn());
+        return new FindIdResponse(true, member.getMbrNo(), strUserId, member.getDeleteYn());
     }
 
     /**

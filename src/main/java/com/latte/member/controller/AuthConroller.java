@@ -493,7 +493,10 @@ public class AuthConroller {
         String message;
         if (result.isValid()) {
             emailService.deleteVerificationCode(email); // 인증번호 사용 후 삭제
-            responseData = new ResponseData<>(result.getMessage(), null);
+            FindIdResponse findId = authService.findIdByNameEmail(email);
+            String mbrNo = findId.getMbrNo();
+
+            responseData = new ResponseData<>(result.getMessage(), mbrNo);
             return new ResponseEntity<>(responseData, HttpStatus.OK);
         } else {
             responseData = new ResponseData<>(result.getMessage(), null);

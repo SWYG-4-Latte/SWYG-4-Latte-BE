@@ -15,6 +15,8 @@ public class FindIdResponse {
     // 상태
     private boolean state;
 
+    private String mbrNo;
+
     // 사용자 ID
     private String mbrId;
 
@@ -28,9 +30,10 @@ public class FindIdResponse {
         super();
     }
 
-    public FindIdResponse(boolean state, String mbrId, String deleteYn) {
+    public FindIdResponse(boolean state, String mbrNo, String mbrId, String deleteYn) {
         super();
         this.state = state;
+        this.mbrNo = mbrNo;
         this.mbrId = mbrId;
         this.deleteYn = deleteYn;
 

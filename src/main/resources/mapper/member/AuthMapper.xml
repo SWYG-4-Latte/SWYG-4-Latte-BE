@@ -81,6 +81,7 @@
         <![CDATA[
             SELECT
                   mbr_id
+                 , mbr_no
                  , code_date
                 , delete_yn
             FROM tb_member
