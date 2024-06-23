@@ -424,12 +424,12 @@ public class AuthConroller {
         String message = "";
 
         if(member.getMbrId() == null || member.getMbrId() == "") {
-            message = "해당 정보로 가입한 아이디가 없습니다.";
+            message = "존재하지 않는 아이디입니다.";
         } else if (member.getDeleteYn().equals("Y")) {
             message = "해당 아이디는 탈퇴한 회원입니다.";
         } else {
             authService.saveTempAuthEmail(user.getMbrNo());
-            message = "아이디를 전송하였습니다. 이메일을 확인해주세요";
+            message = "아이디가 전송되었습니다. 이메일을 확인해주세요.";
         }
 
         ResponseData<?> responseData = new ResponseData<>(message, null);
@@ -450,13 +450,13 @@ public class AuthConroller {
         ResponseData<?> responseData;
 
         if(existUserId == 0) {
-            responseData = new ResponseData<>("존재하지 않은 아이디입니다.", null);
+            responseData = new ResponseData<>("존재하지 않는 아이디입니다.", null);
             //throw new NotIdException("존재하지 않은 아이디입니다.");
-            return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(responseData, HttpStatus.NOT_FOUND);
         } else if(existUserEmail == 0) {
-            responseData = new ResponseData<>("존재하지 않은 이메일입니다.", null);
+            responseData = new ResponseData<>("존재하지 않는 이메일입니다.", null);
             //throw new NotEmailException("존재하지 않은 이메일입니다.");
-            return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(responseData, HttpStatus.NOT_FOUND);
         }
         MemberResponse member = authService.getMemberInfo(id);
 
@@ -470,10 +470,10 @@ public class AuthConroller {
             message = "해당 정보로 가입한 이메일이 없습니다.";*/
 
             responseData = new ResponseData<>("아이디와 이메일을 다시 확인해주세요", null);
-            return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(responseData, HttpStatus.NOT_FOUND);
         } else {
             authService.saveTempAuthInfo(member.getMbrNo());
-            message = "인증번호를 전송하였습니다. 이메일을 확인해주세요";
+            message = "인증번호가 전송되었습니다. 이메일을 확인해주세요.";
         }
 
 
@@ -500,7 +500,7 @@ public class AuthConroller {
             return new ResponseEntity<>(responseData, HttpStatus.OK);
         } else {
             responseData = new ResponseData<>(result.getMessage(), null);
-            return new ResponseEntity<>(responseData, HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(responseData, HttpStatus.BAD_REQUEST);
             //throw new NotCodeException("인증번호가 일치하지 않습니다.");
         }
     }

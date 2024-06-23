@@ -96,10 +96,10 @@ public class EmailService {
             System.out.println("=--------vLocalDateTime.now()" + LocalDateTime.now().minusMinutes(10));
             if (find.getCodeDate().isAfter(LocalDateTime.now().minusMinutes(10))) {
 
-                return new VerifyCodeResult("인증이 성공하였습니다.", true);
+                return new VerifyCodeResult("인증이 완료되었습니다.", true);
             } else {
 
-                return new VerifyCodeResult( "인증코드 유효시간이 지났습니다.", false);
+                return new VerifyCodeResult( "입력 시간이 초과되었습니다. 다시 인증해주세요.", false);
             }
         } else {
             return new VerifyCodeResult( "인증번호가 일치하지 않습니다." ,false);
