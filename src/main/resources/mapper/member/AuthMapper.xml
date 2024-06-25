@@ -97,7 +97,6 @@
         UPDATE `tb_member`
         set
         `mbr_id` = #{mbrId}
-        , `password` = #{password}
         , `age` = #{age}
         , `nickname` = #{nickname}
         , `image_url` = #{imageUrl}

@@ -180,7 +180,7 @@ public class AuthService {
             // 회원탈퇴 여부
             request.setDeleteYn("N");
 
-            request.encodingPassword(passwordEncoder);
+            //request.encodingPassword(passwordEncoder);
 
 
             return authMapper.updateMember(request);
