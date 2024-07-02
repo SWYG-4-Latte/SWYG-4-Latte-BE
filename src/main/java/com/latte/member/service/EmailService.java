@@ -58,12 +58,13 @@ public class EmailService {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom("duswlskfk42@naver.com");
+            //message.setFrom("lattefit.team@gmail.com");
             message.setTo(tempAuthResponse.getEmail());
 
             // 아이디 찾기
             if(tempAuthResponse.getKind().equals("id")) {
                 message.setSubject("아이디 발송 안내");
-                message.setText("이이디 : " + tempAuthResponse.getAuthNumber());
+                message.setText("아이디 : " + tempAuthResponse.getAuthNumber());
             } else {
                 // 비밀번호 찾기
                 message.setSubject("인증번호 발송 안내");

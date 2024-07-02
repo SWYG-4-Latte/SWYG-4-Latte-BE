@@ -18,6 +18,8 @@ public class MailConfig {
         javaMailSender.setHost("smtp.naver.com");
         javaMailSender.setPort(587); // Naver SMTP 포트 번호
         javaMailSender.setUsername("duswlskfk42@naver.com");
+        //javaMailSender.setUsername("lattefit.team@gmail.com");
+        //javaMailSender.setPassword("lattefitteam10!");
         javaMailSender.setPassword("Y9VHBHEYX8Y1");
 
 
@@ -41,6 +43,9 @@ public class MailConfig {
         properties.setProperty("mail.smtp.ssl.protocols", "TLSv1.2");
         //properties.setProperty("mail.smtp.ssl.trust","smtp.naver.com");
         //properties.setProperty("mail.smtp.ssl.enable","false");
+
+        //properties.setProperty("mail.smtp.ssl.enable", "true"); // SSL 사용 설정
+        // properties.setProperty("mail.smtp.ssl.trust", "smtp.gmail.com");
         return properties;
     }
 }

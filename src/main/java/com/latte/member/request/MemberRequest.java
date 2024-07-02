@@ -68,6 +68,8 @@ public class MemberRequest {
 
     private LocalDateTime codeDate;         // 인증코드 발생시간
 
+    private String loginType;           // 로그인타입(일반, 카카오)
+
     public void encodingPassword(PasswordEncoder passwordEncoder) {
         if (StringUtils.isEmpty(password)) {
             return;

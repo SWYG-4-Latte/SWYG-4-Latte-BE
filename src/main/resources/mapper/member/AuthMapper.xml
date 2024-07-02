@@ -83,9 +83,9 @@
                   mbr_id
                  , mbr_no
                  , code_date
-                , delete_yn
             FROM tb_member
             where email = #{email}
+            and delete_yn = 'N'
         ]]>
     </select>
 
@@ -168,6 +168,7 @@
             tb_member
         WHERE
             email = #{email}
+          and delete_yn = 'N'
     </select>
 
 
@@ -199,7 +200,7 @@
 
     <!--인증번호 넣기-->
     <update id="insertCode" parameterType="com.latte.member.request.MemberRequest" >
-        /* AuthMapper.insertMember */
+        /* AuthMapper.insertCode */
         UPDATE `tb_member`
         set code =#{code}, code_date=#{codeDate}
         WHERE
@@ -236,9 +237,11 @@
                               , preg_month
                               , role
                               , symptom
+                              , login_type
                               , delete_yn
                               , reg_date
                               , update_date
+
         ) VALUES (
                    #{mbrId}
                  , #{password}
@@ -254,6 +257,7 @@
                  , #{pregMonth}
                  , #{role}
                  , #{symptom}
+                 , #{loginType}
                  , #{deleteYn}
                  , NOW()
                  , NULL

@@ -17,6 +17,11 @@ public class JwtToken {
     // 액세스 토큰이 만료가 되면 재발급 해주는 토큰
     private String refreshToken;
 
+/*    public JwtToken(String grantType, String accessToken) {
+        this.grantType = grantType;
+        this.accessToken = accessToken;
+    }*/
+
     //private MemberResponse memberResponse;
 
 }

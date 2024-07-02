@@ -120,6 +120,11 @@ public class AuthService {
         // 회원탈퇴 여부
         request.setDeleteYn("N");
 
+
+        if(!(request.getLoginType() == "kakao") || (request.getLoginType() == null)) {
+            request.setLoginType("basic");
+        }
+
         request.encodingPassword(passwordEncoder);
 
         return authMapper.insertMember(request);

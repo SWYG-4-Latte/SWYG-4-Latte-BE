@@ -419,21 +419,25 @@ public class AuthConroller {
 
         FindIdResponse member = authService.findIdByNameEmail(email);
 
-        MemberResponse user = authService.getMemberInfo(member.getMbrId());
+
+
 
         String message = "";
 
         if(member.getMbrId() == null || member.getMbrId() == "") {
             message = "존재하지 않는 아이디입니다.";
-        } else if (member.getDeleteYn().equals("Y")) {
-            message = "해당 아이디는 탈퇴한 회원입니다.";
+            ResponseData<?> responseData = new ResponseData<>(message, null);
+            return new ResponseEntity<>(responseData, HttpStatus.NOT_FOUND);
         } else {
-            authService.saveTempAuthEmail(user.getMbrNo());
+            //MemberResponse user = authService.getMemberInfo(member.getMbrId());
+            authService.saveTempAuthEmail(Integer.parseInt(member.getMbrNo()));
             message = "아이디가 전송되었습니다. 이메일을 확인해주세요.";
+
+            ResponseData<?> responseData = new ResponseData<>(message, null);
+            return new ResponseEntity<>(responseData, OK);
         }
 
-        ResponseData<?> responseData = new ResponseData<>(message, null);
-        return new ResponseEntity<>(responseData, OK);
+
     }
 
 
