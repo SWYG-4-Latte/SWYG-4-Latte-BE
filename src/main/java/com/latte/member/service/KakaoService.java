@@ -42,8 +42,8 @@ public class KakaoService {
     @Value("5c165585248b1b09c20c411387178149")
     private String clientId;        // REST API 키
 
-    @Value("https://localhost:8080/auth/login/oauth")
-    private String redirectUri;
+/*    @Value("https://localhost:8080/auth/login/oauth")
+    private String redirectUri;*/
 
 
 
@@ -56,12 +56,12 @@ public class KakaoService {
 
 
     /** Web 버전 카카오 로그인 **/
-    public LoginResponse kakaoLogin(String code) {
+    public LoginResponse kakaoLogin(String code, String redirectUri) {
         //0. 동적으로 redirect URI 선택
         //String redirectUri = selectRedirectUri(currentDomain);
 
         // 1. "인가 코드"로 "액세스 토큰" 요청
-        String accessToken = getAccessToken(code);
+        String accessToken = getAccessToken(code, redirectUri);
 
         // 2. 토큰으로 카카오 API 호출
         HashMap<String, Object> userInfo= getKakaoUserInfo(accessToken);
@@ -73,7 +73,7 @@ public class KakaoService {
     }
 
     //1. "인가 코드"로 "액세스 토큰" 요청
-    private String getAccessToken(String code) {
+    private String getAccessToken(String code, String redirectUri) {
 
         // HTTP Header 생성
         HttpHeaders headers = new HttpHeaders();

@@ -63,12 +63,14 @@ public class EmailService {
 
             // 아이디 찾기
             if(tempAuthResponse.getKind().equals("id")) {
-                message.setSubject("아이디 발송 안내");
-                message.setText("아이디 : " + tempAuthResponse.getAuthNumber());
+                message.setSubject("[라떼핏] 아이디 발송 안내");
+                //message.setText("라떼핏 아이디 찾기 안내");
+                message.setText("라떼핏 아이디 찾기 안내 \n 아이디 : " + tempAuthResponse.getAuthNumber());
             } else {
                 // 비밀번호 찾기
-                message.setSubject("인증번호 발송 안내");
-                message.setText("인증번호 : " + tempAuthResponse.getAuthNumber());
+                message.setSubject("[라떼핏] 인증번호 발송 안내");
+                //message.setText("라떼핏 비밀번호 찾기 안내");
+                message.setText("라떼핏 비밀번호 찾기 안내 \n 인증번호 : " + tempAuthResponse.getAuthNumber());
 
                 LocalDateTime codeDate = LocalDateTime.now();
                 authMapper.insertCode(tempAuthResponse.getEmail(), tempAuthResponse.getAuthNumber(), codeDate);

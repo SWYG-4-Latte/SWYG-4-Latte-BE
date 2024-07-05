@@ -31,7 +31,7 @@ public class KakaoController {
     //web 버전
     @ResponseBody
     @GetMapping("/auth/login/oauth")
-    public ResponseEntity<?> kakaoLogin(@RequestParam String code, HttpServletRequest request){
+    public ResponseEntity<?> kakaoLogin(@RequestParam String code,@RequestParam String redirectUri, HttpServletRequest request){
 
         String message = null;
         Map<String, Object> dataMap = new HashMap<>();
@@ -39,7 +39,7 @@ public class KakaoController {
         try{
             // 현재 도메인 확인
             //String currentDomain = request.getServerName();
-            String token = kakaoService.kakaoLogin(code).getAccessToken();
+            String token = kakaoService.kakaoLogin(code, redirectUri).getAccessToken();
             message =  "로그인에 성공했습니다";
             dataMap.put("jwtToken", token);
         } catch (NoSuchElementException e) {
