@@ -425,7 +425,7 @@ public class AuthConroller {
         String message = "";
 
         if(member.getMbrId() == null || member.getMbrId() == "") {
-            message = "존재하지 않는 아이디입니다.";
+            message = "존재하지 않는 이메일입니다.";
             ResponseData<?> responseData = new ResponseData<>(message, null);
             return new ResponseEntity<>(responseData, HttpStatus.NOT_FOUND);
         } else {
