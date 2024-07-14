@@ -42,7 +42,12 @@ public class KakaoController {
         try{
             // 현재 도메인 확인
             //String currentDomain = request.getServerName();
-            String token = kakaoService.kakaoLogin(code, redirectUri).getAccessToken();
+            LoginResponse result = kakaoService.kakaoLogin(code, redirectUri);
+            String token = result.getAccessToken();
+            String getMes = result.getMessage();
+            if(getMes.equals("signUp")) {
+                dataMap.put("kakaoSignUp", getMes);
+            }
             message =  "로그인에 성공했습니다";
             dataMap.put("jwtToken", token);
         } catch (NoSuchElementException e) {

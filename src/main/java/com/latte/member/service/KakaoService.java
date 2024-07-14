@@ -155,7 +155,7 @@ public class KakaoService {
 
         Map<String, Object> dataMap = new HashMap<>();
         ResponseData<?> responseData;
-        String message;
+        String message = null;
         JwtToken jwtToken = null;
         Long uid = null;
         String kakaoEmail = null;
@@ -185,7 +185,7 @@ public class KakaoService {
                 if (res) {
                     //MemberResponse result = authService.getMemberInfo(member.getMbrId());
                     //dataMap.put("result", result); // MemberResponse를 Map에 추가
-                    message = "회원 가입에 성공했습니다.";
+                    message = "signUp";
                     log.info("회원가입 성공 request id = {}", kakaoEmail);
 
 
@@ -203,6 +203,7 @@ public class KakaoService {
             } else {
                 jwtToken = jwtTokenProvider.kakaoGenerate(uid.toString(), kakaoEmail);
                 dataMap.put("jwtToken", jwtToken);
+                message = "login";
                 log.info("자동 로그인 성공 request id = {}, token = {}", kakaoEmail, jwtToken.getAccessToken());
             }
 
@@ -221,7 +222,7 @@ public class KakaoService {
 
 
         assert jwtToken != null;
-        return new LoginResponse(uid ,"", kakaoEmail, jwtToken.getAccessToken());
+        return new LoginResponse(uid ,"", kakaoEmail, jwtToken.getAccessToken(), message);
     }
 
 

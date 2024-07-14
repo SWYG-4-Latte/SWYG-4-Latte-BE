@@ -154,6 +154,10 @@ public class MyPageController {
         String message = "";
         List<Map<String, String>> commentDataList = new ArrayList<>();
 
+        if(mbrId.contains("@")) {
+            FindIdResponse find = authService.findIdByNameEmail(mbrId);
+            mbrId = find.getMbrId();
+        }
         // 댓글 개수
         Map<String, String> userCount = new HashMap<>();
         String count = String.valueOf(commentService.userCommentCount(mbrId));
