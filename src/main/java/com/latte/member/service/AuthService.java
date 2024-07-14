@@ -6,6 +6,7 @@ import com.latte.member.mapper.AuthMapper;
 import com.latte.member.request.MemberRequest;
 import com.latte.member.request.PwChangeRequest;
 import com.latte.member.response.FindIdResponse;
+import com.latte.member.response.Gender;
 import com.latte.member.response.MemberResponse;
 import com.latte.member.response.TempAuthResponse;
 import io.jsonwebtoken.Claims;
@@ -119,6 +120,10 @@ public class AuthService {
         request.setRole("USER");
         // 회원탈퇴 여부
         request.setDeleteYn("N");
+        if(request.getGender() == null) {
+            request.setGender(Gender.N);
+        }
+
 
 
         if(!(request.getLoginType() == "kakao") || (request.getLoginType() == null)) {
