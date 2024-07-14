@@ -103,7 +103,6 @@ public class MyPageController {
         Map<String, Object> dataMap = new HashMap<>();
         MemberResponse member = null;
         if(mbrId.contains("@")) {
-
             FindIdResponse find = authService.findIdByNameEmail(mbrId);
             member = authService.getMemberInfo(find.getMbrId());
         } else {

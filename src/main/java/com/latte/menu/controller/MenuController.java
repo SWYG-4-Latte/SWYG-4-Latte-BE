@@ -3,6 +3,7 @@ package com.latte.menu.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.latte.common.response.ResponseData;
 import com.latte.drink.exception.NotEnoughInfoException;
+import com.latte.member.response.FindIdResponse;
 import com.latte.member.response.MemberResponse;
 import com.latte.member.service.AuthService;
 import com.latte.menu.exception.NotCorrectIndexException;
@@ -198,6 +199,14 @@ public class MenuController {
             username = tokenUser.getUsername();
             log.info("username = {}", username);
         }
-        return authService.getMemberInfo(username);
+
+        MemberResponse member = null;
+        if(username.contains("@")) {
+            FindIdResponse find = authService.findIdByNameEmail(username);
+            member = authService.getMemberInfo(find.getMbrId());
+        } else {
+            member = authService.getMemberInfo(username);
+        }
+        return member;
     }
 }

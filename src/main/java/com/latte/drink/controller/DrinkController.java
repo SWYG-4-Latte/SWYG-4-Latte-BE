@@ -8,6 +8,7 @@ import com.latte.drink.response.CalendarResponse;
 import com.latte.drink.response.DateStatusResponse;
 import com.latte.drink.response.DrinkMenuResponse;
 import com.latte.drink.service.DrinkService;
+import com.latte.member.response.FindIdResponse;
 import com.latte.member.response.MemberResponse;
 import com.latte.member.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -140,6 +141,13 @@ public class DrinkController {
             username = tokenUser.getUsername();
             log.info("username = {}", username);
         }
-        return authService.getMemberInfo(username);
+        MemberResponse member = null;
+        if(username.contains("@")) {
+            FindIdResponse find = authService.findIdByNameEmail(username);
+            member = authService.getMemberInfo(find.getMbrId());
+        } else {
+            member = authService.getMemberInfo(username);
+        }
+        return member;
     }
 }

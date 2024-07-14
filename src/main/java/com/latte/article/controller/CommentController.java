@@ -7,6 +7,7 @@ import com.latte.article.response.ArticleResponse;
 import com.latte.article.response.CommentResponse;
 import com.latte.article.service.CommentService;
 import com.latte.member.config.SecurityUtil;
+import com.latte.member.response.FindIdResponse;
 import com.latte.member.response.MemberResponse;
 import com.latte.member.service.AuthService;
 import com.latte.response.ResponseData;
@@ -57,7 +58,13 @@ public class CommentController {
             message = "로그인 후 등록해주세요";
         } else {
             String mbrId = SecurityUtil.getCurrentUsername();
-            MemberResponse member = authService.getMemberInfo(mbrId);
+            MemberResponse member = null;
+            if(mbrId.contains("@")) {
+                FindIdResponse find = authService.findIdByNameEmail(mbrId);
+                member = authService.getMemberInfo(find.getMbrId());
+            } else {
+                member = authService.getMemberInfo(mbrId);
+            }
             request.setArticleNo(articleNo);
             request.setWriterNo(member.getMbrNo());
 
@@ -100,7 +107,13 @@ public class CommentController {
             message = "로그인 후 등록해주세요";
         } else {
             String mbrId = SecurityUtil.getCurrentUsername();
-            MemberResponse member = authService.getMemberInfo(mbrId);
+            MemberResponse member = null;
+            if(mbrId.contains("@")) {
+                FindIdResponse find = authService.findIdByNameEmail(mbrId);
+                member = authService.getMemberInfo(find.getMbrId());
+            } else {
+                member = authService.getMemberInfo(mbrId);
+            }
 
             // 요청된 글의 작성자 확인
             boolean isAuthor = commentService.isCommentAuthor(commentNo, member.getMbrNo());
@@ -153,7 +166,13 @@ public class CommentController {
         } else {
 
             String mbrId = SecurityUtil.getCurrentUsername();
-            MemberResponse member = authService.getMemberInfo(mbrId);
+            MemberResponse member = null;
+            if(mbrId.contains("@")) {
+                FindIdResponse find = authService.findIdByNameEmail(mbrId);
+                member = authService.getMemberInfo(find.getMbrId());
+            } else {
+                member = authService.getMemberInfo(mbrId);
+            }
             // 요청된 댓글의 작성자 확인
             boolean isAuthor = commentService.isCommentAuthor(commentNo, member.getMbrNo());
             boolean isAdmin = false;
@@ -257,7 +276,13 @@ public class CommentController {
 
         } else {
             String mbrId = SecurityUtil.getCurrentUsername();
-            MemberResponse member = authService.getMemberInfo(mbrId);
+            MemberResponse member = null;
+            if(mbrId.contains("@")) {
+                FindIdResponse find = authService.findIdByNameEmail(mbrId);
+                member = authService.getMemberInfo(find.getMbrId());
+            } else {
+                member = authService.getMemberInfo(mbrId);
+            }
             result = commentService.likeCount(commentNo, member.getMbrNo());
             CommentResponse commentResponse = commentService.detailComment(commentNo);
             if (!result) {

@@ -27,7 +27,10 @@ public class KakaoController {
 
 
     private final KakaoService kakaoService;
-
+    // https://kauth.kakao.com/oauth/authorize?client_id=5c165585248b1b09c20c411387178149&redirect_uri=https://lattefit.swygbro.com/auth/login/kakao&response_type=code
+    // https://lattefit.swygbro.com/auth/login/kakao
+    // https://localhost:3000/auth/login/kakao
+    //
     //web 버전
     @ResponseBody
     @GetMapping("/auth/login/oauth")
