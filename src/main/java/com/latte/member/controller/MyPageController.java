@@ -7,6 +7,7 @@ import com.latte.article.service.CommentService;
 import com.latte.drink.exception.NotEnoughInfoException;
 import com.latte.drink.standard.StandardValueCalculate;
 import com.latte.member.config.SecurityUtil;
+import com.latte.member.response.FindIdResponse;
 import com.latte.member.response.MemberResponse;
 import com.latte.member.service.AuthService;
 import com.latte.response.ResponseData;
@@ -100,8 +101,15 @@ public class MyPageController {
         String mbrId = SecurityUtil.getCurrentUsername();
         String message = "";
         Map<String, Object> dataMap = new HashMap<>();
+        MemberResponse member = null;
+        if(mbrId.contains("@")) {
 
-        MemberResponse member = authService.getMemberInfo(mbrId);
+            FindIdResponse find = authService.findIdByNameEmail(mbrId);
+            member = authService.getMemberInfo(find.getMbrId());
+        } else {
+            member = authService.getMemberInfo(mbrId);
+        }
+
         // 토큰을 사용하여 회원 정보 확인
         //MemberResponse member = authService.getMemberInfoFromToken(jwtToken);
 
