@@ -15,7 +15,7 @@ public class SecurityUtil {
         if(authentication == null || authentication.getName() == null) {
             throw new RuntimeException("No authentication information");
         }
-        User user = (User) authentication.getPrincipal();
+        //User user = (User) authentication.getPrincipal();
         //return user.getUsername();
 
         Object principal = authentication.getPrincipal();
