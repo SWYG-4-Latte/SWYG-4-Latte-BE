@@ -32,8 +32,8 @@ public interface MenuMapper {
 
     String findTodaySumCaffeine(@Param("mbrNo") int mbrNo,
                                 @Param("localDateTime") LocalDateTime localDateTime,
-                                @Param("minNormal") int minNormal,
-                                @Param("maxNormal") int maxNormal);
+                                @Param("minNormal") double minNormal,
+                                @Param("maxNormal") double maxNormal);
 
     RecommendPopupResponse findRecommendMenu(@Param("todayStatus") String todayStatus);
 

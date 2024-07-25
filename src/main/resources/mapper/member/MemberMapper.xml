@@ -20,6 +20,7 @@
               , preg_month
               , role
               , symptom
+              , weight
               , delete_yn
               , reg_date
               , update_date

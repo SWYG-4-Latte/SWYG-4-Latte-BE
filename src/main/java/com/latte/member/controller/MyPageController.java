@@ -116,7 +116,7 @@ public class MyPageController {
             String maxCaffeine;
             if(member.getDeleteYn().equals("N")) {
                 try {
-                    maxCaffeine = String.valueOf(standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine());
+                    maxCaffeine = String.valueOf(standardValueCalculate.getMemberStandardValue(member).getMaxNormal());
                 } catch (NotEnoughInfoException e) {
                     maxCaffeine = null;
                 }

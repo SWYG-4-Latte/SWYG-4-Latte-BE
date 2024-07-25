@@ -54,6 +54,8 @@ public class MemberResponse implements UserDetails {
 
     private Timestamp updateDate;   // 변경일
 
+    private String weight;          // 몸무게
+
     private String code;
 
     private String codeDate;

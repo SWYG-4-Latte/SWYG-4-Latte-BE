@@ -21,6 +21,7 @@
               , preg_month
               , role
               , symptom
+              , weight
               , delete_yn
               , reg_date
               , update_date
@@ -57,6 +58,7 @@
               , preg_month
               , role
               , symptom
+              , weight
               , delete_yn
               , reg_date
               , update_date
@@ -107,6 +109,7 @@
         , `email` = #{email}
         , `pregnancy` = #{pregnancy}
         , `preg_month` = #{pregMonth}
+        , `weight` = #{weight}
         , `role` = #{role}
         , `symptom` = #{symptom}
         , `update_date` = NOW()
@@ -237,6 +240,7 @@
                               , preg_month
                               , role
                               , symptom
+                              , weight
                               , login_type
                               , delete_yn
                               , reg_date
@@ -257,6 +261,7 @@
                  , #{pregMonth}
                  , #{role}
                  , #{symptom}
+                 , #{weight}
                  , #{loginType}
                  , #{deleteYn}
                  , NOW()

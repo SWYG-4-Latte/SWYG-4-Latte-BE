@@ -29,8 +29,8 @@ public interface DrinkMapper {
 
     DateStatusResponse findSumCaffeineByDate(@Param("mbrNo") int mbrNo,
                                              @Param("localDateTime") LocalDateTime localDateTime,
-                                             @Param("minNormal") int minNormal,
-                                             @Param("maxNormal") int maxNormal);
+                                             @Param("minNormal") double minNormal,
+                                             @Param("maxNormal") double maxNormal);
 
     List<DrinkMenuResponse> findMenuByDate(@Param("mbrNo") int mbrNo,
                                            @Param("localDateTime") LocalDateTime localDateTime);

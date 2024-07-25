@@ -31,8 +31,8 @@ public class MenuService {
      */
     public RecommendPopupResponse popup(MemberResponse member) {
         LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-        int minNormal = standardValueCalculate.getMemberStandardValue(member).getMinNormal();
-        int maxNormal = standardValueCalculate.getMemberStandardValue(member).getMaxNormal();
+        double minNormal = standardValueCalculate.getMemberStandardValue(member).getMinNormal();
+        double maxNormal = standardValueCalculate.getMemberStandardValue(member).getMaxNormal();
         String todayCaffeineStatus = menuMapper.findTodaySumCaffeine(member.getMbrNo(), today, minNormal, maxNormal);
         return menuMapper.findRecommendMenu(todayCaffeineStatus);
     }
@@ -154,7 +154,7 @@ public class MenuService {
          */
         log.info("##################### 로그인 사용자 Redis 에서 상세 조회 #####################");
         try {
-            int maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();
+            double maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxNormal();
             log.info("##################### 부가 정보를 입력한 사용자 #####################");
             double caffeine = Integer.parseInt(menuDetailResponse.getCaffeine().replace("mg", ""));
             String percent = maxCaffeine == 0 ? "100%" : Math.round((caffeine / maxCaffeine) * 100) + "%";

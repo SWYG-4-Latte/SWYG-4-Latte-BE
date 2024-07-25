@@ -31,7 +31,7 @@ public class DrinkService {
      * 닉네임, 오늘 카페인 섭취 상태, 오늘 카페인 섭취량, 기준값과의 차이, 최근 마신 음료
      */
     public HomeCaffeineResponse findHomeResponse(MemberResponse member) {
-        int maxCaffeine;
+        double maxCaffeine;
         String interval, status;
         LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
 
@@ -39,7 +39,7 @@ public class DrinkService {
         int todayCaffeine = drinkMapper.findSumCaffeineByToday(member.getMbrNo(), today);        // 오늘 마신 카페인 합계
 
         try {
-            maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxCaffeine();   // 카페인 섭취량 기준값
+            maxCaffeine = standardValueCalculate.getMemberStandardValue(member).getMaxNormal();   // 카페인 섭취량 기준값
             status = maxCaffeine < todayCaffeine ? "초과" : "적정";
             interval = Math.abs(maxCaffeine - todayCaffeine) + "mg";
         } catch (NotEnoughInfoException exception) {
