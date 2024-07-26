@@ -21,6 +21,15 @@ public interface MenuMapper {
                             @Param("sortBy") String sortBy,
                             @Param("cond") String cond);
 
+    List<BrandCategoryResponse> findCategoryList(@Param("category") String category,
+                                                      @Param("sortBy") String sortBy,
+                                                      @Param("cond") String cond,
+                                                      @Param("pageable") Pageable pageable);
+
+    int getCategoryCnt(@Param("category") String category,
+                            @Param("sortBy") String sortBy,
+                            @Param("cond") String cond);
+
     List<MenuSearchResponse> findMenuList(@Param("sortBy") String sortBy,
                                           @Param("cond") String cond,
                                           @Param("word") String word,

@@ -78,7 +78,7 @@ public class MenuController {
     }
 
     /**
-     * 브랜드별 메뉴 조회
+     * 브랜드별 메뉴 조회 (미사용)
      */
     @GetMapping("/{brandName}")
     public ResponseEntity<?> brandCategory(@PathVariable String brandName,
@@ -89,6 +89,20 @@ public class MenuController {
         ResponseData<?> responseData = new ResponseData<>(null, brandCategory);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
+
+    /**
+     * 카테고리별 메뉴 조회
+     */
+    @GetMapping("/category/{categoryName}")
+    public ResponseEntity<?> category(@PathVariable String categoryName,
+                                           @RequestParam(value = "sortBy", defaultValue = "") String sortBy,
+                                           @RequestParam(value = "cond", defaultValue = "") String cond,
+                                           @PageableDefault(size = 4) Pageable pageable) {
+        Page<BrandCategoryResponse> brandCategory = menuService.findCategoryList(categoryName, sortBy, cond, pageable);
+        ResponseData<?> responseData = new ResponseData<>(null, brandCategory);
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
 
     /**
      * 검색 API

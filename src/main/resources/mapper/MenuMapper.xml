@@ -40,12 +40,13 @@
         LEFT OUTER JOIN DRINK
             ON MENU.MENU_NO = DRINK.MENU_NO
         WHERE BRAND = #{brand}
+            AND USE_YN = 'Y'
         GROUP BY MENU.MENU_NO, MENU_NAME, BRAND, CAFFEINE, IMAGE_URL
         ORDER BY COUNT(DRINK.MENU_NO) DESC
             LIMIT 10
     </select>
 
-
+    <!-- 카페 브랜드별 리스트 -->
     <select id="findBrandCategoryList" resultType="BrandCategoryResponse">
         SELECT
             M1.MENU_NO,
@@ -62,7 +63,7 @@
                 BRAND,
                 MIN(CAST(SUBSTRING_INDEX(VOLUME, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_ZISE
             FROM MENU
-            <where>
+            WHERE USE_YN = 'Y'
                 <if test="brand != null and brand != ''">
                     and BRAND = #{brand}
                 </if>
@@ -72,7 +73,6 @@
                 <if test="sortBy == 'caffeine-desc' or sortBy == 'caffeine-asc'">
                     and CAFFEINE != "0mg"
                 </if>
-            </where>
             GROUP BY MENU_NAME, BRAND
         ) AS M2
             ON M1.MENU_NAME = M2.MENU_NAME
@@ -93,6 +93,7 @@
         LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
     </select>
 
+    <!-- 카페 브랜드별 리스트 개수-->
     <select id="getBrandCategoryCnt" resultType="int">
         SELECT COUNT(M1.MENU_NO)
         FROM MENU M1
@@ -103,7 +104,7 @@
                 BRAND,
                 MIN(CAST(SUBSTRING_INDEX(VOLUME, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
             FROM MENU
-        <where>
+        WHERE USE_YN = 'Y'
             <if test="brand != null and brand != ''">
                 and BRAND = #{brand}
             </if>
@@ -113,13 +114,90 @@
             <if test="sortBy == 'caffeine-desc' or sortBy == 'caffeine-asc'">
                 and CAFFEINE != "0mg"
             </if>
-        </where>
         GROUP BY MENU_NAME, brand
         ) AS M2
             ON M1.MENU_NAME = M2.MENU_NAME
                 AND M1.BRAND = M2.BRAND
                 AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
     </select>
+
+    <!-- 카페 카테고리별 리스트 -->
+    <select id="findCategoryList" resultType="BrandCategoryResponse">
+        SELECT
+            M1.MENU_NO,
+            M1.CATEGORY,
+            M1.MENU_NAME,
+            M1.BRAND,
+            M1.CAFFEINE,
+            M1.PRICE,
+            M1.IMAGE_URL
+        FROM MENU M1
+        <!-- 용량이 가장 작은 음료들 -->
+        INNER JOIN (
+        SELECT
+            MENU_NAME,
+            BRAND,
+            CATEGORY,
+            MIN(CAST(SUBSTRING_INDEX(VOLUME, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_ZISE
+        FROM MENU
+        WHERE USE_YN = 'Y'
+            <if test="category != null and category != ''">
+                and CATEGORY = #{category}
+            </if>
+            <if test="cond == 'caffeine-none'">
+                and CAFFEINE = "0mg"
+            </if>
+            <if test="sortBy == 'caffeine-desc' or sortBy == 'caffeine-asc'">
+                and CAFFEINE != "0mg"
+            </if>
+        GROUP BY MENU_NAME, CATEGORY
+        ) AS M2
+        ON M1.MENU_NAME = M2.MENU_NAME
+        AND M1.CATEGORY = M2.CATEGORY
+        AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_ZISE
+        ORDER BY
+        <choose>
+            <when test="sortBy == 'caffeine-desc'">
+                CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) DESC
+            </when>
+            <when test="sortBy == 'caffeine-asc'">
+                CAST(SUBSTRING(CAFFEINE, 1, LOCATE('mg', CAFFEINE) - 1) AS UNSIGNED) ASC
+            </when>
+            <otherwise>
+                MENU_NO ASC
+            </otherwise>
+        </choose>
+        LIMIT #{pageable.pageSize} OFFSET #{pageable.offset}
+    </select>
+
+    <!-- 카페 카테고리별 리스트 개수-->
+    <select id="getCategoryCnt" resultType="int">
+        SELECT COUNT(M1.MENU_NO)
+        FROM MENU M1
+        <!-- 용량이 가장 작은 음료들 -->
+        INNER JOIN (
+        SELECT
+            MENU_NAME,
+            CATEGORY,
+            MIN(CAST(SUBSTRING_INDEX(VOLUME, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
+        FROM MENU
+        WHERE USE_YN = 'Y'
+            <if test="category != null and category != ''">
+                and CATEGORY = #{category}
+            </if>
+            <if test="cond == 'caffeine-none'">
+                and CAFFEINE = "0mg"
+            </if>
+            <if test="sortBy == 'caffeine-desc' or sortBy == 'caffeine-asc'">
+                and CAFFEINE != "0mg"
+            </if>
+        GROUP BY MENU_NAME, CATEGORY
+        ) AS M2
+        ON M1.MENU_NAME = M2.MENU_NAME
+        AND M1.CATEGORY = M2.CATEGORY
+        AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
+    </select>
+
 
     <!-- 음료 검색 시, 가장 작은 사이즈를 기준으로 검색 -->
     <select id="findMenuList" resultType="MenuSearchResponse">
@@ -138,12 +216,13 @@
                 BRAND,
                 MIN(CAST(SUBSTRING_INDEX(VOLUME, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
             FROM MENU
+            WHERE USE_YN = 'Y'
             GROUP BY MENU_NAME, BRAND
         ) AS M2
             ON M1.MENU_NAME = M2.MENU_NAME
                 AND M1.BRAND = M2.BRAND
                 AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
-        <where>
+            WHERE M1.USE_YN = 'Y'
             <if test="cond == 'caffeine-none'">
                 and M1.CAFFEINE = "0mg"
             </if>
@@ -157,7 +236,6 @@
                 or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%')
                 or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', '%'), '%'))
             </if>
-        </where>
         ORDER BY
         <choose>
             <when test="sortBy == 'caffeine-desc'">
@@ -191,12 +269,13 @@
                 BRAND,
                 MIN(CAST(SUBSTRING_INDEX(VOLUME, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
             FROM MENU
+            WHERE USE_YN = 'Y'
             GROUP BY MENU_NAME, BRAND
         ) AS M2
             ON M1.MENU_NAME = M2.MENU_NAME
                 AND M1.BRAND = M2.BRAND
                 AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
-        <where>
+            WHERE M1.USE_YN = 'Y'
             <if test="cond == 'caffeine-none'">
                 and M1.CAFFEINE = "0mg"
             </if>
@@ -210,7 +289,6 @@
                 or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', ''), '%')
                 or M1.MENU_NAME LIKE CONCAT('%', REPLACE(TRIM(#{word}), ' ', '%'), '%'))
             </if>
-        </where>
     </select>
 
 
