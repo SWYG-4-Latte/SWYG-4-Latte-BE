@@ -30,6 +30,8 @@ public class MemberRequest {
     private String password;        // PW
 
    // @NotEmpty(message = "닉네임을 입력해주세요")
+
+
     private String nickname;        // 닉네임
 
     //@NotEmpty(message = "핸드폰 번호를 입력해주세요")
@@ -56,6 +58,8 @@ public class MemberRequest {
     private String imageUrl;         // 이미지
 
     private String role;            // 권한(user, admin)
+
+    private String weight;          // 몸무게
 
     //@NotEmpty(message = "나이를 입력해주세요")
     private String age;        // 나이
@@ -89,6 +93,7 @@ public class MemberRequest {
         if (this.allergy == null) this.allergy = response.getAllergy();
         if (this.symptom == null) this.symptom = response.getSymptom();
         if (this.imageUrl == null) this.imageUrl = response.getImgUrl();
+        if (this.weight == null) this.weight = response.getWeight();
         if (this.age == null) this.age = response.getAge();
         if (this.cupDay == null) this.cupDay = response.getCupDay();
 
