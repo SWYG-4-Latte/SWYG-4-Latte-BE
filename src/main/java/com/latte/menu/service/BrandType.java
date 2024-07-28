@@ -2,6 +2,7 @@ package com.latte.menu.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.data.domain.Pageable;
 
 @Getter
 @AllArgsConstructor
@@ -14,4 +15,6 @@ public enum BrandType {
 
     String value;
     String imageUrl;
+
+
 }

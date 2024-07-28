@@ -93,12 +93,13 @@ public class MenuController {
     /**
      * 카테고리별 메뉴 조회
      */
-    @GetMapping("/category/{categoryName}")
-    public ResponseEntity<?> category(@PathVariable String categoryName,
-                                           @RequestParam(value = "sortBy", defaultValue = "") String sortBy,
-                                           @RequestParam(value = "cond", defaultValue = "") String cond,
-                                           @PageableDefault(size = 4) Pageable pageable) {
-        Page<BrandCategoryResponse> brandCategory = menuService.findCategoryList(categoryName, sortBy, cond, pageable);
+    @GetMapping("/category")
+    public ResponseEntity<?> category(@RequestParam String brandName,
+                                      @RequestParam String categoryName,
+                                      @RequestParam(value = "sortBy", defaultValue = "") String sortBy,
+                                      @RequestParam(value = "cond", defaultValue = "") String cond,
+                                      @PageableDefault(size = 4) Pageable pageable) {
+        Page<BrandCategoryResponse> brandCategory = menuService.findCategoryList(brandName, categoryName, sortBy, cond, pageable);
         ResponseData<?> responseData = new ResponseData<>(null, brandCategory);
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }

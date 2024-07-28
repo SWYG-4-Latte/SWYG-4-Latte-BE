@@ -57,11 +57,23 @@ public class MenuService {
 
 
     /**
-     * 카테고리 리스트 ( 카테고리별 리스트 )
+     * 브랜드/카테고리 리스트 ( 브랜드/카테고리별 리스트 )
      */
-    public Page<BrandCategoryResponse> findCategoryList(String category, String sortBy, String cond, Pageable pageable) {
-        List<BrandCategoryResponse> content = menuMapper.findCategoryList(CategoryType.valueOf(category.toUpperCase()).getValue(), sortBy, cond, pageable);
-        int total = menuMapper.getCategoryCnt(CategoryType.valueOf(category.toUpperCase()).getValue(), sortBy, cond);
+    public Page<BrandCategoryResponse> findCategoryList(String brandName, String categoryName, String sortBy, String cond, Pageable pageable) {
+
+        String brand = "";
+        String category = "";
+
+        if(!Objects.equals(brandName, "")) {
+            brand = BrandType.valueOf(brandName.toUpperCase()).getValue();
+        }
+
+        if(!Objects.equals(categoryName, "")) {
+            category = CategoryType.valueOf(categoryName.toUpperCase()).getValue();
+        }
+
+        List<BrandCategoryResponse> content = menuMapper.findCategoryList(brand, category, sortBy, cond, pageable);
+        int total = menuMapper.getCategoryCnt(brand, category, sortBy, cond);
         return new PageImpl<>(content, pageable, total);
     }
 

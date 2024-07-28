@@ -121,7 +121,7 @@
                 AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
     </select>
 
-    <!-- 카페 카테고리별 리스트 -->
+    <!-- 카페 브랜드/카테고리별 리스트 -->
     <select id="findCategoryList" resultType="BrandCategoryResponse">
         SELECT
             M1.MENU_NO,
@@ -144,6 +144,9 @@
             <if test="category != null and category != ''">
                 and CATEGORY = #{category}
             </if>
+            <if test="brand != null and brand != ''">
+                and BRAND = #{brand}
+            </if>
             <if test="cond == 'caffeine-none'">
                 and CAFFEINE = "0mg"
             </if>
@@ -154,6 +157,7 @@
         ) AS M2
         ON M1.MENU_NAME = M2.MENU_NAME
         AND M1.CATEGORY = M2.CATEGORY
+        AND M1.BRAND = M2.BRAND
         AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_ZISE
         ORDER BY
         <choose>
@@ -179,11 +183,15 @@
         SELECT
             MENU_NAME,
             CATEGORY,
+            BRAND,
             MIN(CAST(SUBSTRING_INDEX(VOLUME, 'oz(', 1) AS DECIMAL(5,2))) AS MIN_SIZE
         FROM MENU
         WHERE USE_YN = 'Y'
             <if test="category != null and category != ''">
                 and CATEGORY = #{category}
+            </if>
+            <if test="brand != null and brand != ''">
+                and BRAND = #{brand}
             </if>
             <if test="cond == 'caffeine-none'">
                 and CAFFEINE = "0mg"
@@ -195,6 +203,7 @@
         ) AS M2
         ON M1.MENU_NAME = M2.MENU_NAME
         AND M1.CATEGORY = M2.CATEGORY
+        AND M1.BRAND = M2.BRAND
         AND CAST(SUBSTRING_INDEX(M1.VOLUME, 'oz(', 1) AS DECIMAL(5,2)) = M2.MIN_SIZE
     </select>
 

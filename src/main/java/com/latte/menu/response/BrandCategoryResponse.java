@@ -8,6 +8,7 @@ public class BrandCategoryResponse {
     private String menuName;
     private String caffeine;
     private String brand;
+    private String category;
     private int price;
     private String imageUrl;
 }
